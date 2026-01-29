@@ -58,137 +58,11 @@ const verifySuperAdmin = async (request: any, reply: any) => {
 };
 
 export const superadminRoutes: FastifyPluginAsync = async (app) => {
-  // Apply super admin verification to all routes
-  app.addHook('preHandler', verifySuperAdmin);
-
   // ===========================================
-  // Tenant Management
+  // Public Read Routes (for dashboard display)
   // ===========================================
 
-  // Get all tenants
-  app.get('/tenants', async (request, reply) => {
-    const result = await tenantsService.getAllTenants();
-
-    if (!result.success) {
-      return reply.code(500).send(result);
-    }
-
-    return result;
-  });
-
-  // Get tenant by ID
-  app.get<{ Params: { id: string } }>('/tenants/:id', async (request, reply) => {
-    const result = await tenantsService.getTenantById(request.params.id);
-
-    if (!result.success) {
-      return reply.code(404).send(result);
-    }
-
-    return result;
-  });
-
-  // Get tenant statistics
-  app.get<{ Params: { id: string } }>('/tenants/:id/stats', async (request, reply) => {
-    const result = await tenantsService.getTenantStats(request.params.id);
-
-    if (!result.success) {
-      return reply.code(500).send(result);
-    }
-
-    return result;
-  });
-
-  // Create tenant
-  app.post('/tenants', async (request, reply) => {
-    const validation = createTenantSchema.safeParse(request.body);
-
-    if (!validation.success) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.errors,
-      });
-    }
-
-    const result = await tenantsService.createTenant(validation.data);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return reply.code(201).send(result);
-  });
-
-  // Update tenant
-  app.put<{ Params: { id: string } }>('/tenants/:id', async (request, reply) => {
-    const validation = updateTenantSchema.safeParse(request.body);
-
-    if (!validation.success) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Validation failed',
-        details: validation.error.errors,
-      });
-    }
-
-    const result = await tenantsService.updateTenant(request.params.id, validation.data);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return result;
-  });
-
-  // Activate tenant
-  app.post<{ Params: { id: string } }>('/tenants/:id/activate', async (request, reply) => {
-    const result = await tenantsService.activateTenant(request.params.id);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return { success: true, message: 'Tenant activated' };
-  });
-
-  // Suspend tenant
-  app.post<{ Params: { id: string } }>('/tenants/:id/suspend', async (request, reply) => {
-    const result = await tenantsService.suspendTenant(request.params.id);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return { success: true, message: 'Tenant suspended' };
-  });
-
-  // Regenerate API key
-  app.post<{ Params: { id: string } }>('/tenants/:id/regenerate-api-key', async (request, reply) => {
-    const result = await tenantsService.regenerateApiKey(request.params.id);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return { success: true, apiKey: result.apiKey };
-  });
-
-  // Delete tenant
-  app.delete<{ Params: { id: string } }>('/tenants/:id', async (request, reply) => {
-    const result = await tenantsService.deleteTenant(request.params.id);
-
-    if (!result.success) {
-      return reply.code(400).send(result);
-    }
-
-    return { success: true, message: 'Tenant deleted' };
-  });
-
-  // ===========================================
-  // Platform Statistics
-  // ===========================================
-
-  // Get platform overview
+  // Get platform overview (public for now - TODO: add auth when login is implemented)
   app.get('/stats/overview', async (request, reply) => {
     try {
       // Get total tenants
@@ -248,14 +122,14 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         data: {
           totalTenants: tenantsCount || 0,
           activeTenants: activeTenantsCount || 0,
-          activeSubscriptions: activeTenantsCount || 0, // Using active tenants as proxy
+          activeSubscriptions: activeTenantsCount || 0,
           trialTenants: trialTenantsCount || 0,
           newTenantsThisMonth: newTenantsCount || 0,
           totalUsers: usersCount || 0,
           totalBookings: bookingsCount || 0,
           totalRevenue,
           totalBooths: boothsCount || 0,
-          mrr: 0, // TODO: Calculate from tenant_subscriptions when billing is active
+          mrr: 0,
         },
       };
     } catch (error) {
@@ -267,7 +141,7 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Get recent activity across all tenants
+  // Get recent activity (public for now)
   app.get('/activity', async (request, reply) => {
     try {
       const activities: Array<{
@@ -291,7 +165,6 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Convert bookings to activity items
       recentBookings?.forEach((booking: any) => {
         activities.push({
           id: `booking-${booking.id}`,
@@ -308,7 +181,6 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Convert tenants to activity items
       recentTenants?.forEach((tenant: any) => {
         activities.push({
           id: `tenant-${tenant.id}`,
@@ -318,7 +190,6 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         });
       });
 
-      // Sort by timestamp
       activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
       return {
@@ -332,6 +203,129 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         error: 'Failed to get activity',
       });
     }
+  });
+
+  // Get all tenants (public read for listing)
+  app.get('/tenants', async (request, reply) => {
+    const result = await tenantsService.getAllTenants();
+
+    if (!result.success) {
+      return reply.code(500).send(result);
+    }
+
+    return result;
+  });
+
+  // Get tenant by ID (public read)
+  app.get<{ Params: { id: string } }>('/tenants/:id', async (request, reply) => {
+    const result = await tenantsService.getTenantById(request.params.id);
+
+    if (!result.success) {
+      return reply.code(404).send(result);
+    }
+
+    return result;
+  });
+
+  // Get tenant statistics (public read)
+  app.get<{ Params: { id: string } }>('/tenants/:id/stats', async (request, reply) => {
+    const result = await tenantsService.getTenantStats(request.params.id);
+
+    if (!result.success) {
+      return reply.code(500).send(result);
+    }
+
+    return result;
+  });
+
+  // ===========================================
+  // Protected Routes (require super admin auth)
+  // ===========================================
+
+  // Create tenant (protected)
+  app.post('/tenants', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const validation = createTenantSchema.safeParse(request.body);
+
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    const result = await tenantsService.createTenant(validation.data);
+
+    if (!result.success) {
+      return reply.code(400).send(result);
+    }
+
+    return reply.code(201).send(result);
+  });
+
+  // Update tenant (protected)
+  app.put<{ Params: { id: string } }>('/tenants/:id', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const validation = updateTenantSchema.safeParse(request.body);
+
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    const result = await tenantsService.updateTenant(request.params.id, validation.data);
+
+    if (!result.success) {
+      return reply.code(400).send(result);
+    }
+
+    return result;
+  });
+
+  // Activate tenant (protected)
+  app.post<{ Params: { id: string } }>('/tenants/:id/activate', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const result = await tenantsService.activateTenant(request.params.id);
+
+    if (!result.success) {
+      return reply.code(400).send(result);
+    }
+
+    return { success: true, message: 'Tenant activated' };
+  });
+
+  // Suspend tenant (protected)
+  app.post<{ Params: { id: string } }>('/tenants/:id/suspend', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const result = await tenantsService.suspendTenant(request.params.id);
+
+    if (!result.success) {
+      return reply.code(400).send(result);
+    }
+
+    return { success: true, message: 'Tenant suspended' };
+  });
+
+  // Regenerate API key (protected)
+  app.post<{ Params: { id: string } }>('/tenants/:id/regenerate-api-key', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const result = await tenantsService.regenerateApiKey(request.params.id);
+
+    if (!result.success) {
+      return reply.code(400).send(result);
+    }
+
+    return { success: true, apiKey: result.apiKey };
+  });
+
+  // Delete tenant (protected)
+  app.delete<{ Params: { id: string } }>('/tenants/:id', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const result = await tenantsService.deleteTenant(request.params.id);
+
+    if (!result.success) {
+      return reply.code(500).send(result);
+    }
+
+    return result;
   });
 
   // ===========================================
