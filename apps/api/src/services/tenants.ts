@@ -83,12 +83,14 @@ export class TenantsService {
         .order('created_at', { ascending: false });
 
       if (error) {
+        logger.error({ error }, 'Supabase error fetching tenants');
         return { success: false, error: error.message };
       }
 
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: 'Failed to fetch tenants' };
+      return { success: true, data: data || [] };
+    } catch (error: any) {
+      logger.error({ error: error?.message, stack: error?.stack }, 'Exception fetching tenants');
+      return { success: false, error: error?.message || 'Failed to fetch tenants' };
     }
   }
 
