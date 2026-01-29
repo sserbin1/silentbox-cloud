@@ -1,6 +1,10 @@
 {
+  "version": 2,
   "installCommand": "npm install -g pnpm && pnpm install",
   "buildCommand": "pnpm --filter @silentbox/shared build && pnpm --filter @silentbox/admin build",
   "outputDirectory": "apps/admin/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
