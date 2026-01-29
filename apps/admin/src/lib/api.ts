@@ -234,3 +234,110 @@ interface UpdateUserData {
   phone?: string;
   role?: string;
 }
+
+// ===========================================
+// Super Admin API
+// ===========================================
+
+export const superAdminApi = {
+  // Tenants
+  getTenants: () => adminApi.get<Tenant[]>('/api/super/tenants'),
+  getTenant: (id: string) => adminApi.get<Tenant>(`/api/super/tenants/${id}`),
+  getTenantStats: (id: string) => adminApi.get<TenantStats>(`/api/super/tenants/${id}/stats`),
+  createTenant: (data: CreateTenantData) => adminApi.post<Tenant>('/api/super/tenants', data),
+  updateTenant: (id: string, data: UpdateTenantData) => adminApi.put<Tenant>(`/api/super/tenants/${id}`, data),
+  activateTenant: (id: string) => adminApi.post(`/api/super/tenants/${id}/activate`, {}),
+  suspendTenant: (id: string) => adminApi.post(`/api/super/tenants/${id}/suspend`, {}),
+  deleteTenant: (id: string) => adminApi.delete(`/api/super/tenants/${id}`),
+
+  // Platform
+  getPlatformStats: () => adminApi.get<PlatformStats>('/api/super/stats/overview'),
+  getActivity: () => adminApi.get<PlatformActivity>('/api/super/activity'),
+
+  // Admins
+  getSuperAdmins: () => adminApi.get<User[]>('/api/super/admins'),
+  promoteToSuperAdmin: (userId: string) => adminApi.post(`/api/super/admins/${userId}/promote`, {}),
+  demoteSuperAdmin: (userId: string) => adminApi.post(`/api/super/admins/${userId}/demote`, {}),
+};
+
+interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  domain?: string;
+  logo_url?: string;
+  primary_color: string;
+  secondary_color: string;
+  payment_providers: string[];
+  default_currency: string;
+  default_timezone: string;
+  settings: Record<string, unknown>;
+  is_active: boolean;
+  status: 'active' | 'suspended' | 'pending' | 'trialing';
+  subscription_status?: string;
+  trial_ends_at?: string;
+  billing_email?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  locations_count?: number;
+  booths_count?: number;
+  users_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TenantStats {
+  users: number;
+  locations: number;
+  booths: number;
+  bookings: number;
+  activeBookings: number;
+  revenue: number;
+}
+
+interface CreateTenantData {
+  name: string;
+  slug: string;
+  contactEmail: string;
+  contactPhone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  settings?: Record<string, unknown>;
+}
+
+interface UpdateTenantData {
+  name?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  settings?: Record<string, unknown>;
+  status?: 'active' | 'suspended' | 'pending';
+}
+
+interface PlatformStats {
+  totalTenants: number;
+  activeTenants: number;
+  activeSubscriptions: number;
+  trialTenants: number;
+  newTenantsThisMonth: number;
+  totalUsers: number;
+  totalBookings: number;
+  totalRevenue: number;
+  totalBooths: number;
+  mrr: number;
+}
+
+interface PlatformActivityItem {
+  id: string;
+  type: 'tenant_created' | 'subscription_updated' | 'payment_received' | string;
+  message: string;
+  timestamp: string;
+}
+
+type PlatformActivity = PlatformActivityItem[];
