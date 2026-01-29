@@ -37,7 +37,7 @@ import { cronScheduler } from './services/cron.js';
 
 // Create Fastify instance
 const app = Fastify({
-  logger: logger,
+  logger: logger as any,
 });
 
 // Register plugins

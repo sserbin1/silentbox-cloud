@@ -4,7 +4,7 @@
 
 import { p24Service, Przelewy24Service } from './przelewy24.js';
 import { monobankService, MonobankService } from './monobank.js';
-import { supabase } from '../../lib/supabase.js';
+import { supabaseAdmin as supabase } from '../../lib/supabase.js';
 import { logger } from '../../lib/logger.js';
 import crypto from 'crypto';
 
