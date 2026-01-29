@@ -210,9 +210,7 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     try {
       const { data, error } = await supabase
         .from('tenants')
-        .select('id, name, slug, status, contact_email, contact_phone, address, city, country, created_at, updated_at')
-        .neq('status', 'deleted')
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (error) {
         logger.error({ error }, 'Failed to get tenants');
@@ -222,7 +220,12 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         });
       }
 
-      return { success: true, data: data || [] };
+      // Filter and sort in JS to avoid Supabase query issues
+      const filtered = (data || [])
+        .filter((t: any) => t.status !== 'deleted')
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      return { success: true, data: filtered };
     } catch (err: any) {
       logger.error({ error: err?.message }, 'Exception getting tenants');
       return reply.code(500).send({
