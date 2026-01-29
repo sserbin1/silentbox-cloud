@@ -1,11 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "npm install -g pnpm && pnpm install && pnpm --filter @silentbox/shared build && pnpm --filter @silentbox/admin build",
-  "outputDirectory": "apps/admin/.next",
   "builds": [
     {
       "src": "apps/admin/package.json",
-      "use": "@vercel/next"
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "cd ../.. && npm install -g pnpm && pnpm install",
+        "buildCommand": "cd ../.. && pnpm --filter @silentbox/shared build && cd apps/admin && pnpm build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/apps/admin/$1"
     }
   ]
 }
