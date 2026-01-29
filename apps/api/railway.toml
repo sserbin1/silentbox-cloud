@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd ../.. && pnpm install && pnpm --filter @silentbox/shared build && pnpm --filter @silentbox/api build"
+
+[deploy]
+startCommand = "node dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[env]
+NODE_ENV = "production"
+API_HOST = "0.0.0.0"

@@ -1,6 +1,0 @@
-{
-  "installCommand": "cd ../.. && pnpm install --filter @silentbox/admin...",
-  "buildCommand": "cd ../.. && pnpm --filter @silentbox/admin build",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
-}
