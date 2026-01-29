@@ -27,6 +27,9 @@ RUN pnpm install --frozen-lockfile
 # ===========================================
 FROM base AS builder
 
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
