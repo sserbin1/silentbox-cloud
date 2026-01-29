@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Silentbox Design System */
+/* Primary: Deep Purple #4F46E5 (Indigo-600) */
+/* Accent: Amber #F59E0B for CTAs and highlights */
+/* Professional, modern, clean workspace aesthetic */
+
+@layer base {
+  :root {
+    /* Background & Surface */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary - Silentbox Purple */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - Amber for CTAs */
+    --accent: 38 92% 50%;
+    --accent-foreground: 22 78% 15%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 22 78% 15%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 239 84% 67%;
+
+    --radius: 0.75rem;
+
+    /* Chart Colors */
+    --chart-1: 239 84% 67%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 0 84% 60%;
+  }
+
+  .dark {
+    /* Background & Surface */
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+
+    --card: 224 71% 6%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 224 71% 6%;
+    --popover-foreground: 213 31% 91%;
+
+    /* Primary - Silentbox Purple (lighter for dark mode) */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 213 31% 91%;
+
+    /* Muted */
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent */
+    --accent: 38 92% 50%;
+    --accent-foreground: 22 78% 15%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 22 78% 15%;
+
+    /* Destructive */
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 239 84% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* Stats Card with gradient border */
+  .stats-card {
+    @apply relative overflow-hidden rounded-xl bg-card p-6 shadow-sm;
+    @apply border border-border/50;
+    @apply transition-all duration-200 hover:shadow-md hover:border-primary/20;
+  }
+
+  .stats-card::before {
+    content: '';
+    @apply absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent;
+  }
+
+  /* Data table row hover */
+  .table-row-hover {
+    @apply transition-colors duration-150 hover:bg-muted/50 cursor-pointer;
+  }
+
+  /* Status badge styles */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .status-badge-success {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400;
+  }
+
+  .status-badge-warning {
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400;
+  }
+
+  .status-badge-error {
+    @apply bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400;
+  }
+
+  .status-badge-info {
+    @apply bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400;
+  }
+
+  .status-badge-neutral {
+    @apply bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400;
+  }
+
+  /* Sidebar navigation item */
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground;
+    @apply transition-all duration-150;
+    @apply hover:bg-muted hover:text-foreground;
+  }
+
+  .nav-item-active {
+    @apply bg-primary/10 text-primary font-medium;
+    @apply hover:bg-primary/15;
+  }
+
+  /* Metric card with icon */
+  .metric-card {
+    @apply flex items-center gap-4 rounded-xl bg-card p-5 border border-border/50;
+    @apply transition-all duration-200 hover:shadow-sm;
+  }
+
+  .metric-icon {
+    @apply flex h-12 w-12 items-center justify-center rounded-xl;
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+
+  .empty-state-icon {
+    @apply mb-4 h-12 w-12 text-muted-foreground/50;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-muted;
+  }
+}
+
+@layer utilities {
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md dark:bg-slate-900/80;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+}

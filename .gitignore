@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.expo/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Turbo
+.turbo/
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Mobile
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+android/app/google-services.json
+ios/GoogleService-Info.plist
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
