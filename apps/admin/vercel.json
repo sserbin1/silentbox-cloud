@@ -1,0 +1,5 @@
+{
+  "installCommand": "npm install -g pnpm && cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @silentbox/admin build",
+  "framework": "nextjs"
+}
