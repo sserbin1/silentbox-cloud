@@ -203,6 +203,22 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
+      // Get trial tenants
+      const { count: trialTenantsCount } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscription_status', 'trialing');
+
+      // Get new tenants this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const { count: newTenantsCount } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfMonth.toISOString());
+
       // Get total users
       const { count: usersCount } = await supabase
         .from('users')
@@ -232,10 +248,14 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
         data: {
           totalTenants: tenantsCount || 0,
           activeTenants: activeTenantsCount || 0,
+          activeSubscriptions: activeTenantsCount || 0, // Using active tenants as proxy
+          trialTenants: trialTenantsCount || 0,
+          newTenantsThisMonth: newTenantsCount || 0,
           totalUsers: usersCount || 0,
           totalBookings: bookingsCount || 0,
           totalRevenue,
           totalBooths: boothsCount || 0,
+          mrr: 0, // TODO: Calculate from tenant_subscriptions when billing is active
         },
       };
     } catch (error) {
@@ -250,6 +270,13 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
   // Get recent activity across all tenants
   app.get('/activity', async (request, reply) => {
     try {
+      const activities: Array<{
+        id: string;
+        type: string;
+        message: string;
+        timestamp: string;
+      }> = [];
+
       // Get recent bookings
       const { data: recentBookings } = await supabase
         .from('bookings')
@@ -262,29 +289,41 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
           tenants(name)
         `)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(10);
 
-      // Get recent transactions
-      const { data: recentTransactions } = await supabase
-        .from('transactions')
-        .select(`
-          id,
-          type,
-          amount,
-          status,
-          created_at,
-          users(full_name, email),
-          tenants(name)
-        `)
+      // Convert bookings to activity items
+      recentBookings?.forEach((booking: any) => {
+        activities.push({
+          id: `booking-${booking.id}`,
+          type: 'booking_created',
+          message: `New booking at ${booking.booths?.name || 'Unknown'} by ${booking.users?.full_name || 'Unknown'}`,
+          timestamp: booking.created_at,
+        });
+      });
+
+      // Get recent tenants
+      const { data: recentTenants } = await supabase
+        .from('tenants')
+        .select('id, name, created_at')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(5);
+
+      // Convert tenants to activity items
+      recentTenants?.forEach((tenant: any) => {
+        activities.push({
+          id: `tenant-${tenant.id}`,
+          type: 'tenant_created',
+          message: `New tenant: ${tenant.name}`,
+          timestamp: tenant.created_at,
+        });
+      });
+
+      // Sort by timestamp
+      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
       return {
         success: true,
-        data: {
-          recentBookings,
-          recentTransactions,
-        },
+        data: activities.slice(0, 10),
       };
     } catch (error) {
       logger.error({ error }, 'Failed to get activity');
