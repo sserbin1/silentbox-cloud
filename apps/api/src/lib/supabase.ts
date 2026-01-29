@@ -6,7 +6,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { env } from './env.js';
 
 // Admin client with service role key (bypasses RLS)
-export const supabaseAdmin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+// Falls back to anon key if service role not available (limited functionality)
+const adminKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+export const supabaseAdmin = createClient(env.SUPABASE_URL, adminKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -15,7 +17,7 @@ export const supabaseAdmin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE
 
 // Create tenant-scoped client
 export const createTenantClient = (tenantId: string): SupabaseClient => {
-  const client = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  const client = createClient(env.SUPABASE_URL, adminKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
