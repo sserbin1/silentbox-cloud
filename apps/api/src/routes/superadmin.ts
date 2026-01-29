@@ -207,13 +207,29 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
 
   // Get all tenants (public read for listing)
   app.get('/tenants', async (request, reply) => {
-    const result = await tenantsService.getAllTenants();
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .neq('status', 'deleted')
+        .order('created_at', { ascending: false });
 
-    if (!result.success) {
-      return reply.code(500).send(result);
+      if (error) {
+        logger.error({ error }, 'Failed to get tenants');
+        return reply.code(500).send({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      logger.error({ error }, 'Exception getting tenants');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get tenants',
+      });
     }
-
-    return result;
   });
 
   // Get tenant by ID (public read)
