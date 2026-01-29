@@ -63,8 +63,8 @@ COPY --from=builder --chown=silentbox:nodejs /app/packages/shared/package.json .
 COPY --from=builder --chown=silentbox:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=silentbox:nodejs /app/apps/api/package.json ./apps/api/
 
-# Copy workspace config
-COPY --chown=silentbox:nodejs package.json pnpm-workspace.yaml ./
+# Copy workspace config and lockfile
+COPY --chown=silentbox:nodejs package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile
