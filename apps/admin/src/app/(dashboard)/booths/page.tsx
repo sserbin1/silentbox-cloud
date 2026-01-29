@@ -1,74 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, MapPin, DollarSign, Edit, Wifi, WifiOff } from 'lucide-react';
-
-const booths = [
-  {
-    id: '1',
-    name: 'Booth A1',
-    location: 'Warsaw Central',
-    status: 'available',
-    pricePerHour: 30,
-    amenities: ['WiFi', 'Power outlets', 'Monitor', 'Webcam'],
-    todayBookings: 5,
-    deviceStatus: 'online',
-  },
-  {
-    id: '2',
-    name: 'Booth A2',
-    location: 'Warsaw Central',
-    status: 'occupied',
-    pricePerHour: 30,
-    amenities: ['WiFi', 'Power outlets', 'Monitor'],
-    todayBookings: 7,
-    deviceStatus: 'online',
-  },
-  {
-    id: '3',
-    name: 'Booth B1',
-    location: 'Warsaw Central',
-    status: 'available',
-    pricePerHour: 35,
-    amenities: ['WiFi', 'Power outlets', 'Monitor', 'Webcam', 'Whiteboard'],
-    todayBookings: 4,
-    deviceStatus: 'online',
-  },
-  {
-    id: '4',
-    name: 'Booth B2',
-    location: 'Warsaw Central',
-    status: 'maintenance',
-    pricePerHour: 35,
-    amenities: ['WiFi', 'Power outlets', 'Monitor', 'Webcam', 'Whiteboard'],
-    todayBookings: 0,
-    deviceStatus: 'offline',
-  },
-  {
-    id: '5',
-    name: 'Booth C1',
-    location: 'Krakow Mall',
-    status: 'occupied',
-    pricePerHour: 25,
-    amenities: ['WiFi', 'Power outlets'],
-    todayBookings: 6,
-    deviceStatus: 'online',
-  },
-  {
-    id: '6',
-    name: 'Booth D1',
-    location: 'Gdansk Station',
-    status: 'available',
-    pricePerHour: 28,
-    amenities: ['WiFi', 'Power outlets', 'Monitor'],
-    todayBookings: 3,
-    deviceStatus: 'online',
-  },
-];
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Plus, Search, MapPin, DollarSign, Edit, Wifi, WifiOff, Trash2, AlertCircle, RefreshCw, Loader2, Box } from 'lucide-react';
+import { useBooths, useCreateBooth, useUpdateBooth, useDeleteBooth } from '@/hooks/use-booths';
+import { useLocations } from '@/hooks/use-locations';
+import Link from 'next/link';
 
 const statusColors: Record<string, string> = {
   available: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -77,13 +46,196 @@ const statusColors: Record<string, string> = {
   offline: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
 };
 
-export default function BoothsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+function BoothCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <Skeleton className="h-6 w-24 mb-2" />
+        <Skeleton className="h-4 w-32" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-6 w-28" />
+        <div className="flex gap-1">
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-14" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-9 flex-1" />
+          <Skeleton className="h-9 flex-1" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-  const filteredBooths = booths.filter(
+function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+      <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+      <p className="text-muted-foreground mb-4">{message}</p>
+      {onRetry && (
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      )}
+    </div>
+  );
+}
+
+interface BoothFormData {
+  name: string;
+  location_id: string;
+  price_per_hour: string;
+  amenities: string;
+}
+
+const defaultFormData: BoothFormData = {
+  name: '',
+  location_id: '',
+  price_per_hour: '',
+  amenities: '',
+};
+
+function BoothsContent() {
+  const searchParams = useSearchParams();
+  const locationIdFilter = searchParams.get('locationId');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedBooth, setSelectedBooth] = useState<any>(null);
+  const [formData, setFormData] = useState<BoothFormData>(defaultFormData);
+
+  const { data: booths, isLoading, error, refetch } = useBooths(locationIdFilter || undefined);
+  const { data: locations } = useLocations();
+  const createMutation = useCreateBooth();
+  const updateMutation = useUpdateBooth();
+  const deleteMutation = useDeleteBooth();
+
+  const filteredBooths = booths?.filter(
     (booth) =>
-      booth.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booth.location.toLowerCase().includes(searchQuery.toLowerCase())
+      booth.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const getLocationName = (locationId: string) => {
+    const location = locations?.find(l => l.id === locationId);
+    return location?.name || 'Unknown Location';
+  };
+
+  const handleCreateSubmit = async () => {
+    try {
+      await createMutation.mutateAsync({
+        name: formData.name,
+        location_id: formData.location_id,
+        price_per_hour: parseFloat(formData.price_per_hour) || 0,
+        amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean),
+      });
+      setIsCreateDialogOpen(false);
+      setFormData(defaultFormData);
+    } catch (error) {
+      console.error('Failed to create booth:', error);
+    }
+  };
+
+  const handleEditClick = (booth: any) => {
+    setSelectedBooth(booth);
+    setFormData({
+      name: booth.name,
+      location_id: booth.location_id,
+      price_per_hour: booth.price_per_hour?.toString() || '',
+      amenities: booth.amenities?.join(', ') || '',
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = async () => {
+    if (!selectedBooth) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: selectedBooth.id,
+        data: {
+          name: formData.name,
+          location_id: formData.location_id,
+          price_per_hour: parseFloat(formData.price_per_hour) || 0,
+          amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean),
+        },
+      });
+      setIsEditDialogOpen(false);
+      setSelectedBooth(null);
+      setFormData(defaultFormData);
+    } catch (error) {
+      console.error('Failed to update booth:', error);
+    }
+  };
+
+  const handleDeleteClick = (booth: any) => {
+    setSelectedBooth(booth);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedBooth) return;
+    try {
+      await deleteMutation.mutateAsync(selectedBooth.id);
+      setIsDeleteDialogOpen(false);
+      setSelectedBooth(null);
+    } catch (error) {
+      console.error('Failed to delete booth:', error);
+    }
+  };
+
+  const BoothForm = () => (
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="e.g., Booth A1"
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="location">Location</Label>
+        <Select
+          value={formData.location_id}
+          onValueChange={(value) => setFormData({ ...formData, location_id: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a location" />
+          </SelectTrigger>
+          <SelectContent>
+            {locations?.map((location) => (
+              <SelectItem key={location.id} value={location.id}>
+                {location.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="price">Price per Hour (PLN)</Label>
+        <Input
+          id="price"
+          type="number"
+          value={formData.price_per_hour}
+          onChange={(e) => setFormData({ ...formData, price_per_hour: e.target.value })}
+          placeholder="e.g., 30"
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="amenities">Amenities (comma-separated)</Label>
+        <Input
+          id="amenities"
+          value={formData.amenities}
+          onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
+          placeholder="e.g., WiFi, Power outlets, Monitor"
+        />
+      </div>
+    </div>
   );
 
   return (
@@ -93,86 +245,217 @@ export default function BoothsPage() {
       <div className="p-6 space-y-6">
         {/* Actions Bar */}
         <div className="flex items-center justify-between">
-          <div className="relative w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search booths..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search booths..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {locationIdFilter && (
+              <Link href="/booths">
+                <Button variant="outline" size="sm">
+                  Clear Filter
+                </Button>
+              </Link>
+            )}
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Booth
-          </Button>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Booth
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Booth</DialogTitle>
+                <DialogDescription>
+                  Create a new booth at one of your locations.
+                </DialogDescription>
+              </DialogHeader>
+              <BoothForm />
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateSubmit} disabled={createMutation.isPending}>
+                  {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Create
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Booths Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredBooths.map((booth) => (
-            <Card key={booth.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {booth.name}
-                      {booth.deviceStatus === 'online' ? (
-                        <Wifi className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <WifiOff className="h-4 w-4 text-red-500" />
-                      )}
-                    </CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {booth.location}
+          {isLoading ? (
+            <>
+              <BoothCardSkeleton />
+              <BoothCardSkeleton />
+              <BoothCardSkeleton />
+            </>
+          ) : error ? (
+            <ErrorCard message="Failed to load booths" onRetry={() => refetch()} />
+          ) : filteredBooths.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+              <Box className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground mb-4">
+                {searchQuery ? 'No booths match your search' : 'No booths yet'}
+              </p>
+              {!searchQuery && (
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Booth
+                </Button>
+              )}
+            </div>
+          ) : (
+            filteredBooths.map((booth) => (
+              <Card key={booth.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {booth.name}
+                        {booth.status === 'available' ? (
+                          <Wifi className="h-4 w-4 text-green-500" />
+                        ) : booth.status === 'maintenance' ? (
+                          <WifiOff className="h-4 w-4 text-red-500" />
+                        ) : (
+                          <Wifi className="h-4 w-4 text-blue-500" />
+                        )}
+                      </CardTitle>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {getLocationName(booth.location_id)}
+                      </div>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                        statusColors[booth.status] || statusColors.available
+                      }`}
+                    >
+                      {booth.status}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-lg font-semibold">
+                      <DollarSign className="h-4 w-4" />
+                      {booth.price_per_hour} PLN/h
                     </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                      statusColors[booth.status]
-                    }`}
-                  >
-                    {booth.status}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-lg font-semibold">
-                    <DollarSign className="h-4 w-4" />
-                    {booth.pricePerHour} PLN/h
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {booth.todayBookings} bookings today
-                  </span>
-                </div>
 
-                <div className="flex flex-wrap gap-1">
-                  {booth.amenities.map((amenity) => (
-                    <span
-                      key={amenity}
-                      className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
+                  {booth.amenities && booth.amenities.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {booth.amenities.map((amenity: string) => (
+                        <span
+                          key={amenity}
+                          className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs"
+                        >
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      size="sm"
+                      onClick={() => handleEditClick(booth)}
                     >
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" size="sm">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button variant="outline" className="flex-1" size="sm">
-                    View Bookings
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Link href={`/bookings?boothId=${booth.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full" size="sm">
+                        View Bookings
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteClick(booth)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Booth</DialogTitle>
+            <DialogDescription>
+              Update the booth details.
+            </DialogDescription>
+          </DialogHeader>
+          <BoothForm />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSubmit} disabled={updateMutation.isPending}>
+              {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Booth</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedBooth?.name}"? This action cannot be undone.
+              All bookings associated with this booth will also be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
+  );
+}
+
+export default function BoothsPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <BoothCardSkeleton />
+          <BoothCardSkeleton />
+          <BoothCardSkeleton />
+        </div>
+      </div>
+    }>
+      <BoothsContent />
+    </Suspense>
   );
 }

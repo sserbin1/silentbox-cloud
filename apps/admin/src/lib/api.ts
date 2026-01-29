@@ -140,12 +140,14 @@ export const devicesApi = {
 
 // Types
 interface DashboardStats {
-  totalBookings: number;
-  activeBookings: number;
-  totalRevenue: number;
   totalUsers: number;
+  activeBookings: number;
+  todayBookings: number;
+  monthlyRevenue: number;
+  totalBooths: number;
   availableBooths: number;
   occupiedBooths: number;
+  totalLocations: number;
 }
 
 interface RevenueData {
