@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm turbo build --filter=@silentbox/admin",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "outputDirectory": "apps/admin/.next"
+}
