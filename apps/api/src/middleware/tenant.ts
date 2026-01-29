@@ -22,7 +22,7 @@ const AUTH_ROUTES = [
 ];
 
 // Super admin routes (platform-level, no tenant)
-const SUPER_ADMIN_ROUTES = ['/api/admin/tenants'];
+const SUPER_ADMIN_ROUTES = ['/api/super'];
 
 export const tenantMiddleware = async (request: FastifyRequest, reply: FastifyReply) => {
   const path = request.url.split('?')[0];
