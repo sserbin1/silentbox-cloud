@@ -90,8 +90,10 @@ app.decorate('socketEvents', socketEvents);
 // Start server
 const start = async () => {
   try {
+    // Railway sets PORT, fallback to API_PORT for local dev
+    const port = env.PORT || env.API_PORT;
     const address = await app.listen({
-      port: env.API_PORT,
+      port,
       host: env.API_HOST,
     });
     logger.info(`Server listening at ${address}`);

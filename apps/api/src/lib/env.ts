@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // API
+  PORT: z.coerce.number().optional(), // Railway sets this
   API_PORT: z.coerce.number().default(3001),
   API_HOST: z.string().default('0.0.0.0'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -65,3 +66,6 @@ export const env = parsed.data;
 export const isDev = env.NODE_ENV === 'development';
 export const isProd = env.NODE_ENV === 'production';
 export const isTest = env.NODE_ENV === 'test';
+
+// Server port - Railway sets PORT, fallback to API_PORT
+export const serverPort = env.PORT || env.API_PORT;
