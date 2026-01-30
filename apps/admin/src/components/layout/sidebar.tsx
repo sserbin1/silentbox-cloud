@@ -15,61 +15,82 @@ import {
   Bell,
   ChevronRight,
   Zap,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
-const navigation = [
+interface NavItem {
+  nameKey: TranslationKey;
+  fallbackName: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  descriptionKey?: TranslationKey;
+  fallbackDescription?: string;
+}
+
+const navigation: NavItem[] = [
   {
-    name: 'Dashboard',
+    nameKey: 'admin.nav.dashboard',
+    fallbackName: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    description: 'Overview & analytics'
+    fallbackDescription: 'Overview & analytics'
   },
   {
-    name: 'Locations',
+    nameKey: 'admin.nav.locations',
+    fallbackName: 'Locations',
     href: '/locations',
     icon: MapPin,
-    description: 'Manage venues'
+    fallbackDescription: 'Manage venues'
   },
   {
-    name: 'Booths',
+    nameKey: 'admin.nav.booths',
+    fallbackName: 'Booths',
     href: '/booths',
     icon: Box,
-    description: 'Booth inventory'
+    fallbackDescription: 'Booth inventory'
   },
   {
-    name: 'Bookings',
+    nameKey: 'admin.nav.bookings',
+    fallbackName: 'Bookings',
     href: '/bookings',
     icon: Calendar,
-    description: 'Reservations'
+    fallbackDescription: 'Reservations'
   },
   {
-    name: 'Users',
+    nameKey: 'admin.nav.users',
+    fallbackName: 'Users',
     href: '/users',
     icon: Users,
-    description: 'Customer management'
+    fallbackDescription: 'Customer management'
   },
   {
-    name: 'Transactions',
-    href: '/transactions',
-    icon: CreditCard,
-    description: 'Payment history'
+    nameKey: 'admin.nav.pricing',
+    fallbackName: 'Pricing',
+    href: '/pricing',
+    icon: DollarSign,
+    fallbackDescription: 'Rates & packages'
   },
   {
-    name: 'Devices',
+    nameKey: 'admin.nav.devices',
+    fallbackName: 'Devices',
     href: '/devices',
     icon: Lock,
-    description: 'Smart locks'
+    fallbackDescription: 'Smart locks'
   },
 ];
 
-const secondaryNav = [
-  { name: 'Settings', href: '/settings', icon: Settings },
+const secondaryNav: NavItem[] = [
+  { nameKey: 'admin.nav.settings', fallbackName: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <div className="flex h-full w-72 flex-col bg-card/50 backdrop-blur-xl border-r border-border/50">
@@ -117,9 +138,10 @@ export function Sidebar() {
         </p>
         {navigation.map((item) => {
           const isActive = pathname.startsWith(item.href);
+          const name = t(item.nameKey) || item.fallbackName;
           return (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
               className={cn(
                 'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
@@ -140,10 +162,10 @@ export function Sidebar() {
                 <p className={cn(
                   'truncate',
                   isActive ? 'font-semibold' : ''
-                )}>{item.name}</p>
-                {!isActive && (
+                )}>{name}</p>
+                {!isActive && item.fallbackDescription && (
                   <p className="text-xs text-muted-foreground/70 truncate">
-                    {item.description}
+                    {item.fallbackDescription}
                   </p>
                 )}
               </div>
@@ -160,9 +182,10 @@ export function Sidebar() {
           </p>
           {secondaryNav.map((item) => {
             const isActive = pathname.startsWith(item.href);
+            const name = t(item.nameKey) || item.fallbackName;
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className={cn(
                   'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
@@ -179,7 +202,7 @@ export function Sidebar() {
                 )}>
                   <item.icon className="h-4.5 w-4.5" />
                 </div>
-                <span>{item.name}</span>
+                <span>{name}</span>
               </Link>
             );
           })}
@@ -188,6 +211,12 @@ export function Sidebar() {
 
       {/* User Section */}
       <div className="border-t border-border/50 p-4 space-y-3">
+        {/* Language Switcher */}
+        <div className="flex items-center justify-between rounded-xl bg-muted/30 px-3 py-2">
+          <span className="text-sm text-muted-foreground">{t('admin.settings.language')}</span>
+          <LanguageSwitcher variant="compact" />
+        </div>
+
         {/* Notifications */}
         <button className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-muted/50">

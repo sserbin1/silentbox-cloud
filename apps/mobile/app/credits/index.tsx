@@ -189,6 +189,16 @@ export default function CreditsScreen() {
           </View>
         </View>
 
+        {/* Transaction History Link */}
+        <TouchableOpacity
+          style={styles.historyLink}
+          onPress={() => router.push('/transactions')}
+        >
+          <Ionicons name="receipt-outline" size={20} color="#4F46E5" />
+          <Text style={styles.historyLinkText}>View Transaction History</Text>
+          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+
         {/* Terms */}
         <Text style={styles.terms}>
           By purchasing credits, you agree to our Terms of Service and Refund Policy.
@@ -405,6 +415,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#6B7280',
+  },
+  historyLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  historyLinkText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1F2937',
   },
   terms: {
     fontSize: 12,

@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silentbox Mobile - Futuristic Design</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Dark theme base */
+      --slate-950: #020617;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-300: #cbd5e1;
+
+      /* Neon accents */
+      --violet-600: #7c3aed;
+      --violet-500: #8b5cf6;
+      --violet-400: #a78bfa;
+      --cyan-500: #06b6d4;
+      --cyan-400: #22d3ee;
+
+      /* Status colors */
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+
+      /* Glows */
+      --glow-violet: rgba(139, 92, 246, 0.4);
+      --glow-cyan: rgba(6, 182, 212, 0.4);
+      --glow-success: rgba(16, 185, 129, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--violet-500), var(--cyan-500));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      box-shadow: 0 0 30px var(--glow-violet);
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--violet-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      font-size: 18px;
+      color: var(--slate-400);
+    }
+
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+      gap: 40px;
+      justify-items: center;
+    }
+
+    .screen-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: var(--slate-950);
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 12px #1a1a2e,
+        0 0 0 14px #2d2d44,
+        0 0 60px var(--glow-violet);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 34px;
+      background: #1a1a2e;
+      border-radius: 0 0 20px 20px;
+      z-index: 100;
+    }
+
+    .phone-frame::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 6px;
+      background: #2d2d44;
+      border-radius: 3px;
+      z-index: 101;
+    }
+
+    .screen-title {
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+
+    .screen-subtitle {
+      text-align: center;
+      color: var(--slate-500);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* Common Screen Styles */
+    .screen {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--slate-950);
+      position: relative;
+      overflow-y: auto;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+    }
+
+    /* Gradient Border Card */
+    .gradient-card {
+      position: relative;
+      background: var(--slate-900);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .gradient-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--violet-500), var(--cyan-500));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    /* Neon Button */
+    .neon-btn {
+      background: linear-gradient(135deg, var(--violet-600), var(--violet-500));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--glow-violet);
+      transition: all 0.3s;
+    }
+
+    .neon-btn:hover {
+      box-shadow: 0 0 30px var(--glow-violet);
+      transform: translateY(-2px);
+    }
+
+    /* Glow Badge */
+    .glow-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .glow-badge.violet {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--violet-400);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .glow-badge.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .glow-badge.warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* ==================== */
+    /* SCREEN 1: ACTIVE SESSION */
+    /* ==================== */
+
+    .session-header {
+      height: 260px;
+      background:
+        linear-gradient(180deg, rgba(2,6,23,0.3) 0%, transparent 30%, rgba(2,6,23,0.9) 100%),
+        url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=800') center/cover;
+      position: relative;
+      padding: 60px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .session-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .status-badge-live {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px var(--glow-success);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .status-badge-live span {
+      color: #34d399;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .booth-info {
+      color: #fff;
+    }
+
+    .booth-info h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .booth-info p {
+      font-size: 15px;
+      color: var(--slate-300);
+    }
+
+    /* Timer Card */
+    .timer-card {
+      margin: 20px;
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      background: var(--slate-900);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 2px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--violet-500), var(--cyan-500));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .timer-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--violet-400);
+    }
+
+    .timer-header span {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .timer-value {
+      font-size: 56px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--violet-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -2px;
+    }
+
+    .extend-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 999px;
+      color: var(--violet-400);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .extend-btn:hover {
+      background: rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 20px var(--glow-violet);
+    }
+
+    /* Action Cards Grid */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .action-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .action-card:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 26px;
+    }
+
+    .action-icon.unlock {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      color: #34d399;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .action-icon.lights {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
+      color: var(--violet-400);
+      box-shadow: 0 0 20px var(--glow-violet);
+    }
+
+    .action-icon.climate {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
+      color: var(--cyan-400);
+      box-shadow: 0 0 20px var(--glow-cyan);
+    }
+
+    .action-icon.help {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+      color: #fbbf24;
+    }
+
+    .action-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .action-card p {
+      font-size: 12px;
+      color: var(--slate-400);
+    }
+
+    /* Details Card */
+    .details-card {
+      margin: 0 20px 16px;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+    }
+
+    .details-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--slate-400);
+      font-size: 14px;
+    }
+
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(139, 92, 246, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--violet-400);
+    }
+
+    /* Bottom Action */
+    .bottom-action {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 20px 40px;
+      background: linear-gradient(to top, var(--slate-950) 60%, transparent);
+    }
+
+    .end-session-btn {
+      width: 100%;
+      padding: 18px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 16px;
+      color: #f87171;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .end-session-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==================== */
+    /* SCREEN 2: MY BOOKINGS */
+    /* ==================== */
+
+    .bookings-header {
+      padding: 60px 20px 20px;
+      background: linear-gradient(180deg, var(--slate-900) 0%, var(--slate-950) 100%);
+    }
+
+    .bookings-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .bookings-header p {
+      font-size: 14px;
+      color: var(--slate-400);
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 4px;
+    }
+
+    .tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--slate-400);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--violet-600), var(--violet-500));
+      color: #fff;
+      box-shadow: 0 0 20px var(--glow-violet);
+    }
+
+    .tab-badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab.active .tab-badge {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Booking Card */
+    .booking-card {
+      margin: 16px 20px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    .booking-image {
+      height: 140px;
+      background:
+        linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.8) 100%),
+        url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=600') center/cover;
+      position: relative;
+    }
+
+    .live-indicator {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.9);
+      padding: 6px 12px;
+      border-radius: 999px;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .live-indicator span {
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .booking-content {
+      padding: 16px 20px 20px;
+    }
+
+    .booking-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .booking-title-row h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pill.active {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--violet-400);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .status-pill.confirmed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .booking-location {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--slate-400);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .booking-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(139, 92, 246, 0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--violet-400);
+      font-size: 14px;
+    }
+
+    .meta-item span {
+      font-size: 13px;
+      color: var(--slate-300);
+      font-weight: 500;
+    }
+
+    .booking-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price-info .price-label {
+      font-size: 12px;
+      color: var(--slate-500);
+      margin-bottom: 2px;
+    }
+
+    .price-info .price-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .price-info .price-value small {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--slate-400);
+    }
+
+    .manage-btn {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--violet-600), var(--violet-500));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--glow-violet);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Tab Bar */
+    .tab-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      height: 70px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--slate-500);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-item.active {
+      color: var(--violet-400);
+    }
+
+    .tab-item .tab-icon {
+      width: 40px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border-radius: 10px;
+    }
+
+    .tab-item.active .tab-icon {
+      background: rgba(139, 92, 246, 0.2);
+      box-shadow: 0 0 15px var(--glow-violet);
+    }
+
+    /* ==================== */
+    /* SCREEN 3: EXPLORE */
+    /* ==================== */
+
+    .explore-header {
+      padding: 60px 20px 20px;
+      background: linear-gradient(180deg, var(--slate-900) 0%, var(--slate-950) 100%);
+    }
+
+    .greeting {
+      font-size: 14px;
+      color: var(--slate-400);
+      margin-bottom: 4px;
+    }
+
+    .explore-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      transition: all 0.3s;
+    }
+
+    .search-bar:focus-within {
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 20px var(--glow-violet);
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: #fff;
+      background: transparent;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--slate-500);
+    }
+
+    .search-icon {
+      color: var(--slate-400);
+      font-size: 18px;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .chip {
+      padding: 10px 18px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--slate-300);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .chip:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, var(--violet-600), var(--violet-500));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 15px var(--glow-violet);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px 12px;
+    }
+
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .see-all {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--violet-400);
+      cursor: pointer;
+    }
+
+    .booth-scroll {
+      display: flex;
+      gap: 12px;
+      padding: 0 20px 24px;
+      overflow-x: auto;
+    }
+
+    .booth-card-small {
+      min-width: 200px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .booth-card-small:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .booth-card-small .image {
+      height: 120px;
+      background:
+        linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.7) 100%),
+        url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400') center/cover;
+      position: relative;
+    }
+
+    .booth-card-small:nth-child(2) .image {
+      background-image:
+        linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.7) 100%),
+        url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400');
+    }
+
+    .booth-card-small:nth-child(3) .image {
+      background-image:
+        linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.7) 100%),
+        url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400');
+    }
+
+    .available-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 5px 10px;
+      background: rgba(16, 185, 129, 0.9);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 8px;
+      box-shadow: 0 0 10px var(--glow-success);
+    }
+
+    .booth-card-small .info {
+      padding: 14px;
+    }
+
+    .booth-card-small h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .booth-card-small .location {
+      font-size: 12px;
+      color: var(--slate-400);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .booth-card-small .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .booth-card-small .price {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--violet-400), var(--cyan-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .booth-card-small .price small {
+      font-size: 12px;
+      font-weight: 500;
+      -webkit-text-fill-color: var(--slate-500);
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--slate-300);
+    }
+
+    .rating .star {
+      color: #fbbf24;
+    }
+
+    .padding-bottom {
+      height: 110px;
+    }
+
+    /* ==================== */
+    /* SCREEN 4: PROFILE */
+    /* ==================== */
+
+    .profile-header {
+      padding: 60px 20px 40px;
+      background: linear-gradient(180deg, var(--violet-600) 0%, var(--slate-950) 100%);
+      text-align: center;
+      position: relative;
+    }
+
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet-500), var(--cyan-500));
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: #fff;
+      border: 4px solid rgba(255,255,255,0.2);
+      box-shadow: 0 0 40px var(--glow-violet);
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-header p {
+      font-size: 14px;
+      color: var(--slate-300);
+      position: relative;
+      z-index: 1;
+    }
+
+    .credits-card {
+      margin: -24px 20px 20px;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 10;
+    }
+
+    .credits-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .credits-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #f59e0b, #fcd34d);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .credits-info h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .credits-info span {
+      font-size: 13px;
+      color: var(--slate-400);
+    }
+
+    .add-credits-btn {
+      padding: 12px 18px;
+      background: linear-gradient(135deg, var(--violet-600), var(--violet-500));
+      color: #fff;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 15px var(--glow-violet);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      padding: 0 20px 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--violet-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: var(--slate-400);
+    }
+
+    .menu-section {
+      padding: 0 20px;
+    }
+
+    .menu-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .menu-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item:hover {
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .menu-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .menu-icon.violet {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--violet-400);
+    }
+
+    .menu-icon.cyan {
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--cyan-400);
+    }
+
+    .menu-icon.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .menu-icon.warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+
+    .menu-icon.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .menu-item .menu-content {
+      flex: 1;
+    }
+
+    .menu-item h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .menu-item p {
+      font-size: 13px;
+      color: var(--slate-400);
+    }
+
+    .menu-arrow {
+      color: var(--slate-500);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">📦</div>
+      </div>
+      <h1>Silentbox Mobile</h1>
+      <p>Futuristic Design System</p>
+    </div>
+
+    <div class="screens-grid">
+
+      <!-- Screen 1: Active Session -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="session-header">
+              <div class="session-top-bar">
+                <div class="close-btn">✕</div>
+                <div class="status-badge-live">
+                  <div class="status-dot"></div>
+                  <span>Активна сесія</span>
+                </div>
+              </div>
+              <div class="booth-info">
+                <h2>Focus Pod #3</h2>
+                <p>📍 Кабіна для роботи • Поверх 2</p>
+              </div>
+            </div>
+
+            <div class="timer-card">
+              <div class="timer-header">
+                <span>⏱️</span>
+                <span>Залишилось часу</span>
+              </div>
+              <div class="timer-value">47:23</div>
+              <button class="extend-btn">
+                <span>➕</span>
+                <span>Продовжити сесію</span>
+              </button>
+            </div>
+
+            <div class="actions-grid">
+              <div class="action-card">
+                <div class="action-icon unlock">🔓</div>
+                <h4>Відчинити</h4>
+                <p>Двері кабіни</p>
+              </div>
+              <div class="action-card">
+                <div class="action-icon lights">💡</div>
+                <h4>Освітлення</h4>
+                <p>Яскравість: 80%</p>
+              </div>
+              <div class="action-card">
+                <div class="action-icon climate">❄️</div>
+                <h4>Клімат</h4>
+                <p>22°C • Авто</p>
+              </div>
+              <div class="action-card">
+                <div class="action-icon help">🆘</div>
+                <h4>Допомога</h4>
+                <p>Зв'язатись</p>
+              </div>
+            </div>
+
+            <div class="details-card">
+              <h3>Деталі бронювання</h3>
+              <div class="detail-row">
+                <div class="detail-icon">📅</div>
+                <span>Сьогодні, 14:00 - 16:00</span>
+              </div>
+              <div class="detail-row">
+                <div class="detail-icon">💳</div>
+                <span>Списано: 120 кредитів</span>
+              </div>
+              <div class="detail-row">
+                <div class="detail-icon">🔑</div>
+                <span>Код доступу: 4829</span>
+              </div>
+            </div>
+
+            <div class="bottom-action">
+              <button class="end-session-btn">
+                <span>⏹️</span>
+                <span>Завершити сесію</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Активна сесія</div>
+        <div class="screen-subtitle">Управління кабіною</div>
+      </div>
+
+      <!-- Screen 2: My Bookings -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="bookings-header">
+              <h1>Мої бронювання</h1>
+              <p>Керуйте своїми сесіями</p>
+              <div class="tabs">
+                <div class="tab active">
+                  Активні
+                  <span class="tab-badge">2</span>
+                </div>
+                <div class="tab">
+                  Майбутні
+                  <span class="tab-badge">3</span>
+                </div>
+                <div class="tab">
+                  Історія
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-card">
+              <div class="booking-image">
+                <div class="live-indicator">
+                  <div class="live-dot"></div>
+                  <span>Live</span>
+                </div>
+              </div>
+              <div class="booking-content">
+                <div class="booking-title-row">
+                  <h3>Focus Pod #3</h3>
+                  <div class="status-pill active">
+                    <span>⚡</span> Активна
+                  </div>
+                </div>
+                <div class="booking-location">
+                  <span>📍</span> Silentbox Центр • Поверх 2
+                </div>
+                <div class="booking-meta">
+                  <div class="meta-item">
+                    <div class="meta-icon">📅</div>
+                    <span>Сьогодні</span>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-icon">⏰</div>
+                    <span>14:00 - 16:00</span>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-icon">⏱️</div>
+                    <span>2 години</span>
+                  </div>
+                </div>
+                <div class="booking-footer">
+                  <div class="price-info">
+                    <div class="price-label">Вартість</div>
+                    <div class="price-value">120 <small>кредитів</small></div>
+                  </div>
+                  <button class="manage-btn">
+                    <span>Керувати</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-card">
+              <div class="booking-image" style="background-image: linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.8) 100%), url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600');">
+              </div>
+              <div class="booking-content">
+                <div class="booking-title-row">
+                  <h3>Meeting Room A</h3>
+                  <div class="status-pill confirmed">
+                    <span>✓</span> Підтверджено
+                  </div>
+                </div>
+                <div class="booking-location">
+                  <span>📍</span> Silentbox Центр • Поверх 3
+                </div>
+                <div class="booking-meta">
+                  <div class="meta-item">
+                    <div class="meta-icon">📅</div>
+                    <span>Завтра</span>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-icon">⏰</div>
+                    <span>10:00 - 12:00</span>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-icon">👥</div>
+                    <span>4 особи</span>
+                  </div>
+                </div>
+                <div class="booking-footer">
+                  <div class="price-info">
+                    <div class="price-label">Вартість</div>
+                    <div class="price-value">200 <small>кредитів</small></div>
+                  </div>
+                  <button class="manage-btn">
+                    <span>Деталі</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item">
+                <div class="tab-icon">🏠</div>
+                <span>Головна</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">🔍</div>
+                <span>Пошук</span>
+              </div>
+              <div class="tab-item active">
+                <div class="tab-icon">📋</div>
+                <span>Броні</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">👤</div>
+                <span>Профіль</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Мої бронювання</div>
+        <div class="screen-subtitle">Список активних та майбутніх</div>
+      </div>
+
+      <!-- Screen 3: Explore -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="explore-header">
+              <div class="greeting">👋 Привіт, Олександр</div>
+              <h1>Знайди свій простір</h1>
+              <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Пошук кабін...">
+              </div>
+            </div>
+
+            <div class="filter-chips">
+              <div class="chip active">Всі</div>
+              <div class="chip">Focus Pod</div>
+              <div class="chip">Meeting Room</div>
+              <div class="chip">Phone Booth</div>
+              <div class="chip">Open Space</div>
+            </div>
+
+            <div class="section-header">
+              <h2>🔥 Популярні</h2>
+              <span class="see-all">Всі →</span>
+            </div>
+
+            <div class="booth-scroll">
+              <div class="booth-card-small">
+                <div class="image">
+                  <div class="available-badge">✓ Вільно</div>
+                </div>
+                <div class="info">
+                  <h4>Focus Pod #1</h4>
+                  <div class="location">📍 Поверх 1</div>
+                  <div class="price-row">
+                    <span class="price">60 <small>/год</small></span>
+                    <div class="rating">
+                      <span class="star">★</span> 4.9
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booth-card-small">
+                <div class="image">
+                  <div class="available-badge">✓ Вільно</div>
+                </div>
+                <div class="info">
+                  <h4>Meeting Room A</h4>
+                  <div class="location">📍 Поверх 3</div>
+                  <div class="price-row">
+                    <span class="price">100 <small>/год</small></span>
+                    <div class="rating">
+                      <span class="star">★</span> 4.8
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booth-card-small">
+                <div class="image">
+                </div>
+                <div class="info">
+                  <h4>Phone Booth #2</h4>
+                  <div class="location">📍 Поверх 1</div>
+                  <div class="price-row">
+                    <span class="price">40 <small>/год</small></span>
+                    <div class="rating">
+                      <span class="star">★</span> 4.7
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-header">
+              <h2>⚡ Доступні зараз</h2>
+              <span class="see-all">Всі →</span>
+            </div>
+
+            <div class="booth-scroll">
+              <div class="booth-card-small">
+                <div class="image" style="background-image: linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.7) 100%), url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400');">
+                  <div class="available-badge">✓ Вільно</div>
+                </div>
+                <div class="info">
+                  <h4>Creative Space</h4>
+                  <div class="location">📍 Поверх 2</div>
+                  <div class="price-row">
+                    <span class="price">80 <small>/год</small></span>
+                    <div class="rating">
+                      <span class="star">★</span> 4.9
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booth-card-small">
+                <div class="image" style="background-image: linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.7) 100%), url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400');">
+                  <div class="available-badge">✓ Вільно</div>
+                </div>
+                <div class="info">
+                  <h4>Focus Pod #5</h4>
+                  <div class="location">📍 Поверх 1</div>
+                  <div class="price-row">
+                    <span class="price">60 <small>/год</small></span>
+                    <div class="rating">
+                      <span class="star">★</span> 4.6
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="padding-bottom"></div>
+
+            <div class="tab-bar">
+              <div class="tab-item active">
+                <div class="tab-icon">🏠</div>
+                <span>Головна</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">🗺️</div>
+                <span>Карта</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">📋</div>
+                <span>Броні</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">👤</div>
+                <span>Профіль</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Головна / Пошук</div>
+        <div class="screen-subtitle">Каталог доступних кабін</div>
+      </div>
+
+      <!-- Screen 4: Profile -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="profile-header">
+              <div class="profile-avatar">👤</div>
+              <h2>Олександр Коваль</h2>
+              <p>oleksandr@example.com</p>
+            </div>
+
+            <div class="credits-card">
+              <div class="credits-info">
+                <div class="credits-icon">💰</div>
+                <div>
+                  <h3>1,250</h3>
+                  <span>кредитів</span>
+                </div>
+              </div>
+              <button class="add-credits-btn">+ Поповнити</button>
+            </div>
+
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-value">47</div>
+                <div class="stat-label">Бронювань</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">124</div>
+                <div class="stat-label">Годин</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">Gold</div>
+                <div class="stat-label">Статус</div>
+              </div>
+            </div>
+
+            <div class="menu-section">
+              <div class="menu-section-title">Налаштування</div>
+              <div class="menu-card">
+                <div class="menu-item">
+                  <div class="menu-icon violet">👤</div>
+                  <div class="menu-content">
+                    <h4>Особисті дані</h4>
+                    <p>Ім'я, email, телефон</p>
+                  </div>
+                  <span class="menu-arrow">›</span>
+                </div>
+                <div class="menu-item">
+                  <div class="menu-icon cyan">🔔</div>
+                  <div class="menu-content">
+                    <h4>Сповіщення</h4>
+                    <p>Push, Email, SMS</p>
+                  </div>
+                  <span class="menu-arrow">›</span>
+                </div>
+                <div class="menu-item">
+                  <div class="menu-icon success">💳</div>
+                  <div class="menu-content">
+                    <h4>Платіжні методи</h4>
+                    <p>Картки та рахунки</p>
+                  </div>
+                  <span class="menu-arrow">›</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="menu-section">
+              <div class="menu-section-title">Інше</div>
+              <div class="menu-card">
+                <div class="menu-item">
+                  <div class="menu-icon warning">❓</div>
+                  <div class="menu-content">
+                    <h4>Допомога</h4>
+                    <p>FAQ та підтримка</p>
+                  </div>
+                  <span class="menu-arrow">›</span>
+                </div>
+                <div class="menu-item">
+                  <div class="menu-icon error">🚪</div>
+                  <div class="menu-content">
+                    <h4>Вийти</h4>
+                    <p>Завершити сесію</p>
+                  </div>
+                  <span class="menu-arrow">›</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="padding-bottom"></div>
+
+            <div class="tab-bar">
+              <div class="tab-item">
+                <div class="tab-icon">🏠</div>
+                <span>Головна</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">🗺️</div>
+                <span>Карта</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">📋</div>
+                <span>Броні</span>
+              </div>
+              <div class="tab-item active">
+                <div class="tab-icon">👤</div>
+                <span>Профіль</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Профіль</div>
+        <div class="screen-subtitle">Аккаунт та налаштування</div>
+      </div>
+
+      <!-- Screen 5: Welcome -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen" style="background: linear-gradient(180deg, var(--slate-950) 0%, #1e1b4b 50%, var(--slate-950) 100%);">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 24px; text-align: center;">
+              <!-- Animated logo -->
+              <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--violet-500), var(--cyan-500)); border-radius: 32px; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 32px; box-shadow: 0 0 60px var(--glow-violet); animation: float 3s ease-in-out infinite;">
+                📦
+              </div>
+              <style>
+                @keyframes float {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-10px); }
+                }
+              </style>
+
+              <h1 style="font-size: 36px; font-weight: 700; background: linear-gradient(135deg, #fff, var(--violet-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;">Silentbox</h1>
+              <p style="font-size: 18px; color: var(--slate-400); margin-bottom: 48px; line-height: 1.6;">Приватні робочі простори<br>у вашому смартфоні</p>
+
+              <!-- Features -->
+              <div style="width: 100%; margin-bottom: 48px;">
+                <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 16px; margin-bottom: 12px;">
+                  <div style="width: 44px; height: 44px; background: rgba(139, 92, 246, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🔓</div>
+                  <div style="text-align: left;">
+                    <div style="font-size: 15px; font-weight: 600; color: #fff;">Миттєвий доступ</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">Відчиняйте кабіни через додаток</div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 16px; margin-bottom: 12px;">
+                  <div style="width: 44px; height: 44px; background: rgba(6, 182, 212, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📅</div>
+                  <div style="text-align: left;">
+                    <div style="font-size: 15px; font-weight: 600; color: #fff;">Легке бронювання</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">Забронюйте за кілька секунд</div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px;">
+                  <div style="width: 44px; height: 44px; background: rgba(16, 185, 129, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">💳</div>
+                  <div style="text-align: left;">
+                    <div style="font-size: 15px; font-weight: 600; color: #fff;">Система кредитів</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">Гнучка оплата без зайвого</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding: 20px 24px 50px;">
+              <button style="width: 100%; padding: 18px; background: linear-gradient(135deg, var(--violet-600), var(--violet-500)); color: #fff; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; box-shadow: 0 0 30px var(--glow-violet); cursor: pointer; margin-bottom: 16px;">
+                Почати
+              </button>
+              <p style="text-align: center; color: var(--slate-500); font-size: 14px;">
+                Вже є акаунт? <span style="color: var(--violet-400); font-weight: 500; cursor: pointer;">Увійти</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Welcome</div>
+        <div class="screen-subtitle">Онбординг користувача</div>
+      </div>
+
+      <!-- Screen 6: Login -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div style="padding: 60px 24px 24px;">
+              <div style="text-align: center; margin-bottom: 40px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--violet-500), var(--cyan-500)); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 24px; box-shadow: 0 0 40px var(--glow-violet);">📦</div>
+                <h1 style="font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px;">Вхід</h1>
+                <p style="font-size: 15px; color: var(--slate-400);">Увійдіть у свій акаунт</p>
+              </div>
+
+              <!-- Form -->
+              <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: var(--slate-300); margin-bottom: 8px;">Email</label>
+                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px;">
+                  <span style="color: var(--slate-400);">📧</span>
+                  <input type="email" placeholder="your@email.com" style="flex: 1; border: none; outline: none; background: transparent; color: #fff; font-size: 15px;">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: var(--slate-300); margin-bottom: 8px;">Пароль</label>
+                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px;">
+                  <span style="color: var(--slate-400);">🔒</span>
+                  <input type="password" placeholder="••••••••" style="flex: 1; border: none; outline: none; background: transparent; color: #fff; font-size: 15px;">
+                  <span style="color: var(--slate-500); cursor: pointer;">👁️</span>
+                </div>
+              </div>
+
+              <div style="text-align: right; margin-bottom: 32px;">
+                <span style="color: var(--violet-400); font-size: 14px; font-weight: 500; cursor: pointer;">Забули пароль?</span>
+              </div>
+
+              <button style="width: 100%; padding: 18px; background: linear-gradient(135deg, var(--violet-600), var(--violet-500)); color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; box-shadow: 0 0 25px var(--glow-violet); cursor: pointer; margin-bottom: 24px;">
+                Увійти
+              </button>
+
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+                <span style="color: var(--slate-500); font-size: 14px;">або</span>
+                <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+              </div>
+
+              <!-- Social login -->
+              <div style="display: flex; gap: 12px; margin-bottom: 32px;">
+                <button style="flex: 1; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer;">
+                  <span style="font-size: 20px;">🔵</span> Google
+                </button>
+                <button style="flex: 1; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer;">
+                  <span style="font-size: 20px;">⚫</span> Apple
+                </button>
+              </div>
+
+              <p style="text-align: center; color: var(--slate-400); font-size: 14px;">
+                Немає акаунту? <span style="color: var(--violet-400); font-weight: 600; cursor: pointer;">Зареєструватись</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Login</div>
+        <div class="screen-subtitle">Авторизація</div>
+      </div>
+
+      <!-- Screen 7: Booth Detail -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <!-- Hero image -->
+            <div style="height: 280px; background: linear-gradient(180deg, rgba(2,6,23,0.3) 0%, transparent 30%, rgba(2,6,23,0.95) 100%), url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=800') center/cover; position: relative;">
+              <div style="position: absolute; top: 50px; left: 16px; right: 16px; display: flex; justify-content: space-between;">
+                <div style="width: 44px; height: 44px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; cursor: pointer;">←</div>
+                <div style="display: flex; gap: 10px;">
+                  <div style="width: 44px; height: 44px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; cursor: pointer;">♡</div>
+                  <div style="width: 44px; height: 44px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; cursor: pointer;">↗</div>
+                </div>
+              </div>
+              <div style="position: absolute; bottom: 16px; left: 16px; right: 16px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(139, 92, 246, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 999px; margin-bottom: 8px;">
+                  <span style="color: var(--violet-400); font-size: 12px; font-weight: 600;">Focus Pod</span>
+                </div>
+                <h1 style="font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Focus Pod #3</h1>
+                <div style="display: flex; align-items: center; gap: 16px; color: var(--slate-300); font-size: 14px;">
+                  <span style="display: flex; align-items: center; gap: 4px;">📍 Поверх 2</span>
+                  <span style="display: flex; align-items: center; gap: 4px;"><span style="color: #fbbf24;">★</span> 4.9 (128)</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; padding-bottom: 100px;">
+              <!-- Quick info pills -->
+              <div style="display: flex; gap: 10px; padding: 20px;">
+                <div style="flex: 1; padding: 16px 12px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 22px; margin-bottom: 6px;">👤</div>
+                  <div style="font-size: 11px; color: var(--slate-500); margin-bottom: 2px;">Місткість</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #fff;">1 особа</div>
+                </div>
+                <div style="flex: 1; padding: 16px 12px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 22px; margin-bottom: 6px;">📐</div>
+                  <div style="font-size: 11px; color: var(--slate-500); margin-bottom: 2px;">Площа</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #fff;">4 м²</div>
+                </div>
+                <div style="flex: 1; padding: 16px 12px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; text-align: center;">
+                  <div style="font-size: 22px; margin-bottom: 6px;">⚡</div>
+                  <div style="font-size: 11px; color: var(--slate-500); margin-bottom: 2px;">Статус</div>
+                  <div style="font-size: 14px; font-weight: 600; color: #34d399;">Вільно</div>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div style="padding: 0 20px 20px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px;">Про простір</h3>
+                <p style="font-size: 14px; color: var(--slate-400); line-height: 1.6;">Компактна звукоізольована кабіна для фокусованої роботи. Ідеально підходить для дзвінків, відеоконференцій та глибокої концентрації.</p>
+              </div>
+
+              <!-- Amenities -->
+              <div style="padding: 0 20px 20px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px;">Зручності</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                  <div style="padding: 14px 8px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">📶</div>
+                    <div style="font-size: 11px; color: var(--slate-400);">Wi-Fi</div>
+                  </div>
+                  <div style="padding: 14px 8px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">🔌</div>
+                    <div style="font-size: 11px; color: var(--slate-400);">Розетки</div>
+                  </div>
+                  <div style="padding: 14px 8px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">❄️</div>
+                    <div style="font-size: 11px; color: var(--slate-400);">Клімат</div>
+                  </div>
+                  <div style="padding: 14px 8px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">💡</div>
+                    <div style="font-size: 11px; color: var(--slate-400);">Світло</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews -->
+              <div style="padding: 0 20px 20px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px;">Відгуки</h3>
+                <div style="padding: 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--violet-500), var(--cyan-500)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff;">М</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 14px; font-weight: 600; color: #fff;">Марія</div>
+                      <div style="font-size: 12px; color: var(--slate-500);">2 дні тому</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; color: #fbbf24; font-size: 14px;">★★★★★</div>
+                  </div>
+                  <p style="font-size: 14px; color: var(--slate-400); line-height: 1.5;">Чудова кабіна! Тихо, комфортно, все працює. Рекомендую для важливих дзвінків.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom CTA -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 20px 40px; background: linear-gradient(to top, var(--slate-950) 70%, transparent); display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <div style="font-size: 26px; font-weight: 700; background: linear-gradient(135deg, var(--violet-400), var(--cyan-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">60</div>
+                <div style="font-size: 13px; color: var(--slate-400);">кредитів/год</div>
+              </div>
+              <button style="padding: 16px 32px; background: linear-gradient(135deg, var(--violet-600), var(--violet-500)); color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; box-shadow: 0 0 25px var(--glow-violet); cursor: pointer;">
+                Забронювати
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Деталі кабіни</div>
+        <div class="screen-subtitle">Інформація про простір</div>
+      </div>
+
+      <!-- Screen 8: Map -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen" style="position: relative;">
+            <!-- Map background -->
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, #1a1a2e 0%, #0f172a 100%);">
+              <!-- Fake map grid -->
+              <svg style="width: 100%; height: 100%; opacity: 0.1;" viewBox="0 0 100 100">
+                <defs>
+                  <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#fff" stroke-width="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+
+              <!-- Map pins -->
+              <div style="position: absolute; top: 30%; left: 25%; width: 44px; height: 44px; background: var(--violet-600); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--glow-violet);">
+                <span style="transform: rotate(45deg); font-size: 18px;">📦</span>
+              </div>
+              <div style="position: absolute; top: 45%; left: 55%; width: 44px; height: 44px; background: var(--cyan-500); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--glow-cyan);">
+                <span style="transform: rotate(45deg); font-size: 18px;">📦</span>
+              </div>
+              <div style="position: absolute; top: 60%; left: 35%; width: 52px; height: 52px; background: #f59e0b; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);">
+                <span style="transform: rotate(45deg); font-size: 22px;">📦</span>
+              </div>
+            </div>
+
+            <!-- Search bar -->
+            <div style="position: absolute; top: 60px; left: 16px; right: 16px; display: flex; gap: 10px;">
+              <div style="flex: 1; display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <span style="color: var(--slate-400); font-size: 18px;">🔍</span>
+                <input type="text" placeholder="Пошук локації..." style="flex: 1; border: none; outline: none; background: transparent; color: #fff; font-size: 15px;">
+              </div>
+              <div style="width: 52px; height: 52px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--slate-400); font-size: 20px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                ⚙️
+              </div>
+            </div>
+
+            <!-- Recenter button -->
+            <div style="position: absolute; bottom: 320px; right: 16px; width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--slate-300); font-size: 22px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+              ◎
+            </div>
+
+            <!-- Bottom card -->
+            <div style="position: absolute; bottom: 110px; left: 16px; right: 16px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4); display: flex;">
+              <div style="width: 110px; background: url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=300') center/cover;"></div>
+              <div style="flex: 1; padding: 16px;">
+                <h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px;">Silentbox Центр</h3>
+                <div style="font-size: 13px; color: var(--slate-400); margin-bottom: 8px;">📍 вул. Хрещатик, 22</div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                  <span style="font-size: 13px; color: var(--slate-300); display: flex; align-items: center; gap: 4px;"><span style="color: #fbbf24;">★</span> 4.9</span>
+                  <span style="font-size: 13px; color: #34d399;">5 вільних</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="font-size: 17px; font-weight: 700; background: linear-gradient(135deg, var(--violet-400), var(--cyan-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">від 40 <span style="font-size: 13px; -webkit-text-fill-color: var(--slate-500);">/год</span></div>
+                  <button style="padding: 10px 18px; background: linear-gradient(135deg, var(--violet-600), var(--violet-500)); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 0 15px var(--glow-violet);">
+                    Переглянути
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item">
+                <div class="tab-icon">🏠</div>
+                <span>Головна</span>
+              </div>
+              <div class="tab-item active">
+                <div class="tab-icon">🗺️</div>
+                <span>Карта</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">📋</div>
+                <span>Броні</span>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">👤</div>
+                <span>Профіль</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Карта</div>
+        <div class="screen-subtitle">Пошук локацій</div>
+      </div>
+
+      <!-- Screen 9: Buy Credits -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <!-- Header -->
+            <div style="padding: 60px 20px 30px; background: linear-gradient(180deg, #f59e0b 0%, var(--slate-950) 100%); text-align: center; position: relative;">
+              <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.3) 0%, transparent 70%);"></div>
+              <div style="font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 8px; position: relative; z-index: 1;">Поточний баланс</div>
+              <div style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 4px; position: relative; z-index: 1;">1,250</div>
+              <div style="font-size: 16px; color: rgba(255,255,255,0.7); position: relative; z-index: 1;">кредитів</div>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; padding-bottom: 20px;">
+              <!-- Packages -->
+              <div style="padding: 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px;">Оберіть пакет</h3>
+
+                <!-- Package 1 -->
+                <div style="display: flex; align-items: center; padding: 16px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; margin-bottom: 12px; cursor: pointer;">
+                  <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b, #fcd34d); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 14px;">💰</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px;">100 кредитів</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">~1.5 години роботи</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 700; color: #fff;">99 ₴</div>
+                  </div>
+                </div>
+
+                <!-- Package 2 - Popular -->
+                <div style="position: relative; display: flex; align-items: center; padding: 16px; background: rgba(139, 92, 246, 0.15); backdrop-filter: blur(10px); border: 2px solid var(--violet-500); border-radius: 20px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 0 25px var(--glow-violet);">
+                  <div style="position: absolute; top: -10px; right: 16px; padding: 4px 12px; background: linear-gradient(135deg, var(--violet-600), var(--violet-500)); color: #fff; font-size: 11px; font-weight: 600; border-radius: 8px;">ПОПУЛЯРНИЙ</div>
+                  <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b, #fcd34d); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 14px;">💎</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px;">500 кредитів</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">~8 годин роботи</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 700; color: #fff;">449 ₴</div>
+                    <div style="font-size: 12px; color: var(--success); font-weight: 600;">-10%</div>
+                  </div>
+                </div>
+
+                <!-- Package 3 -->
+                <div style="display: flex; align-items: center; padding: 16px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; margin-bottom: 12px; cursor: pointer;">
+                  <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b, #fcd34d); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 14px;">🏆</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px;">1000 кредитів</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">~16 годин роботи</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 700; color: #fff;">799 ₴</div>
+                    <div style="font-size: 12px; color: var(--success); font-weight: 600;">-20%</div>
+                  </div>
+                </div>
+
+                <!-- Package 4 -->
+                <div style="display: flex; align-items: center; padding: 16px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; margin-bottom: 24px; cursor: pointer;">
+                  <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b, #fcd34d); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 14px;">👑</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px;">2500 кредитів</div>
+                    <div style="font-size: 13px; color: var(--slate-400);">~40 годин роботи</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 700; color: #fff;">1799 ₴</div>
+                    <div style="font-size: 12px; color: var(--success); font-weight: 600;">-28%</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent transactions -->
+              <div style="padding: 0 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px;">Останні транзакції</h3>
+
+                <div style="display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <div style="width: 44px; height: 44px; background: rgba(239, 68, 68, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #f87171; margin-right: 12px;">−</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 2px;">Focus Pod #3</div>
+                    <div style="font-size: 13px; color: var(--slate-500);">Сьогодні, 14:00</div>
+                  </div>
+                  <div style="font-size: 15px; font-weight: 600; color: #f87171;">-120</div>
+                </div>
+
+                <div style="display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <div style="width: 44px; height: 44px; background: rgba(16, 185, 129, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #34d399; margin-right: 12px;">+</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 2px;">Поповнення</div>
+                    <div style="font-size: 13px; color: var(--slate-500);">Вчора, 10:30</div>
+                  </div>
+                  <div style="font-size: 15px; font-weight: 600; color: #34d399;">+500</div>
+                </div>
+
+                <div style="display: flex; align-items: center; padding: 14px 0;">
+                  <div style="width: 44px; height: 44px; background: rgba(239, 68, 68, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #f87171; margin-right: 12px;">−</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 2px;">Meeting Room A</div>
+                    <div style="font-size: 13px; color: var(--slate-500);">28 січня, 16:00</div>
+                  </div>
+                  <div style="font-size: 15px; font-weight: 600; color: #f87171;">-200</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-title">Поповнення</div>
+        <div class="screen-subtitle">Купівля кредитів</div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { logger } from '../lib/logger.js';
 import { notificationService, processBookingReminders, processSessionEndingWarnings } from './notifications.js';
 import { ttlockService } from './ttlock.js';
+import { availabilityService } from './availability.js';
 
 interface CronJobConfig {
   name: string;
@@ -198,6 +199,9 @@ class CronScheduler {
           accessCode || 'N/A'
         );
 
+        // Broadcast availability update
+        await availabilityService.onBookingStarted(booking.id, booth.id, booking.user_id);
+
         logger.info({ bookingId: booking.id }, 'Session auto-started');
       } catch (error) {
         logger.error({ error, bookingId: booking.id }, 'Failed to auto-start session');
@@ -261,6 +265,9 @@ class CronScheduler {
 
         // Notify user
         await notificationService.onSessionEnded(session.id, session.user_id);
+
+        // Broadcast availability update
+        await availabilityService.onBookingEnded(session.id, booth.id, session.user_id);
 
         logger.info({ bookingId: session.id }, 'Session auto-ended');
       } catch (error) {

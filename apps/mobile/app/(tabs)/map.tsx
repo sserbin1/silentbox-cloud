@@ -2,7 +2,7 @@
 // Map Screen
 // ===========================================
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { locationsApi, boothsApi } from '../../src/lib/api';
 import { Button } from '../../src/components/ui/Button';
+import { socketService } from '../../src/services/socket';
+import { useAuthStore } from '../../src/store/auth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,6 +32,8 @@ interface LocationData {
   latitude: number;
   longitude: number;
   images?: string[];
+  availableBooths?: number;
+  totalBooths?: number;
 }
 
 export default function MapScreen() {
@@ -40,11 +44,58 @@ export default function MapScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const { user } = useAuthStore();
+
+  // Handle real-time location availability updates
+  const handleLocationUpdate = useCallback((data: { locationId: string; availableBooths: number }) => {
+    setLocations(prev => prev.map(loc =>
+      loc.id === data.locationId
+        ? { ...loc, availableBooths: data.availableBooths }
+        : loc
+    ));
+
+    // Update selected location if it matches
+    setSelectedLocation(prev =>
+      prev?.id === data.locationId
+        ? { ...prev, availableBooths: data.availableBooths }
+        : prev
+    );
+  }, []);
 
   useEffect(() => {
     loadLocations();
     requestLocation();
   }, []);
+
+  // Setup socket connection and subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    // Connect to socket
+    socketService.connect();
+
+    // Subscribe to location updates when locations load
+    const unsubscribe = socketService.onLocationUpdate(handleLocationUpdate);
+
+    return () => {
+      unsubscribe();
+      // Unsubscribe from all locations on cleanup
+      locations.forEach(loc => socketService.unsubscribeFromLocation(loc.id));
+    };
+  }, [user, handleLocationUpdate]);
+
+  // Subscribe to location updates when locations change
+  useEffect(() => {
+    if (!socketService.isConnected()) return;
+
+    // Subscribe to all visible locations
+    locations.forEach(loc => socketService.subscribeToLocation(loc.id));
+
+    return () => {
+      // Cleanup subscriptions
+      locations.forEach(loc => socketService.unsubscribeFromLocation(loc.id));
+    };
+  }, [locations]);
 
   const requestLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -98,29 +149,45 @@ export default function MapScreen() {
         showsMyLocationButton={false}
         onPress={() => setSelectedLocation(null)}
       >
-        {locations.map((location) => (
-          <Marker
-            key={location.id}
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            onPress={() => setSelectedLocation(location)}
-          >
-            <View
-              style={[
-                styles.marker,
-                selectedLocation?.id === location.id && styles.markerSelected,
-              ]}
+        {locations.map((location) => {
+          const hasAvailability = location.availableBooths !== undefined && location.availableBooths > 0;
+          const isSelected = selectedLocation?.id === location.id;
+
+          return (
+            <Marker
+              key={location.id}
+              coordinate={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }}
+              onPress={() => setSelectedLocation(location)}
             >
-              <Ionicons
-                name="location"
-                size={24}
-                color={selectedLocation?.id === location.id ? '#fff' : '#4F46E5'}
-              />
-            </View>
-          </Marker>
-        ))}
+              <View
+                style={[
+                  styles.marker,
+                  isSelected && styles.markerSelected,
+                  !hasAvailability && location.availableBooths !== undefined && styles.markerUnavailable,
+                ]}
+              >
+                {location.availableBooths !== undefined ? (
+                  <Text style={[
+                    styles.markerText,
+                    isSelected && styles.markerTextSelected,
+                    !hasAvailability && styles.markerTextUnavailable,
+                  ]}>
+                    {location.availableBooths}
+                  </Text>
+                ) : (
+                  <Ionicons
+                    name="location"
+                    size={24}
+                    color={isSelected ? '#fff' : '#4F46E5'}
+                  />
+                )}
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
 
       {/* Search Bar Overlay */}
@@ -155,6 +222,19 @@ export default function MapScreen() {
               <Text style={styles.locationAddress} numberOfLines={2}>
                 {selectedLocation.address}, {selectedLocation.city}
               </Text>
+              {selectedLocation.availableBooths !== undefined && (
+                <View style={styles.availabilityBadge}>
+                  <View style={[
+                    styles.availabilityDot,
+                    { backgroundColor: selectedLocation.availableBooths > 0 ? '#10B981' : '#EF4444' }
+                  ]} />
+                  <Text style={styles.availabilityText}>
+                    {selectedLocation.availableBooths > 0
+                      ? `${selectedLocation.availableBooths} available`
+                      : 'All occupied'}
+                  </Text>
+                </View>
+              )}
             </View>
             <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
           </TouchableOpacity>
@@ -209,6 +289,21 @@ const styles = StyleSheet.create({
   },
   markerSelected: {
     backgroundColor: '#4F46E5',
+  },
+  markerUnavailable: {
+    backgroundColor: '#FEE2E2',
+    borderColor: '#EF4444',
+  },
+  markerText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#4F46E5',
+  },
+  markerTextSelected: {
+    color: '#fff',
+  },
+  markerTextUnavailable: {
+    color: '#EF4444',
   },
   searchOverlay: {
     position: 'absolute',
@@ -324,5 +419,21 @@ const styles = StyleSheet.create({
   },
   viewButton: {
     marginTop: 4,
+  },
+  availabilityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    gap: 6,
+  },
+  availabilityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  availabilityText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
   },
 });

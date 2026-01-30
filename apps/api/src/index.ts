@@ -36,6 +36,9 @@ import { setupSocketServer, SocketEvents } from './socket/index.js';
 // Import cron scheduler
 import { cronScheduler } from './services/cron.js';
 
+// Import availability service
+import { availabilityService } from './services/availability.js';
+
 // Create Fastify instance
 const app = Fastify({
   logger: logger as any,
@@ -94,6 +97,9 @@ await app.register(tenantsPublicRoutes, { prefix: '/api' }); // Public tenant ro
 // Socket.io setup
 const io = setupSocketServer(app.server);
 const socketEvents = new SocketEvents(io);
+
+// Initialize availability service with socket events
+availabilityService.setSocketEvents(socketEvents);
 
 // Make io and socketEvents available globally
 app.decorate('io', io);

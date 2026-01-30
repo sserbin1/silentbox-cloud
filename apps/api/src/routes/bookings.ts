@@ -10,6 +10,7 @@ import { ERROR_CODES, MIN_BOOKING_DURATION_MINUTES } from '@silentbox/shared';
 import { ttlockService } from '../services/ttlock.js';
 import { notificationService } from '../services/notifications.js';
 import { calendarService } from '../services/calendar.js';
+import { availabilityService } from '../services/availability.js';
 import { logger } from '../lib/logger.js';
 
 export const bookingsRoutes = async (app: FastifyInstance) => {
@@ -153,6 +154,11 @@ export const bookingsRoutes = async (app: FastifyInstance) => {
       currency: booth.currency,
       payment_provider: 'credits',
       status: 'completed',
+    });
+
+    // Broadcast availability update
+    setImmediate(() => {
+      availabilityService.onBookingCreated(booking.id, body.boothId, tenantId);
     });
 
     // Background integrations (don't block response)
@@ -404,6 +410,11 @@ export const bookingsRoutes = async (app: FastifyInstance) => {
       status: 'completed',
     });
 
+    // Broadcast availability update
+    setImmediate(() => {
+      availabilityService.onBookingExtended(id, booking.booth_id, userId, newEndTime.toISOString());
+    });
+
     return reply.send({
       success: true,
       data: updatedBooking,
@@ -500,6 +511,11 @@ export const bookingsRoutes = async (app: FastifyInstance) => {
         });
       }
     }
+
+    // Broadcast availability update (cancelled booking frees up the slot)
+    setImmediate(() => {
+      availabilityService.onBookingCancelled(id, booking.booth_id, userId);
+    });
 
     // Background cleanup (don't block response)
     setImmediate(async () => {

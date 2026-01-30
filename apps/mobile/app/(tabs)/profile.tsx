@@ -41,13 +41,13 @@ export default function ProfileScreen() {
     {
       icon: 'wallet-outline',
       label: 'Buy Credits',
-      onPress: () => {},
+      onPress: () => router.push('/credits'),
       badge: `${user?.credits || 0} credits`,
     },
     {
       icon: 'receipt-outline',
       label: 'Transaction History',
-      onPress: () => {},
+      onPress: () => router.push('/transactions'),
     },
     {
       icon: 'calendar-outline',
@@ -57,7 +57,7 @@ export default function ProfileScreen() {
     {
       icon: 'notifications-outline',
       label: 'Notifications',
-      onPress: () => {},
+      onPress: () => router.push('/notifications'),
     },
     {
       icon: 'language-outline',
@@ -113,14 +113,14 @@ export default function ProfileScreen() {
         </View>
 
         {/* Credits Card */}
-        <TouchableOpacity style={styles.creditsCard}>
+        <TouchableOpacity style={styles.creditsCard} onPress={() => router.push('/transactions')}>
           <View style={styles.creditsInfo}>
             <Text style={styles.creditsLabel}>Available Credits</Text>
             <Text style={styles.creditsAmount}>{user?.credits || 0}</Text>
           </View>
           <Button
             title="Top Up"
-            onPress={() => {}}
+            onPress={() => router.push('/credits')}
             size="small"
             variant="secondary"
             style={styles.topUpButton}
