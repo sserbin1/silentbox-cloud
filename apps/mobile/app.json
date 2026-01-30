@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Silentbox",
-    "slug": "silentbox",
+    "slug": "silentbox-cloud",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -47,9 +47,7 @@
       }
     },
     "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
@@ -70,7 +68,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "9ef73153-df98-4427-a257-ee58409836af"
       }
     }
   }

@@ -184,10 +184,20 @@ function BookingCard({ booking }: { booking: any }) {
     return `${minutes}m`;
   };
 
+  const handlePress = () => {
+    if (isActive) {
+      // Navigate to active session screen for active bookings
+      router.push({ pathname: '/session/[id]' as any, params: { id: booking.id } });
+    } else {
+      // Navigate to booking details for other statuses
+      router.push({ pathname: '/booking/[id]', params: { id: booking.id } });
+    }
+  };
+
   return (
     <TouchableOpacity
       style={[styles.bookingCard, isCancelled && styles.bookingCardCancelled]}
-      onPress={() => router.push(`/booking/${booking.id}`)}
+      onPress={handlePress}
       activeOpacity={0.9}
     >
       <View style={styles.bookingImageContainer}>
@@ -253,13 +263,13 @@ function BookingCard({ booking }: { booking: any }) {
           </View>
           {(isActive || isUpcoming) && (
             <Button
-              title={isActive ? 'Unlock' : 'View Details'}
-              onPress={() => router.push(`/booking/${booking.id}`)}
+              title={isActive ? 'Open Session' : 'View Details'}
+              onPress={handlePress}
               size="small"
               variant={isActive ? 'primary' : 'outline'}
               icon={
                 isActive ? (
-                  <Ionicons name="lock-open" size={16} color="#fff" />
+                  <Ionicons name="enter-outline" size={16} color="#fff" />
                 ) : undefined
               }
             />
