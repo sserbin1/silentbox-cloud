@@ -33,6 +33,7 @@ interface AuthState {
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
   setTenantId: (tenantId: string) => void;
+  refreshUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -181,5 +182,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await SecureStore.setItemAsync('tenantId', tenantId);
     api.setTenantId(tenantId);
     set({ tenantId });
+  },
+
+  refreshUser: async () => {
+    try {
+      const response = await usersApi.getProfile();
+
+      if (response.success && response.data) {
+        set({
+          user: {
+            id: response.data.id,
+            email: response.data.email,
+            fullName: response.data.full_name,
+            role: response.data.role,
+            credits: response.data.credits,
+            avatarUrl: response.data.avatar_url,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
   },
 }));

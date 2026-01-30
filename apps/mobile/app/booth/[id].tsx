@@ -125,7 +125,7 @@ export default function BoothDetailScreen() {
               Alert.alert('Booking Confirmed!', 'Your booth is ready.', [
                 {
                   text: 'View Booking',
-                  onPress: () => router.replace(`/booking/${result.booking.id}`),
+                  onPress: () => router.replace(`/booking/${result.booking!.id}`),
                 },
               ]);
             } else {

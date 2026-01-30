@@ -5,6 +5,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+const DEFAULT_TENANT_ID = process.env.EXPO_PUBLIC_TENANT_ID || '';
 
 interface ApiResponse<T = unknown> {
   success: boolean;
@@ -24,8 +25,11 @@ class ApiClient {
   private baseUrl: string;
   private tenantId: string | null = null;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, tenantId?: string) {
     this.baseUrl = baseUrl;
+    if (tenantId) {
+      this.tenantId = tenantId;
+    }
   }
 
   setTenantId(tenantId: string) {
@@ -118,7 +122,7 @@ class ApiClient {
   }
 }
 
-export const api = new ApiClient(API_URL);
+export const api = new ApiClient(API_URL, DEFAULT_TENANT_ID);
 
 // ===========================================
 // API Endpoints

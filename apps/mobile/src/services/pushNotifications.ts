@@ -185,8 +185,9 @@ export class PushNotificationService {
         sound: 'default',
       },
       trigger: {
+        type: 'timeInterval',
         seconds: triggerSeconds,
-      },
+      } as Notifications.TimeIntervalTriggerInput,
     });
 
     return id;

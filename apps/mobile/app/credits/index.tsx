@@ -32,7 +32,7 @@ interface CreditPackage {
 }
 
 export default function CreditsScreen() {
-  const { user, fetchUser } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const [packages, setPackages] = useState<CreditPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
@@ -66,14 +66,14 @@ export default function CreditsScreen() {
           Alert.alert('Payment Cancelled', 'The payment was cancelled.');
         } else {
           // Refresh user data to get updated credits
-          await fetchUser();
+          await refreshUser();
           Alert.alert(
             'Payment Processing',
             'Your payment is being processed. Credits will be added shortly.'
           );
         }
       } else {
-        Alert.alert('Error', res.error || 'Failed to initiate payment');
+        Alert.alert('Error', typeof res.error === 'string' ? res.error : res.error?.message || 'Failed to initiate payment');
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred. Please try again.');

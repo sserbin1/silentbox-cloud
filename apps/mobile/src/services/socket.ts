@@ -3,7 +3,7 @@
 // ===========================================
 
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore } from '../store/auth';
+import * as SecureStore from 'expo-secure-store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -47,8 +47,8 @@ class SocketService {
   }
 
   // Connect to socket server
-  connect(): Socket | null {
-    const token = useAuthStore.getState().token;
+  async connect(): Promise<Socket | null> {
+    const token = await SecureStore.getItemAsync('accessToken');
 
     if (!token) {
       console.log('No auth token, cannot connect to socket');

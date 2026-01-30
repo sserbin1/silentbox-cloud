@@ -154,7 +154,7 @@ export default function ExploreScreen() {
               </Text>
               <Text style={styles.activeBookingLocation}>
                 <Ionicons name="location" size={14} color="rgba(255,255,255,0.8)" />{' '}
-                {activeBooking.booth?.location?.name}
+                {activeBooking.booth?.locations?.name}
               </Text>
 
               <View style={styles.activeBookingTimeRow}>
