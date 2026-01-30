@@ -42,8 +42,13 @@ class AdminApiClient {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || 'Request failed',
+          error: data.error || data.message || 'Request failed',
         };
+      }
+
+      // API returns { success, data } directly - don't double-wrap
+      if (typeof data === 'object' && 'success' in data) {
+        return data as ApiResponse<T>;
       }
 
       return {
