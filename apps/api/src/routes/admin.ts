@@ -7,7 +7,26 @@ import { supabaseAdmin as supabase } from '../lib/supabase.js';
 import { logger } from '../lib/logger.js';
 
 // Admin middleware - verify admin or operator role
+// Also supports X-Tenant-ID header for development/testing
 const verifyAdmin = async (request: any, reply: any) => {
+  // Check for X-Tenant-ID header (dev/testing mode)
+  const tenantIdHeader = request.headers['x-tenant-id'];
+  if (tenantIdHeader) {
+    // Verify tenant exists
+    const { data: tenant, error } = await supabase
+      .from('tenants')
+      .select('id')
+      .eq('id', tenantIdHeader)
+      .single();
+
+    if (!error && tenant) {
+      request.adminTenantId = tenantIdHeader;
+      request.adminRole = 'admin'; // Assume admin for header-based auth
+      return;
+    }
+  }
+
+  // Standard JWT authentication
   try {
     await request.jwtVerify();
 
