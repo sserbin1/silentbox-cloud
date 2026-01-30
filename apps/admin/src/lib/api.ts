@@ -13,9 +13,18 @@ interface ApiResponse<T> {
 
 class AdminApiClient {
   private token: string | null = null;
+  private tenantId: string | null = null;
 
   setToken(token: string | null) {
     this.token = token;
+  }
+
+  setTenantId(tenantId: string | null) {
+    this.tenantId = tenantId;
+  }
+
+  getTenantId(): string | null {
+    return this.tenantId;
   }
 
   private async request<T>(
@@ -29,6 +38,11 @@ class AdminApiClient {
 
     if (this.token) {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    // Add tenant header for tenant-scoped routes
+    if (this.tenantId && !endpoint.startsWith('/api/super')) {
+      (headers as Record<string, string>)['X-Tenant-ID'] = this.tenantId;
     }
 
     try {
