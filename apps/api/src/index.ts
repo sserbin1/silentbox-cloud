@@ -28,6 +28,7 @@ import { webhookRoutes } from './routes/webhooks/index.js';
 import { notificationsRoutes } from './routes/notifications.js';
 import { superadminRoutes } from './routes/superadmin.js';
 import { adminRoutes } from './routes/admin.js';
+import { tenantsPublicRoutes } from './routes/tenants-public.js';
 
 // Import socket setup
 import { setupSocketServer, SocketEvents } from './socket/index.js';
@@ -46,9 +47,12 @@ await app.register(cors, {
     env.APP_URL,
     env.ADMIN_URL,
     'http://localhost:3000',
+    'http://localhost:3002', // Booking portal
     'http://localhost:8081',
     'http://cloud.silent-box.com',
     'https://cloud.silent-box.com',
+    // Allow all subdomains for tenant booking portals
+    /\.silentbox\.io$/,
   ],
   credentials: true,
 });
@@ -85,6 +89,7 @@ await app.register(webhookRoutes, { prefix: '/webhooks' });
 await app.register(notificationsRoutes, { prefix: '/api/notifications' });
 await app.register(superadminRoutes, { prefix: '/api/super' });
 await app.register(adminRoutes, { prefix: '/api/admin' });
+await app.register(tenantsPublicRoutes, { prefix: '/api' }); // Public tenant routes for booking portal
 
 // Socket.io setup
 const io = setupSocketServer(app.server);

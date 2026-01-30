@@ -34,9 +34,11 @@
     "socket.io-client": "^4.7.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zustand": "^4.5.0"
+    "zustand": "^4.5.0",
+    "canvas-confetti": "^1.9.2"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
