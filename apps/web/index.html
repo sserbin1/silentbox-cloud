@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silentbox Cloud - Mobile Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-50: #EEF2FF;
+      --primary-100: #E0E7FF;
+      --primary-200: #C7D2FE;
+      --primary-300: #A5B4FC;
+      --primary-400: #818CF8;
+      --primary-500: #6366F1;
+      --primary-600: #4F46E5;
+      --primary-700: #4338CA;
+      --primary-800: #3730A3;
+      --primary-900: #312E81;
+
+      --accent-50: #FFFBEB;
+      --accent-500: #F59E0B;
+      --accent-600: #D97706;
+
+      --success-light: #D1FAE5;
+      --success-main: #10B981;
+      --success-dark: #059669;
+
+      --warning-light: #FEF3C7;
+      --warning-main: #F59E0B;
+      --warning-dark: #D97706;
+
+      --error-light: #FEE2E2;
+      --error-main: #EF4444;
+      --error-dark: #DC2626;
+
+      --info-light: #DBEAFE;
+      --info-main: #3B82F6;
+      --info-dark: #2563EB;
+
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+
+      --background: #F9FAFB;
+      --surface: #FFFFFF;
+      --border: #E5E7EB;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .header p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .nav-tab.active {
+      background: var(--primary-600);
+      border-color: var(--primary-600);
+      color: #fff;
+    }
+
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+      gap: 40px;
+      justify-items: center;
+    }
+
+    .screen-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: var(--background);
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                  0 0 0 12px #1a1a1a,
+                  0 0 0 14px #333;
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 34px;
+      background: #1a1a1a;
+      border-radius: 0 0 20px 20px;
+      z-index: 100;
+    }
+
+    .phone-frame::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      z-index: 101;
+    }
+
+    .screen-title {
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 20px;
+      opacity: 0.9;
+    }
+
+    .screen-subtitle {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* Common Screen Styles */
+    .screen {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--background);
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 16px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .screen-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+
+    .header-btn:hover {
+      background: var(--gray-100);
+    }
+
+    .header-btn.primary {
+      color: var(--primary-600);
+    }
+
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Active Session Screen */
+    .session-header {
+      height: 240px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, rgba(0,0,0,0.7) 100%),
+                  url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=800') center/cover;
+      position: relative;
+      padding: 60px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .session-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.25);
+      backdrop-filter: blur(10px);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success-main);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 8px var(--success-main);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .status-badge span {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .booth-info {
+      color: #fff;
+    }
+
+    .booth-info h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .booth-info p {
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    .time-card {
+      margin: 20px;
+      padding: 24px;
+      background: var(--surface);
+      border-radius: 20px;
+      border: 2px solid var(--primary-600);
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);
+    }
+
+    .time-card.warning {
+      border-color: var(--warning-main);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .time-card.danger {
+      border-color: var(--error-main);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+    }
+
+    .time-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--primary-600);
+    }
+
+    .time-card.warning .time-header,
+    .time-card.warning .time-value { color: var(--warning-dark); }
+
+    .time-card.danger .time-header,
+    .time-card.danger .time-value { color: var(--error-main); }
+
+    .time-header span {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .time-value {
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--primary-600);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -2px;
+    }
+
+    .extend-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 10px 20px;
+      background: var(--primary-50);
+      border-radius: 999px;
+      color: var(--primary-600);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .extend-btn:hover {
+      background: var(--primary-100);
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .action-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      border-color: var(--primary-200);
+    }
+
+    .action-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 26px;
+    }
+
+    .action-icon.success { background: var(--success-light); color: var(--success-main); }
+    .action-icon.primary { background: var(--primary-50); color: var(--primary-600); }
+    .action-icon.accent { background: var(--accent-50); color: var(--accent-600); }
+    .action-icon.info { background: var(--info-light); color: var(--info-main); }
+
+    .action-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .action-card p {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .details-card, .help-card {
+      margin: 0 16px 16px;
+      padding: 20px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .details-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--gray-500);
+      font-size: 15px;
+    }
+
+    .detail-row:last-child { margin-bottom: 0; }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .help-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--primary-50);
+      cursor: pointer;
+    }
+
+    .help-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-100);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-600);
+      font-size: 22px;
+    }
+
+    .help-card .help-content {
+      flex: 1;
+    }
+
+    .help-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .help-card p {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .bottom-action {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      padding-bottom: 40px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Access Code Screen */
+    .booth-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 20px 16px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .booth-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-600);
+      font-size: 24px;
+    }
+
+    .booth-card-info {
+      flex: 1;
+    }
+
+    .booth-card-info h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .booth-card-info p {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    .badge {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.success {
+      background: var(--success-light);
+      color: var(--success-dark);
+    }
+
+    .validity-card {
+      margin: 0 16px 20px;
+      padding: 20px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .validity-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .validity-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .validity-item .label {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+
+    .validity-item .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .validity-item .date {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .validity-divider {
+      padding: 0 16px;
+      color: var(--gray-300);
+      font-size: 20px;
+    }
+
+    .code-card {
+      margin: 0 16px 24px;
+      padding: 28px 24px;
+      background: var(--surface);
+      border-radius: 20px;
+      border: 2px solid var(--primary-100);
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+    }
+
+    .code-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .code-digits {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .code-digit {
+      width: 46px;
+      height: 58px;
+      background: linear-gradient(180deg, var(--gray-50), var(--gray-100));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-800);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .code-hint {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 18px;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--primary-50);
+      border-radius: 999px;
+      color: var(--primary-600);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary-100);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin: 0 16px 12px;
+    }
+
+    .method-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 16px 12px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .method-card:hover {
+      border-color: var(--primary-300);
+      background: var(--primary-50);
+    }
+
+    .method-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--gray-100);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .method-content {
+      flex: 1;
+    }
+
+    .method-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .method-content p {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .method-badge {
+      padding: 4px 10px;
+      background: var(--success-light);
+      color: var(--success-dark);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 999px;
+    }
+
+    .instructions-card {
+      margin: 8px 16px 16px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary-50), #E8EDFF);
+      border-radius: 16px;
+    }
+
+    .instructions-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      color: var(--primary-700);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .instruction-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .instruction-step:last-child { margin-bottom: 0; }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      background: var(--primary-600);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .instruction-step p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    /* Bookings List Screen */
+    .bookings-header {
+      padding: 60px 20px 16px;
+      background: var(--surface);
+    }
+
+    .bookings-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .bookings-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .bookings-header p {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    .filter-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-50);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-600);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: var(--surface);
+      color: var(--gray-800);
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .tab-badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: var(--gray-200);
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab.active .tab-badge {
+      background: var(--primary-600);
+      color: #fff;
+    }
+
+    .booking-card {
+      margin: 16px;
+      background: var(--surface);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .booking-image {
+      height: 140px;
+      background: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=600') center/cover;
+      position: relative;
+    }
+
+    .live-indicator {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--error-main);
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .live-indicator span {
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .booking-content {
+      padding: 16px;
+    }
+
+    .booking-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .booking-title-row h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pill.active {
+      background: var(--primary-50);
+      color: var(--primary-700);
+    }
+
+    .status-pill.confirmed {
+      background: var(--success-light);
+      color: var(--success-dark);
+    }
+
+    .booking-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--gray-500);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .booking-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--primary-50);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-600);
+      font-size: 14px;
+    }
+
+    .meta-item span {
+      font-size: 14px;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .booking-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .price-label {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-bottom: 2px;
+    }
+
+    .price-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    .price-value small {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+
+    .action-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .action-btn.primary {
+      background: var(--primary-600);
+      color: #fff;
+      border: none;
+    }
+
+    .action-btn.outline {
+      background: transparent;
+      color: var(--primary-600);
+      border: 1px solid var(--primary-200);
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 20px;
+      right: 20px;
+      height: 70px;
+      background: var(--surface);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid var(--gray-100);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--gray-400);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tab-item.active {
+      color: var(--primary-600);
+    }
+
+    .tab-item .tab-icon {
+      width: 40px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border-radius: 10px;
+    }
+
+    .tab-item.active .tab-icon {
+      background: var(--primary-50);
+    }
+
+    /* Explore Screen */
+    .explore-header {
+      padding: 60px 20px 20px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+    }
+
+    .greeting {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+
+    .explore-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: var(--gray-800);
+      background: transparent;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--gray-400);
+    }
+
+    .search-icon {
+      color: var(--gray-400);
+      font-size: 20px;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      overflow-x: auto;
+    }
+
+    .chip {
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: var(--primary-600);
+      border-color: var(--primary-600);
+      color: #fff;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px 12px;
+    }
+
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .see-all {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary-600);
+      cursor: pointer;
+    }
+
+    .booth-scroll {
+      display: flex;
+      gap: 12px;
+      padding: 0 20px 20px;
+      overflow-x: auto;
+    }
+
+    .booth-card-small {
+      min-width: 200px;
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .booth-card-small .image {
+      height: 120px;
+      background: url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400') center/cover;
+      position: relative;
+    }
+
+    .booth-card-small:nth-child(2) .image {
+      background-image: url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400');
+    }
+
+    .booth-card-small:nth-child(3) .image {
+      background-image: url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400');
+    }
+
+    .available-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 4px 8px;
+      background: var(--success-main);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+
+    .booth-card-small .info {
+      padding: 12px;
+    }
+
+    .booth-card-small h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .booth-card-small .location {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .booth-card-small .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .booth-card-small .price {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary-600);
+    }
+
+    .booth-card-small .price small {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--gray-600);
+    }
+
+    .rating .star {
+      color: var(--accent-500);
+    }
+
+    .padding-bottom {
+      height: 100px;
+    }
+
+    /* Profile Screen */
+    .profile-header {
+      padding: 60px 20px 30px;
+      background: linear-gradient(180deg, var(--primary-600) 0%, var(--primary-700) 100%);
+      text-align: center;
+      color: #fff;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-300), var(--primary-400));
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: #fff;
+      border: 4px solid rgba(255,255,255,0.2);
+    }
+
+    .profile-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .profile-header p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .credits-card {
+      margin: -30px 20px 20px;
+      padding: 20px;
+      background: var(--surface);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 10;
+    }
+
+    .credits-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .credits-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--accent-500), #FCD34D);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .credits-info h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    .credits-info span {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .add-credits-btn {
+      padding: 10px 16px;
+      background: var(--primary-600);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      padding: 0 20px 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stat-card .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .menu-section {
+      padding: 0 20px;
+    }
+
+    .menu-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .menu-card {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item:hover {
+      background: var(--gray-50);
+    }
+
+    .menu-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .menu-icon.blue { background: var(--info-light); color: var(--info-main); }
+    .menu-icon.green { background: var(--success-light); color: var(--success-main); }
+    .menu-icon.purple { background: var(--primary-50); color: var(--primary-600); }
+    .menu-icon.orange { background: var(--warning-light); color: var(--warning-dark); }
+    .menu-icon.red { background: var(--error-light); color: var(--error-main); }
+
+    .menu-item .menu-content {
+      flex: 1;
+    }
+
+    .menu-item h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .menu-item p {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .menu-arrow {
+      color: var(--gray-400);
+      font-size: 18px;
+    }
+
+    /* Booth Details Screen */
+    .booth-hero {
+      height: 280px;
+      background: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=800') center/cover;
+      position: relative;
+    }
+
+    .booth-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, rgba(0,0,0,0.7) 100%);
+    }
+
+    .booth-hero-nav {
+      position: absolute;
+      top: 50px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .hero-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .booth-hero-info {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      color: #fff;
+    }
+
+    .booth-hero-info h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .booth-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .booth-hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .booth-detail-content {
+      padding: 20px;
+    }
+
+    .quick-info {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .info-pill {
+      flex: 1;
+      padding: 14px 12px;
+      background: var(--surface);
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .info-pill .icon {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .info-pill .label {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-bottom: 2px;
+    }
+
+    .info-pill .value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .about-section {
+      margin-bottom: 20px;
+    }
+
+    .about-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 10px;
+    }
+
+    .about-section p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+
+    .amenities-section {
+      margin-bottom: 20px;
+    }
+
+    .amenities-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 12px;
+    }
+
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .amenity-item {
+      padding: 14px 8px;
+      background: var(--surface);
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .amenity-item .icon {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .amenity-item .name {
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .reviews-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 12px;
+    }
+
+    .review-card {
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary-200), var(--primary-300));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--primary-700);
+    }
+
+    .reviewer-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .reviewer-info span {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .review-rating {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent-500);
+      font-size: 14px;
+    }
+
+    .review-card p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    .booking-cta {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      padding-bottom: 40px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    }
+
+    .cta-price {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    .cta-price small {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+
+    .book-now-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    /* Date/Time Selection Screen */
+    .datetime-header {
+      padding: 60px 20px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .datetime-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .step-circle.active {
+      background: var(--primary-600);
+      color: #fff;
+    }
+
+    .step-circle.done {
+      background: var(--success-main);
+      color: #fff;
+    }
+
+    .step-circle.pending {
+      background: var(--gray-200);
+      color: var(--gray-500);
+    }
+
+    .step-line {
+      width: 40px;
+      height: 2px;
+      background: var(--gray-200);
+    }
+
+    .step-line.done {
+      background: var(--success-main);
+    }
+
+    .calendar-section {
+      padding: 20px;
+    }
+
+    .calendar-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .month-nav h4 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .month-nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .month-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      cursor: pointer;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+
+    .calendar-day-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-400);
+      padding: 8px 0;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .calendar-day:hover {
+      background: var(--gray-100);
+    }
+
+    .calendar-day.selected {
+      background: var(--primary-600);
+      color: #fff;
+    }
+
+    .calendar-day.today {
+      border: 2px solid var(--primary-300);
+    }
+
+    .calendar-day.disabled {
+      color: var(--gray-300);
+      cursor: default;
+    }
+
+    .time-section {
+      padding: 0 20px 20px;
+    }
+
+    .time-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .time-slots {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .time-slot {
+      padding: 12px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .time-slot:hover {
+      border-color: var(--primary-300);
+      background: var(--primary-50);
+    }
+
+    .time-slot.selected {
+      background: var(--primary-600);
+      border-color: var(--primary-600);
+      color: #fff;
+    }
+
+    .time-slot.unavailable {
+      background: var(--gray-100);
+      color: var(--gray-400);
+      cursor: default;
+      text-decoration: line-through;
+    }
+
+    .duration-section {
+      padding: 0 20px 20px;
+    }
+
+    .duration-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .duration-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .duration-option {
+      flex: 1;
+      padding: 16px 12px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .duration-option:hover {
+      border-color: var(--primary-300);
+    }
+
+    .duration-option.selected {
+      border-color: var(--primary-600);
+      background: var(--primary-50);
+    }
+
+    .duration-option .hours {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .duration-option.selected .hours {
+      color: var(--primary-700);
+    }
+
+    .duration-option .price {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-600);
+    }
+
+    /* Map Screen */
+    .map-container {
+      position: relative;
+      height: 100%;
+      background: linear-gradient(180deg, #E8F4F8 0%, #D4E6EC 100%);
+    }
+
+    .map-placeholder {
+      position: absolute;
+      inset: 0;
+      background: url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/19.9450,50.0647,13,0/375x812?access_token=placeholder') center/cover;
+      background-color: #E8F4F8;
+    }
+
+    .map-pins {
+      position: absolute;
+      inset: 0;
+    }
+
+    .map-pin {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      background: var(--primary-600);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+      cursor: pointer;
+    }
+
+    .map-pin::before {
+      content: '&#9632;';
+      transform: rotate(45deg);
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .map-pin.active {
+      background: var(--accent-500);
+      width: 52px;
+      height: 52px;
+    }
+
+    .map-search {
+      position: absolute;
+      top: 60px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .map-search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .map-search-input input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: var(--gray-800);
+    }
+
+    .map-filter-btn {
+      width: 52px;
+      height: 52px;
+      background: var(--surface);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      color: var(--gray-600);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .map-booth-card {
+      position: absolute;
+      bottom: 110px;
+      left: 16px;
+      right: 16px;
+      background: var(--surface);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      display: flex;
+    }
+
+    .map-booth-image {
+      width: 110px;
+      background: url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=300') center/cover;
+    }
+
+    .map-booth-info {
+      flex: 1;
+      padding: 16px;
+    }
+
+    .map-booth-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .map-booth-info .location {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+
+    .map-booth-info .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .map-booth-info .meta span {
+      font-size: 13px;
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .map-booth-info .meta .star {
+      color: var(--accent-500);
+    }
+
+    .map-booth-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .map-booth-footer .price {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary-600);
+    }
+
+    .map-booth-footer .price small {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+
+    .map-book-btn {
+      padding: 10px 16px;
+      background: var(--primary-600);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .map-recenter {
+      position: absolute;
+      bottom: 300px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      background: var(--surface);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      color: var(--gray-600);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    /* Wallet/Credits Screen */
+    .wallet-header {
+      padding: 60px 20px 30px;
+      background: linear-gradient(135deg, var(--accent-500) 0%, #FCD34D 100%);
+      text-align: center;
+      color: #fff;
+    }
+
+    .wallet-balance-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .wallet-balance {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .wallet-balance small {
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .wallet-equivalent {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    .wallet-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .wallet-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .packages-section {
+      padding: 20px;
+    }
+
+    .packages-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .package-card {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .package-card:hover {
+      border-color: var(--primary-200);
+    }
+
+    .package-card.popular {
+      border-color: var(--primary-600);
+      background: var(--primary-50);
+    }
+
+    .package-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--accent-500), #FCD34D);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-right: 14px;
+    }
+
+    .package-info {
+      flex: 1;
+    }
+
+    .package-info h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .package-info span {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .package-price {
+      text-align: right;
+    }
+
+    .package-price .amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    .package-price .savings {
+      font-size: 12px;
+      color: var(--success-main);
+      font-weight: 600;
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -8px;
+      right: 16px;
+      padding: 4px 10px;
+      background: var(--primary-600);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+
+    .transactions-section {
+      padding: 0 20px 20px;
+    }
+
+    .transactions-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+
+    .transaction-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 12px;
+    }
+
+    .transaction-icon.debit {
+      background: var(--error-light);
+      color: var(--error-main);
+    }
+
+    .transaction-icon.credit {
+      background: var(--success-light);
+      color: var(--success-main);
+    }
+
+    .transaction-info {
+      flex: 1;
+    }
+
+    .transaction-info h4 {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+
+    .transaction-info span {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .transaction-amount {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .transaction-amount.debit {
+      color: var(--error-main);
+    }
+
+    .transaction-amount.credit {
+      color: var(--success-main);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">&#9632;</div>
+        <h1>Silentbox Cloud</h1>
+      </div>
+      <p>Mobile App Design Preview - All Screens</p>
+    </div>
+
+    <div class="nav-tabs">
+      <div class="nav-tab active">All Screens</div>
+      <div class="nav-tab">IoT Integration</div>
+      <div class="nav-tab">Bookings</div>
+      <div class="nav-tab">Explore</div>
+      <div class="nav-tab">Profile</div>
+      <div class="nav-tab">Booking Flow</div>
+    </div>
+
+    <div class="screens-grid">
+      <!-- Active Session Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="session-header">
+              <div class="session-top-bar">
+                <div class="close-btn">&#10005;</div>
+                <div class="status-badge">
+                  <div class="status-dot"></div>
+                  <span>Session Active</span>
+                </div>
+              </div>
+              <div class="booth-info">
+                <h2>Focus Pod A3</h2>
+                <p>WeWork Menlo Park</p>
+              </div>
+            </div>
+
+            <div class="screen-content" style="padding-bottom: 100px;">
+              <div class="time-card">
+                <div class="time-header">
+                  <span>&#128339;</span>
+                  <span>Time Remaining</span>
+                </div>
+                <div class="time-value">1:23:45</div>
+                <button class="extend-btn">
+                  <span>+</span>
+                  Extend Session
+                </button>
+              </div>
+
+              <div class="actions-grid">
+                <div class="action-card">
+                  <div class="action-icon success">&#128275;</div>
+                  <h4>Unlock Door</h4>
+                  <p>Remote unlock</p>
+                </div>
+                <div class="action-card">
+                  <div class="action-icon primary">&#9000;</div>
+                  <h4>Access Code</h4>
+                  <p>Manual entry</p>
+                </div>
+                <div class="action-card">
+                  <div class="action-icon accent">&#9201;</div>
+                  <h4>Extend</h4>
+                  <p>Add time</p>
+                </div>
+                <div class="action-card">
+                  <div class="action-icon info">&#9638;</div>
+                  <h4>Full Access</h4>
+                  <p>All options</p>
+                </div>
+              </div>
+
+              <div class="details-card">
+                <h3>Session Details</h3>
+                <div class="detail-row">
+                  <div class="detail-icon">&#128197;</div>
+                  <span>Thu, Jan 30</span>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-icon">&#128336;</div>
+                  <span>14:00 - 17:00</span>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-icon">&#128205;</div>
+                  <span>535 Middlefield Rd</span>
+                </div>
+              </div>
+
+              <div class="help-card">
+                <div class="help-icon">&#10067;</div>
+                <div class="help-content">
+                  <h4>Need help?</h4>
+                  <p>Tap for support options</p>
+                </div>
+                <span style="color: var(--gray-400);">&#10095;</span>
+              </div>
+            </div>
+
+            <div class="bottom-action">
+              <button class="primary-btn">
+                <span>&#128275;</span>
+                Unlock Door
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Active Session</p>
+        <p class="screen-subtitle">Live booth session with timer</p>
+      </div>
+
+      <!-- Access Code Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="screen-header">
+              <div class="header-btn">&#8592;</div>
+              <h1>Access Options</h1>
+              <div class="header-btn primary">&#8599;</div>
+            </div>
+
+            <div class="screen-content">
+              <div class="booth-card">
+                <div class="booth-icon">&#9632;</div>
+                <div class="booth-card-info">
+                  <h3>Focus Pod A3</h3>
+                  <p>WeWork Menlo Park</p>
+                </div>
+                <span class="badge success">Active</span>
+              </div>
+
+              <div class="validity-card">
+                <div class="validity-row">
+                  <div class="validity-item">
+                    <div class="label">Valid From</div>
+                    <div class="value">14:00</div>
+                    <div class="date">Thu, Jan 30</div>
+                  </div>
+                  <div class="validity-divider">&#8594;</div>
+                  <div class="validity-item">
+                    <div class="label">Valid Until</div>
+                    <div class="value">17:00</div>
+                    <div class="date">Thu, Jan 30</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="code-card">
+                <div class="code-title">Access Code</div>
+                <div class="code-digits">
+                  <div class="code-digit">4</div>
+                  <div class="code-digit">7</div>
+                  <div class="code-digit">2</div>
+                  <div class="code-digit">9</div>
+                  <div class="code-digit">1</div>
+                  <div class="code-digit">8</div>
+                </div>
+                <div class="code-hint">Enter this code on the door keypad</div>
+                <button class="copy-btn">
+                  <span>&#128203;</span>
+                  Copy Code
+                </button>
+              </div>
+
+              <div class="section-title">Unlock Methods</div>
+
+              <div class="method-card">
+                <div class="method-icon" style="color: var(--success-main);">&#128246;</div>
+                <div class="method-content">
+                  <h4>Remote Unlock</h4>
+                  <p>Unlock instantly via internet</p>
+                </div>
+                <span class="method-badge">Recommended</span>
+              </div>
+
+              <div class="method-card">
+                <div class="method-icon" style="color: var(--info-main);">&#9928;</div>
+                <div class="method-content">
+                  <h4>Bluetooth Unlock</h4>
+                  <p>Hold phone near the lock</p>
+                </div>
+              </div>
+
+              <div class="method-card">
+                <div class="method-icon" style="color: var(--primary-600);">&#9000;</div>
+                <div class="method-content">
+                  <h4>Keypad Entry</h4>
+                  <p>Enter 472918 on keypad</p>
+                </div>
+              </div>
+
+              <div class="instructions-card">
+                <div class="instructions-header">
+                  <span>&#9432;</span>
+                  <span>How to Enter</span>
+                </div>
+                <div class="instruction-step">
+                  <div class="step-number">1</div>
+                  <p>Tap "Remote Unlock" for instant access</p>
+                </div>
+                <div class="instruction-step">
+                  <div class="step-number">2</div>
+                  <p>If remote fails, try Bluetooth</p>
+                </div>
+                <div class="instruction-step">
+                  <div class="step-number">3</div>
+                  <p>As backup, enter code on keypad</p>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Access Code</p>
+        <p class="screen-subtitle">Multiple unlock methods</p>
+      </div>
+
+      <!-- Bookings List Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="bookings-header">
+              <div class="bookings-header-top">
+                <div>
+                  <h1>My Bookings</h1>
+                  <p>Manage your reservations</p>
+                </div>
+                <div class="filter-btn">&#9776;</div>
+              </div>
+              <div class="tabs">
+                <div class="tab active">
+                  Upcoming
+                  <span class="tab-badge">2</span>
+                </div>
+                <div class="tab">
+                  Past
+                  <span class="tab-badge">5</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="screen-content">
+              <div class="booking-card">
+                <div class="booking-image">
+                  <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>Live</span>
+                  </div>
+                </div>
+                <div class="booking-content">
+                  <div class="booking-title-row">
+                    <h3>Focus Pod A3</h3>
+                    <div class="status-pill active">
+                      <span>&#9679;</span>
+                      Active
+                    </div>
+                  </div>
+                  <div class="booking-location">
+                    <span>&#128205;</span>
+                    WeWork Menlo Park
+                  </div>
+                  <div class="booking-meta">
+                    <div class="meta-item">
+                      <div class="meta-icon">&#128197;</div>
+                      <span>Thu, Jan 30</span>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-icon">&#128336;</div>
+                      <span>14:00 - 17:00</span>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-icon">&#9201;</div>
+                      <span>3h</span>
+                    </div>
+                  </div>
+                  <div class="booking-footer">
+                    <div>
+                      <div class="price-label">Total</div>
+                      <div class="price-value">45 <small>PLN</small></div>
+                    </div>
+                    <button class="action-btn primary">
+                      <span>&#8599;</span>
+                      Open Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="booking-card">
+                <div class="booking-image" style="background-image: url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=600');"></div>
+                <div class="booking-content">
+                  <div class="booking-title-row">
+                    <h3>Meeting Room B2</h3>
+                    <div class="status-pill confirmed">
+                      <span>&#10003;</span>
+                      Confirmed
+                    </div>
+                  </div>
+                  <div class="booking-location">
+                    <span>&#128205;</span>
+                    Spaces Krakow
+                  </div>
+                  <div class="booking-meta">
+                    <div class="meta-item">
+                      <div class="meta-icon">&#128197;</div>
+                      <span>Fri, Jan 31</span>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-icon">&#128336;</div>
+                      <span>10:00 - 12:00</span>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-icon">&#9201;</div>
+                      <span>2h</span>
+                    </div>
+                  </div>
+                  <div class="booking-footer">
+                    <div>
+                      <div class="price-label">Total</div>
+                      <div class="price-value">60 <small>PLN</small></div>
+                    </div>
+                    <button class="action-btn outline">
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item">
+                <div class="tab-icon">&#9678;</div>
+                Explore
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#9635;</div>
+                Map
+              </div>
+              <div class="tab-item active">
+                <div class="tab-icon">&#128197;</div>
+                Bookings
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#9787;</div>
+                Profile
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">My Bookings</p>
+        <p class="screen-subtitle">Upcoming & past reservations</p>
+      </div>
+
+      <!-- Explore Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="explore-header">
+              <div class="greeting">Good afternoon, Serhii</div>
+              <h1>Find your space</h1>
+              <div class="search-bar">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" placeholder="Search booths, locations...">
+              </div>
+            </div>
+
+            <div class="filter-chips">
+              <div class="chip active">All</div>
+              <div class="chip">Focus Pod</div>
+              <div class="chip">Meeting Room</div>
+              <div class="chip">Phone Booth</div>
+              <div class="chip">Quiet Zone</div>
+            </div>
+
+            <div class="screen-content">
+              <div class="section-header">
+                <h2>Nearby</h2>
+                <span class="see-all">See all</span>
+              </div>
+
+              <div class="booth-scroll">
+                <div class="booth-card-small">
+                  <div class="image">
+                    <div class="available-badge">Available Now</div>
+                  </div>
+                  <div class="info">
+                    <h4>Focus Pod A1</h4>
+                    <div class="location">WeWork Menlo Park</div>
+                    <div class="price-row">
+                      <span class="price">15 <small>PLN/h</small></span>
+                      <div class="rating">
+                        <span class="star">&#9733;</span>
+                        4.8
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="booth-card-small">
+                  <div class="image"></div>
+                  <div class="info">
+                    <h4>Meeting Room B2</h4>
+                    <div class="location">Spaces Krakow</div>
+                    <div class="price-row">
+                      <span class="price">30 <small>PLN/h</small></span>
+                      <div class="rating">
+                        <span class="star">&#9733;</span>
+                        4.9
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="booth-card-small">
+                  <div class="image"></div>
+                  <div class="info">
+                    <h4>Phone Booth C3</h4>
+                    <div class="location">Business Link</div>
+                    <div class="price-row">
+                      <span class="price">10 <small>PLN/h</small></span>
+                      <div class="rating">
+                        <span class="star">&#9733;</span>
+                        4.7
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-header">
+                <h2>Popular this week</h2>
+                <span class="see-all">See all</span>
+              </div>
+
+              <div class="booth-scroll">
+                <div class="booth-card-small">
+                  <div class="image" style="background-image: url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400');"></div>
+                  <div class="info">
+                    <h4>Premium Suite</h4>
+                    <div class="location">Regus Center</div>
+                    <div class="price-row">
+                      <span class="price">50 <small>PLN/h</small></span>
+                      <div class="rating">
+                        <span class="star">&#9733;</span>
+                        5.0
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="booth-card-small">
+                  <div class="image" style="background-image: url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400');"></div>
+                  <div class="info">
+                    <h4>Creative Studio</h4>
+                    <div class="location">Hub Kolektyw</div>
+                    <div class="price-row">
+                      <span class="price">25 <small>PLN/h</small></span>
+                      <div class="rating">
+                        <span class="star">&#9733;</span>
+                        4.6
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item active">
+                <div class="tab-icon">&#9678;</div>
+                Explore
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#9635;</div>
+                Map
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#128197;</div>
+                Bookings
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#9787;</div>
+                Profile
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Explore</p>
+        <p class="screen-subtitle">Discover nearby workspaces</p>
+      </div>
+
+      <!-- Profile Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="profile-header">
+              <div class="profile-avatar">S</div>
+              <h2>Serhii Borovets</h2>
+              <p>serhii@silentbox.io</p>
+            </div>
+
+            <div class="screen-content" style="background: var(--background);">
+              <div class="credits-card">
+                <div class="credits-info">
+                  <div class="credits-icon">&#9733;</div>
+                  <div>
+                    <h3>245</h3>
+                    <span>Credits available</span>
+                  </div>
+                </div>
+                <button class="add-credits-btn">+ Add</button>
+              </div>
+
+              <div class="stats-row">
+                <div class="stat-card">
+                  <div class="stat-value">24</div>
+                  <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">48h</div>
+                  <div class="stat-label">Time Spent</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">4.9</div>
+                  <div class="stat-label">Avg Rating</div>
+                </div>
+              </div>
+
+              <div class="menu-section">
+                <div class="menu-section-title">Account</div>
+                <div class="menu-card">
+                  <div class="menu-item">
+                    <div class="menu-icon blue">&#9787;</div>
+                    <div class="menu-content">
+                      <h4>Edit Profile</h4>
+                      <p>Update your personal info</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                  <div class="menu-item">
+                    <div class="menu-icon green">&#128179;</div>
+                    <div class="menu-content">
+                      <h4>Payment Methods</h4>
+                      <p>Manage cards and wallets</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                  <div class="menu-item">
+                    <div class="menu-icon purple">&#9733;</div>
+                    <div class="menu-content">
+                      <h4>Credits & Wallet</h4>
+                      <p>245 credits available</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="menu-section">
+                <div class="menu-section-title">Preferences</div>
+                <div class="menu-card">
+                  <div class="menu-item">
+                    <div class="menu-icon orange">&#128276;</div>
+                    <div class="menu-content">
+                      <h4>Notifications</h4>
+                      <p>Push, email, SMS settings</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                  <div class="menu-item">
+                    <div class="menu-icon blue">&#127760;</div>
+                    <div class="menu-content">
+                      <h4>Language</h4>
+                      <p>English (US)</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="menu-section">
+                <div class="menu-section-title">Support</div>
+                <div class="menu-card">
+                  <div class="menu-item">
+                    <div class="menu-icon green">&#10067;</div>
+                    <div class="menu-content">
+                      <h4>Help Center</h4>
+                      <p>FAQs and guides</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                  <div class="menu-item">
+                    <div class="menu-icon red">&#9888;</div>
+                    <div class="menu-content">
+                      <h4>Report Issue</h4>
+                      <p>Get help with problems</p>
+                    </div>
+                    <span class="menu-arrow">&#10095;</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+
+            <div class="tab-bar">
+              <div class="tab-item">
+                <div class="tab-icon">&#9678;</div>
+                Explore
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#9635;</div>
+                Map
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">&#128197;</div>
+                Bookings
+              </div>
+              <div class="tab-item active">
+                <div class="tab-icon">&#9787;</div>
+                Profile
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Profile</p>
+        <p class="screen-subtitle">User account & settings</p>
+      </div>
+
+      <!-- Booth Details Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="booth-hero">
+              <div class="booth-hero-overlay"></div>
+              <div class="booth-hero-nav">
+                <div class="hero-btn">&#8592;</div>
+                <div class="hero-actions">
+                  <div class="hero-btn">&#9825;</div>
+                  <div class="hero-btn">&#8599;</div>
+                </div>
+              </div>
+              <div class="booth-hero-info">
+                <h1>Focus Pod A3</h1>
+                <div class="booth-hero-meta">
+                  <span>&#9733; 4.9 (128)</span>
+                  <span>&#128205; WeWork Menlo Park</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="screen-content" style="padding-bottom: 100px;">
+              <div class="booth-detail-content">
+                <div class="quick-info">
+                  <div class="info-pill">
+                    <div class="icon">&#128100;</div>
+                    <div class="label">Capacity</div>
+                    <div class="value">1 person</div>
+                  </div>
+                  <div class="info-pill">
+                    <div class="icon">&#128200;</div>
+                    <div class="label">Size</div>
+                    <div class="value">4 m²</div>
+                  </div>
+                  <div class="info-pill">
+                    <div class="icon">&#128267;</div>
+                    <div class="label">Floor</div>
+                    <div class="value">3rd</div>
+                  </div>
+                </div>
+
+                <div class="about-section">
+                  <h3>About</h3>
+                  <p>A private, soundproof workspace perfect for focused work, video calls, or quiet thinking time. Equipped with high-speed WiFi, adjustable lighting, and climate control.</p>
+                </div>
+
+                <div class="amenities-section">
+                  <h3>Amenities</h3>
+                  <div class="amenities-grid">
+                    <div class="amenity-item">
+                      <div class="icon">&#128246;</div>
+                      <div class="name">WiFi</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#9889;</div>
+                      <div class="name">Power</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#10052;</div>
+                      <div class="name">A/C</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#128161;</div>
+                      <div class="name">Lights</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#127908;</div>
+                      <div class="name">Soundproof</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#128187;</div>
+                      <div class="name">Monitor</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#127869;</div>
+                      <div class="name">Desk</div>
+                    </div>
+                    <div class="amenity-item">
+                      <div class="icon">&#129681;</div>
+                      <div class="name">Ventilation</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="reviews-section">
+                  <h3>Reviews</h3>
+                  <div class="review-card">
+                    <div class="review-header">
+                      <div class="reviewer-avatar">A</div>
+                      <div class="reviewer-info">
+                        <h4>Anna K.</h4>
+                        <span>2 days ago</span>
+                      </div>
+                      <div class="review-rating">
+                        <span>&#9733;</span>
+                        5.0
+                      </div>
+                    </div>
+                    <p>Perfect for focused work! Great soundproofing and the smart lock made access super easy.</p>
+                  </div>
+                  <div class="review-card">
+                    <div class="review-header">
+                      <div class="reviewer-avatar">M</div>
+                      <div class="reviewer-info">
+                        <h4>Michal W.</h4>
+                        <span>1 week ago</span>
+                      </div>
+                      <div class="review-rating">
+                        <span>&#9733;</span>
+                        4.8
+                      </div>
+                    </div>
+                    <p>Clean and comfortable. WiFi was fast. Would book again!</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+
+            <div class="booking-cta">
+              <div class="cta-price">
+                15 <small>PLN / hour</small>
+              </div>
+              <button class="book-now-btn">Book Now</button>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Booth Details</p>
+        <p class="screen-subtitle">Space info, amenities & reviews</p>
+      </div>
+
+      <!-- Date/Time Selection Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="datetime-header">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div class="header-btn">&#8592;</div>
+                <h1 style="flex: 1; text-align: center; margin: 0;">Select Time</h1>
+                <div style="width: 40px;"></div>
+              </div>
+              <div class="progress-steps">
+                <div class="progress-step">
+                  <div class="step-circle done">&#10003;</div>
+                </div>
+                <div class="step-line done"></div>
+                <div class="progress-step">
+                  <div class="step-circle active">2</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="progress-step">
+                  <div class="step-circle pending">3</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="screen-content" style="padding-bottom: 100px;">
+              <div class="calendar-section">
+                <h3>Select Date</h3>
+                <div class="month-nav">
+                  <h4>January 2026</h4>
+                  <div class="month-nav-btns">
+                    <div class="month-btn">&#8592;</div>
+                    <div class="month-btn">&#8594;</div>
+                  </div>
+                </div>
+                <div class="calendar-grid">
+                  <div class="calendar-day-name">Sun</div>
+                  <div class="calendar-day-name">Mon</div>
+                  <div class="calendar-day-name">Tue</div>
+                  <div class="calendar-day-name">Wed</div>
+                  <div class="calendar-day-name">Thu</div>
+                  <div class="calendar-day-name">Fri</div>
+                  <div class="calendar-day-name">Sat</div>
+                  <div class="calendar-day disabled"></div>
+                  <div class="calendar-day disabled"></div>
+                  <div class="calendar-day disabled"></div>
+                  <div class="calendar-day disabled">1</div>
+                  <div class="calendar-day disabled">2</div>
+                  <div class="calendar-day disabled">3</div>
+                  <div class="calendar-day disabled">4</div>
+                  <div class="calendar-day disabled">5</div>
+                  <div class="calendar-day disabled">6</div>
+                  <div class="calendar-day disabled">7</div>
+                  <div class="calendar-day disabled">8</div>
+                  <div class="calendar-day disabled">9</div>
+                  <div class="calendar-day disabled">10</div>
+                  <div class="calendar-day disabled">11</div>
+                  <div class="calendar-day">12</div>
+                  <div class="calendar-day">13</div>
+                  <div class="calendar-day">14</div>
+                  <div class="calendar-day">15</div>
+                  <div class="calendar-day">16</div>
+                  <div class="calendar-day">17</div>
+                  <div class="calendar-day">18</div>
+                  <div class="calendar-day">19</div>
+                  <div class="calendar-day">20</div>
+                  <div class="calendar-day">21</div>
+                  <div class="calendar-day">22</div>
+                  <div class="calendar-day">23</div>
+                  <div class="calendar-day">24</div>
+                  <div class="calendar-day">25</div>
+                  <div class="calendar-day">26</div>
+                  <div class="calendar-day">27</div>
+                  <div class="calendar-day">28</div>
+                  <div class="calendar-day">29</div>
+                  <div class="calendar-day today selected">30</div>
+                  <div class="calendar-day">31</div>
+                </div>
+              </div>
+
+              <div class="time-section">
+                <h3>Select Time</h3>
+                <div class="time-slots">
+                  <div class="time-slot unavailable">08:00</div>
+                  <div class="time-slot unavailable">09:00</div>
+                  <div class="time-slot">10:00</div>
+                  <div class="time-slot">11:00</div>
+                  <div class="time-slot">12:00</div>
+                  <div class="time-slot">13:00</div>
+                  <div class="time-slot selected">14:00</div>
+                  <div class="time-slot">15:00</div>
+                  <div class="time-slot">16:00</div>
+                  <div class="time-slot">17:00</div>
+                  <div class="time-slot unavailable">18:00</div>
+                  <div class="time-slot unavailable">19:00</div>
+                </div>
+              </div>
+
+              <div class="duration-section">
+                <h3>Duration</h3>
+                <div class="duration-options">
+                  <div class="duration-option">
+                    <div class="hours">1h</div>
+                    <div class="price">15 PLN</div>
+                  </div>
+                  <div class="duration-option">
+                    <div class="hours">2h</div>
+                    <div class="price">28 PLN</div>
+                  </div>
+                  <div class="duration-option selected">
+                    <div class="hours">3h</div>
+                    <div class="price">40 PLN</div>
+                  </div>
+                  <div class="duration-option">
+                    <div class="hours">4h</div>
+                    <div class="price">50 PLN</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-cta">
+              <div>
+                <div style="font-size: 12px; color: var(--gray-500);">Total</div>
+                <div class="cta-price">40 <small>PLN</small></div>
+              </div>
+              <button class="book-now-btn">Continue</button>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Date & Time</p>
+        <p class="screen-subtitle">Booking flow step 2</p>
+      </div>
+
+      <!-- Map Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="map-container">
+              <div class="map-placeholder" style="background: linear-gradient(180deg, #E5EEF2 0%, #D1E0E8 30%, #C8D8E1 100%);"></div>
+
+              <!-- Fake map elements -->
+              <div style="position: absolute; inset: 0; overflow: hidden;">
+                <div style="position: absolute; top: 200px; left: 80px; width: 44px; height: 44px; background: var(--primary-600); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);"></div>
+                <div style="position: absolute; top: 350px; left: 200px; width: 52px; height: 52px; background: var(--accent-500); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);"></div>
+                <div style="position: absolute; top: 280px; right: 60px; width: 44px; height: 44px; background: var(--primary-600); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);"></div>
+                <div style="position: absolute; top: 450px; left: 120px; width: 44px; height: 44px; background: var(--primary-600); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);"></div>
+
+                <!-- Roads -->
+                <div style="position: absolute; top: 300px; left: 0; right: 0; height: 12px; background: #fff; opacity: 0.6;"></div>
+                <div style="position: absolute; top: 0; bottom: 0; left: 150px; width: 12px; background: #fff; opacity: 0.6;"></div>
+                <div style="position: absolute; top: 0; bottom: 0; right: 100px; width: 8px; background: #fff; opacity: 0.4;"></div>
+              </div>
+
+              <div class="map-search">
+                <div class="map-search-input">
+                  <span style="color: var(--gray-400); font-size: 18px;">&#128269;</span>
+                  <input type="text" placeholder="Search area...">
+                </div>
+                <div class="map-filter-btn">&#9776;</div>
+              </div>
+
+              <div class="map-recenter">&#9678;</div>
+
+              <div class="map-booth-card">
+                <div class="map-booth-image"></div>
+                <div class="map-booth-info">
+                  <h3>Focus Pod A3</h3>
+                  <div class="location">&#128205; WeWork Menlo Park</div>
+                  <div class="meta">
+                    <span><span class="star">&#9733;</span> 4.9</span>
+                    <span>&#128100; 1</span>
+                    <span style="color: var(--success-main);">&#9679; Available</span>
+                  </div>
+                  <div class="map-booth-footer">
+                    <div class="price">15 <small>PLN/h</small></div>
+                    <button class="map-book-btn">Book</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-bar">
+                <div class="tab-item">
+                  <div class="tab-icon">&#9678;</div>
+                  Explore
+                </div>
+                <div class="tab-item active">
+                  <div class="tab-icon">&#9635;</div>
+                  Map
+                </div>
+                <div class="tab-item">
+                  <div class="tab-icon">&#128197;</div>
+                  Bookings
+                </div>
+                <div class="tab-item">
+                  <div class="tab-icon">&#9787;</div>
+                  Profile
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Map View</p>
+        <p class="screen-subtitle">Find booths on the map</p>
+      </div>
+
+      <!-- Wallet/Credits Screen -->
+      <div class="screen-wrapper">
+        <div class="phone-frame">
+          <div class="screen">
+            <div class="wallet-header">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="hero-btn" style="background: rgba(0,0,0,0.2);">&#8592;</div>
+                <div class="hero-btn" style="background: rgba(0,0,0,0.2);">&#9881;</div>
+              </div>
+              <div class="wallet-balance-label">Your Balance</div>
+              <div class="wallet-balance">245 <small>credits</small></div>
+              <div class="wallet-equivalent">&#8776; 245 PLN</div>
+              <div class="wallet-actions">
+                <button class="wallet-action-btn">
+                  <span>+</span>
+                  Add Credits
+                </button>
+                <button class="wallet-action-btn">
+                  <span>&#128279;</span>
+                  Gift
+                </button>
+              </div>
+            </div>
+
+            <div class="screen-content" style="background: var(--background);">
+              <div class="packages-section">
+                <h3>Buy Credits</h3>
+                <div class="package-card" style="position: relative;">
+                  <div class="package-icon">&#9733;</div>
+                  <div class="package-info">
+                    <h4>50 Credits</h4>
+                    <span>Perfect for trying out</span>
+                  </div>
+                  <div class="package-price">
+                    <div class="amount">50 PLN</div>
+                  </div>
+                </div>
+                <div class="package-card popular" style="position: relative;">
+                  <div class="popular-badge">Most Popular</div>
+                  <div class="package-icon">&#9733;&#9733;</div>
+                  <div class="package-info">
+                    <h4>100 Credits</h4>
+                    <span>Best value for regulars</span>
+                  </div>
+                  <div class="package-price">
+                    <div class="amount">90 PLN</div>
+                    <div class="savings">Save 10%</div>
+                  </div>
+                </div>
+                <div class="package-card" style="position: relative;">
+                  <div class="package-icon">&#9733;&#9733;&#9733;</div>
+                  <div class="package-info">
+                    <h4>250 Credits</h4>
+                    <span>For power users</span>
+                  </div>
+                  <div class="package-price">
+                    <div class="amount">200 PLN</div>
+                    <div class="savings">Save 20%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="transactions-section">
+                <h3>Recent Activity</h3>
+                <div class="transaction-item">
+                  <div class="transaction-icon debit">&#8595;</div>
+                  <div class="transaction-info">
+                    <h4>Focus Pod A3</h4>
+                    <span>Today, 14:00</span>
+                  </div>
+                  <div class="transaction-amount debit">-45</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon credit">&#8593;</div>
+                  <div class="transaction-info">
+                    <h4>Credits Purchase</h4>
+                    <span>Jan 28, 2026</span>
+                  </div>
+                  <div class="transaction-amount credit">+100</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon debit">&#8595;</div>
+                  <div class="transaction-info">
+                    <h4>Meeting Room B2</h4>
+                    <span>Jan 25, 2026</span>
+                  </div>
+                  <div class="transaction-amount debit">-60</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon credit">&#8593;</div>
+                  <div class="transaction-info">
+                    <h4>Referral Bonus</h4>
+                    <span>Jan 20, 2026</span>
+                  </div>
+                  <div class="transaction-amount credit">+25</div>
+                </div>
+              </div>
+
+              <div class="padding-bottom"></div>
+            </div>
+          </div>
+        </div>
+        <p class="screen-title">Wallet & Credits</p>
+        <p class="screen-subtitle">Balance, packages & history</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

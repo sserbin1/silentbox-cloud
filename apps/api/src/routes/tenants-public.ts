@@ -248,7 +248,7 @@ export const tenantsPublicRoutes: FastifyPluginAsync = async (app) => {
         description: booth.description,
         type: booth.type,
         capacity: booth.capacity,
-        pricePerHour: booth.price_per_hour,
+        pricePerHour: booth.price_per_hour || 50, // Default price if not set
         currency: booth.currency || 'PLN',
         amenities: booth.amenities || [],
         images: booth.images || [],
