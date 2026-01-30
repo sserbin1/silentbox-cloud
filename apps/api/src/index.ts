@@ -84,7 +84,7 @@ await app.register(accessRoutes, { prefix: '/api/access' });
 await app.register(webhookRoutes, { prefix: '/webhooks' });
 await app.register(notificationsRoutes, { prefix: '/api/notifications' });
 await app.register(superadminRoutes, { prefix: '/api/super' });
-await app.register(adminRoutes, { prefix: '/admin' });
+await app.register(adminRoutes, { prefix: '/api/admin' });
 
 // Socket.io setup
 const io = setupSocketServer(app.server);

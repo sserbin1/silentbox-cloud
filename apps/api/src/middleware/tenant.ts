@@ -24,6 +24,9 @@ const AUTH_ROUTES = [
 // Super admin routes (platform-level, no tenant)
 const SUPER_ADMIN_ROUTES = ['/api/super'];
 
+// Admin routes (have their own auth, get tenant from JWT)
+const ADMIN_ROUTES = ['/api/admin'];
+
 export const tenantMiddleware = async (request: FastifyRequest, reply: FastifyReply) => {
   const path = request.url.split('?')[0];
 
@@ -34,6 +37,11 @@ export const tenantMiddleware = async (request: FastifyRequest, reply: FastifyRe
 
   // Skip for super admin routes (handled separately)
   if (SUPER_ADMIN_ROUTES.some((route) => path.startsWith(route))) {
+    return;
+  }
+
+  // Skip for admin routes (they have their own JWT-based auth)
+  if (ADMIN_ROUTES.some((route) => path.startsWith(route))) {
     return;
   }
 
