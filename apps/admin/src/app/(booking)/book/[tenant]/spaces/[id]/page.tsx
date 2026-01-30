@@ -272,22 +272,15 @@ export default function SpaceDetailPage() {
           <div className="relative rounded-3xl overflow-hidden group">
             {/* Main image */}
             <div className="aspect-[16/9] md:aspect-[21/9] relative">
-              {booth.images?.[selectedImage] ? (
-                <img
-                  src={booth.images[selectedImage]}
-                  alt={booth.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-violet-900/50 to-slate-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 rounded-full bg-violet-500/20 flex items-center justify-center mx-auto mb-4">
-                      <MapPin className="w-12 h-12 text-violet-400" />
-                    </div>
-                    <p className="text-slate-400">No images available</p>
-                  </div>
-                </div>
-              )}
+              <img
+                src={booth.images?.[selectedImage] || `https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=600&fit=crop&q=80&sig=${booth.id}`}
+                alt={booth.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=600&fit=crop&q=80';
+                }}
+              />
 
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
