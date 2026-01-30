@@ -97,9 +97,9 @@ export function SearchForm({ tenantSlug, locations }: SearchFormProps) {
           {/* Search Button */}
           <button
             type="submit"
-            className="btn-primary py-4 px-6 rounded-xl flex items-center justify-center gap-2"
+            className="btn-primary py-4 px-6 rounded-xl flex items-center justify-center gap-2 whitespace-nowrap min-w-fit"
           >
-            <Search className="w-5 h-5" />
+            <Search className="w-5 h-5 flex-shrink-0" />
             <span className="font-semibold">Search</span>
           </button>
         </div>
