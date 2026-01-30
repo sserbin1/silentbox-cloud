@@ -372,6 +372,149 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
   });
 
   // ===========================================
+  // Booking Management
+  // ===========================================
+
+  // Get all bookings with filters
+  app.get<{ Querystring: { status?: string; locationId?: string; date?: string } }>(
+    '/bookings',
+    async (request: any, reply) => {
+      const tenantId = request.adminTenantId;
+      const { status, locationId, date } = request.query;
+
+      try {
+        let query = supabase
+          .from('bookings')
+          .select(`
+            id,
+            user_id,
+            booth_id,
+            status,
+            start_time,
+            end_time,
+            duration_minutes,
+            total_price,
+            currency,
+            created_at,
+            users(full_name, email),
+            booths(name, locations(name))
+          `)
+          .eq('tenant_id', tenantId);
+
+        if (status) {
+          query = query.eq('status', status);
+        }
+        if (locationId) {
+          query = query.eq('booths.location_id', locationId);
+        }
+        if (date) {
+          // Filter by date (start of day to end of day)
+          const startOfDay = new Date(date);
+          startOfDay.setHours(0, 0, 0, 0);
+          const endOfDay = new Date(date);
+          endOfDay.setHours(23, 59, 59, 999);
+          query = query.gte('start_time', startOfDay.toISOString()).lte('start_time', endOfDay.toISOString());
+        }
+
+        const { data, error } = await query.order('start_time', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        return { success: true, data };
+      } catch (error) {
+        logger.error({ error, tenantId }, 'Failed to get bookings');
+        return reply.code(500).send({
+          success: false,
+          error: 'Failed to get bookings',
+        });
+      }
+    }
+  );
+
+  // Get single booking
+  app.get<{ Params: { bookingId: string } }>('/bookings/:bookingId', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const { bookingId } = request.params;
+
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          users(full_name, email, phone),
+          booths(name, locations(name, address))
+        `)
+        .eq('id', bookingId)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      logger.error({ error, tenantId, bookingId }, 'Failed to get booking');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get booking',
+      });
+    }
+  });
+
+  // Cancel booking
+  app.post<{ Params: { bookingId: string } }>('/bookings/:bookingId/cancel', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const { bookingId } = request.params;
+
+    try {
+      // Verify booking belongs to tenant and can be cancelled
+      const { data: booking, error: fetchError } = await supabase
+        .from('bookings')
+        .select('id, status, user_id, total_price')
+        .eq('id', bookingId)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (fetchError || !booking) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Booking not found',
+        });
+      }
+
+      if (['cancelled', 'completed'].includes(booking.status)) {
+        return reply.code(400).send({
+          success: false,
+          error: `Cannot cancel booking with status: ${booking.status}`,
+        });
+      }
+
+      // Update booking status
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+        .eq('id', bookingId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      logger.info({ bookingId, tenantId }, 'Booking cancelled by admin');
+
+      return { success: true, data: { id: bookingId, status: 'cancelled' } };
+    } catch (error) {
+      logger.error({ error, tenantId, bookingId }, 'Failed to cancel booking');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to cancel booking',
+      });
+    }
+  });
+
+  // ===========================================
   // Reports
   // ===========================================
 

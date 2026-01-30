@@ -136,11 +136,15 @@ export const boothsApi = {
 
 export const bookingsApi = {
   getAll: (params?: { status?: string; locationId?: string; date?: string }) => {
-    const searchParams = new URLSearchParams(params as Record<string, string>);
-    return adminApi.get<Booking[]>(`/api/bookings?${searchParams}`);
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.locationId) searchParams.set('locationId', params.locationId);
+    if (params?.date) searchParams.set('date', params.date);
+    const queryString = searchParams.toString();
+    return adminApi.get<Booking[]>(`/api/admin/bookings${queryString ? `?${queryString}` : ''}`);
   },
-  getById: (id: string) => adminApi.get<Booking>(`/api/bookings/${id}`),
-  cancel: (id: string) => adminApi.post(`/api/bookings/${id}/cancel`, {}),
+  getById: (id: string) => adminApi.get<Booking>(`/api/admin/bookings/${id}`),
+  cancel: (id: string) => adminApi.post(`/api/admin/bookings/${id}/cancel`, {}),
 };
 
 export const usersApi = {
