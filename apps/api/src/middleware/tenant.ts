@@ -11,6 +11,7 @@ import { ERROR_CODES } from '@silentbox/shared';
 const PUBLIC_ROUTES = [
   '/health',
   '/webhooks',
+  '/api/tenants', // Public tenant API for booking portal
 ];
 
 // Auth routes that need tenant context but don't require it for access
