@@ -42,7 +42,14 @@ const app = Fastify({
 
 // Register plugins
 await app.register(cors, {
-  origin: [env.APP_URL, env.ADMIN_URL, 'http://localhost:3000', 'http://localhost:8081'],
+  origin: [
+    env.APP_URL,
+    env.ADMIN_URL,
+    'http://localhost:3000',
+    'http://localhost:8081',
+    'http://cloud.silent-box.com',
+    'https://cloud.silent-box.com',
+  ],
   credentials: true,
 });
 
