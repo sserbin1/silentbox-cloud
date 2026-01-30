@@ -49,7 +49,7 @@ export function LanguageSelector({ className = '', variant = 'default' }: Langua
       <div ref={dropdownRef} className={`relative ${className}`}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1 px-2 py-1 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-all"
           aria-label="Select language"
         >
           <span className="text-lg">{LANGUAGE_FLAGS[language]}</span>
@@ -57,18 +57,18 @@ export function LanguageSelector({ className = '', variant = 'default' }: Langua
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px] z-50">
+          <div className="absolute right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-white/10 py-1 min-w-[140px] z-50">
             {supportedLanguages.map((lang) => (
               <button
                 key={lang}
                 onClick={() => handleSelect(lang)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                  language === lang ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700'
+                className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/5 transition-colors ${
+                  language === lang ? 'text-violet-400 bg-violet-500/10' : 'text-slate-300'
                 }`}
               >
                 <span className="text-lg">{LANGUAGE_FLAGS[lang]}</span>
                 <span className="flex-1 text-left">{LANGUAGE_NAMES[lang]}</span>
-                {language === lang && <Check className="w-4 h-4" />}
+                {language === lang && <Check className="w-4 h-4 text-violet-400" />}
               </button>
             ))}
           </div>

@@ -80,8 +80,8 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            {tenant?.logoUrl ? (
-              <img src={tenant.logoUrl} alt={tenant.name} className="h-12 mx-auto mb-4" />
+            {tenant?.logo ? (
+              <img src={tenant.logo} alt={tenant.name} className="h-12 mx-auto mb-4" />
             ) : (
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-bold mx-auto mb-4"

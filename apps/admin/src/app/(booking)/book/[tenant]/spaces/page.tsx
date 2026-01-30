@@ -5,7 +5,19 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useBookingContext } from '../layout';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { MapPin, Users, Star, Filter, X } from 'lucide-react';
+import { FuturisticBackground, futuristicAnimations } from '@/components/booking/FuturisticBackground';
+import { GlassCard, GradientBorderCard, NeonButton, GlowBadge } from '@/components/booking/GlassCard';
+import {
+  MapPin,
+  Users,
+  Star,
+  Filter,
+  X,
+  Search,
+  Sparkles,
+  ArrowRight,
+  SlidersHorizontal,
+} from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -42,11 +54,12 @@ function formatPrice(amount: number, currency: string): string {
   }).format(amount);
 }
 
-const boothTypeLabels: Record<string, string> = {
-  focus_pod: 'Focus Pod',
-  meeting_room: 'Meeting Room',
-  phone_booth: 'Phone Booth',
-  quiet_zone: 'Quiet Zone',
+// Translation keys for booth types
+const boothTypeKeys: Record<string, string> = {
+  focus_pod: 'type.focus_pod',
+  meeting_room: 'type.meeting_room',
+  phone_booth: 'type.phone_booth',
+  quiet_zone: 'type.quiet_zone',
 };
 
 const boothTypes = [
@@ -111,261 +124,323 @@ export default function SpacesPage() {
   };
 
   const hasFilters = locationId || boothType || minCapacity || maxPrice;
+  const activeFilterCount = [locationId, boothType, minCapacity, maxPrice].filter(Boolean).length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('spaces.title')}</h1>
-          <p className="text-gray-600">
-            {booths.length} {t('spaces.person')}
-          </p>
+    <div className="min-h-screen bg-slate-950 relative">
+      <FuturisticBackground variant="cyber" />
+      <style dangerouslySetInnerHTML={{ __html: futuristicAnimations }} />
+
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="max-w-7xl mx-auto px-4 pt-8 pb-6">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <GlowBadge color="cyan" className="mb-3">
+                <Search className="w-3 h-3 mr-1" />
+                {t('spaces.title')}
+              </GlowBadge>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                {t('spaces.findSpace')}
+              </h1>
+              <p className="text-slate-400">
+                {booths.length} {booths.length === 1 ? t('spaces.spaceAvailable') : t('spaces.spacesAvailable')}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="inline-flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:bg-white/10 hover:border-white/20 transition-all md:hidden"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              {t('spaces.filters')}
+              {activeFilterCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-violet-500 text-xs text-white flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 md:hidden"
-        >
-          <Filter className="w-4 h-4" />
-          {t('spaces.filters')}
-          {hasFilters && (
-            <span
-              className="w-5 h-5 rounded-full text-xs text-white flex items-center justify-center"
-              style={{ backgroundColor: tenant?.primaryColor }}
+        <div className="max-w-7xl mx-auto px-4 pb-12">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Filters Sidebar */}
+            <aside
+              className={`md:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}
             >
-              !
-            </span>
-          )}
-        </button>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Filters Sidebar */}
-        <aside
-          className={`md:w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}
-        >
-          <div className="bg-white rounded-xl border border-gray-200 p-4 sticky top-24">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">{t('spaces.filters')}</h2>
-              {hasFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" />
-                  {t('spaces.clear')}
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('search.location')}
-                </label>
-                <select
-                  value={locationId}
-                  onChange={(e) => setLocationId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">{t('search.allLocations')}</option>
-                  {locations.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('spaces.spaceType')}
-                </label>
-                <select
-                  value={boothType}
-                  onChange={(e) => setBoothType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                >
-                  {boothTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Capacity */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('spaces.minCapacity')}
-                </label>
-                <select
-                  value={minCapacity}
-                  onChange={(e) => setMinCapacity(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">{t('spaces.any')}</option>
-                  <option value="1">1+ {t('spaces.person')}</option>
-                  <option value="2">2+ {t('spaces.people')}</option>
-                  <option value="4">4+ {t('spaces.people')}</option>
-                  <option value="6">6+ {t('spaces.people')}</option>
-                </select>
-              </div>
-
-              {/* Max Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('spaces.maxPrice')}
-                </label>
-                <select
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">{t('spaces.any')}</option>
-                  <option value="50">{t('spaces.upTo')} 50 PLN</option>
-                  <option value="100">{t('spaces.upTo')} 100 PLN</option>
-                  <option value="150">{t('spaces.upTo')} 150 PLN</option>
-                  <option value="200">{t('spaces.upTo')} 200 PLN</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Results Grid */}
-        <div className="flex-1">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
-                  <div className="aspect-video bg-gray-200" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-5 bg-gray-200 rounded w-3/4" />
-                    <div className="h-4 bg-gray-200 rounded w-1/2" />
-                    <div className="h-4 bg-gray-200 rounded w-1/4" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : booths.length === 0 ? (
-            <div className="text-center py-12">
-              <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('spaces.noSpaces')}</h3>
-              <p className="text-gray-500 mb-4">
-                {t('spaces.noSpacesDesc')}
-              </p>
-              {hasFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm font-medium"
-                  style={{ color: tenant?.primaryColor }}
-                >
-                  {t('spaces.clearFilters')}
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {booths.map((booth) => (
-                <Link
-                  key={booth.id}
-                  href={`/book/${tenantSlug}/spaces/${booth.id}`}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group"
-                >
-                  <div className="aspect-video bg-gray-100 relative overflow-hidden">
-                    {booth.images?.[0] ? (
-                      <img
-                        src={booth.images[0]}
-                        alt={booth.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <MapPin className="w-12 h-12" />
-                      </div>
+              <div className="sticky top-24">
+                <GlassCard className="p-5" hover={false}>
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="font-semibold text-white flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-violet-400" />
+                      {t('spaces.filters')}
+                    </h2>
+                    {hasFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                        {t('spaces.clear')}
+                      </button>
                     )}
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2 py-1 bg-white/90 rounded-full text-xs font-medium text-gray-700">
-                        {boothTypeLabels[booth.type] || booth.type}
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{booth.name}</h3>
-                    {booth.location && (
-                      <p className="text-sm text-gray-500 flex items-center gap-1 mb-2">
-                        <MapPin className="w-3 h-3" />
-                        {booth.location.name}, {booth.location.city}
-                      </p>
-                    )}
-
-                    {booth.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {booth.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        {booth.capacity} {booth.capacity === 1 ? t('spaces.person') : t('spaces.people')}
-                      </span>
-                      {booth.averageRating && (
-                        <span className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          {booth.averageRating.toFixed(1)}
-                          {booth.reviewCount && (
-                            <span className="text-gray-400">({booth.reviewCount})</span>
-                          )}
-                        </span>
-                      )}
-                    </div>
-
-                    {booth.amenities?.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {booth.amenities.slice(0, 3).map((amenity) => (
-                          <span
-                            key={amenity}
-                            className="px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-600"
-                          >
-                            {amenity}
-                          </span>
+                  <div className="space-y-5">
+                    {/* Location */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        {t('search.location')}
+                      </label>
+                      <select
+                        value={locationId}
+                        onChange={(e) => setLocationId(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" className="bg-slate-900">{t('search.allLocations')}</option>
+                        {locations.map((loc) => (
+                          <option key={loc.id} value={loc.id} className="bg-slate-900">
+                            {loc.name}
+                          </option>
                         ))}
-                        {booth.amenities.length > 3 && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-500">
-                            +{booth.amenities.length - 3}
+                      </select>
+                    </div>
+
+                    {/* Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        {t('spaces.spaceType')}
+                      </label>
+                      <select
+                        value={boothType}
+                        onChange={(e) => setBoothType(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all appearance-none cursor-pointer"
+                      >
+                        {boothTypes.map((type) => (
+                          <option key={type.value} value={type.value} className="bg-slate-900">
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Capacity */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        {t('spaces.minCapacity')}
+                      </label>
+                      <select
+                        value={minCapacity}
+                        onChange={(e) => setMinCapacity(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" className="bg-slate-900">{t('spaces.any')}</option>
+                        <option value="1" className="bg-slate-900">1+ {t('spaces.person')}</option>
+                        <option value="2" className="bg-slate-900">2+ {t('spaces.people')}</option>
+                        <option value="4" className="bg-slate-900">4+ {t('spaces.people')}</option>
+                        <option value="6" className="bg-slate-900">6+ {t('spaces.people')}</option>
+                      </select>
+                    </div>
+
+                    {/* Max Price */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        {t('spaces.maxPrice')}
+                      </label>
+                      <select
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" className="bg-slate-900">{t('spaces.any')}</option>
+                        <option value="50" className="bg-slate-900">{t('spaces.upTo')} 50 PLN</option>
+                        <option value="100" className="bg-slate-900">{t('spaces.upTo')} 100 PLN</option>
+                        <option value="150" className="bg-slate-900">{t('spaces.upTo')} 150 PLN</option>
+                        <option value="200" className="bg-slate-900">{t('spaces.upTo')} 200 PLN</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Active filters summary */}
+                  {hasFilters && (
+                    <div className="mt-5 pt-5 border-t border-white/10">
+                      <p className="text-xs text-slate-500 mb-2">Active filters:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {locationId && (
+                          <span className="px-2 py-1 rounded-lg bg-violet-500/20 text-violet-300 text-xs">
+                            {locations.find(l => l.id === locationId)?.name}
+                          </span>
+                        )}
+                        {boothType && (
+                          <span className="px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs">
+                            {boothTypes.find(t => t.value === boothType)?.label}
+                          </span>
+                        )}
+                        {minCapacity && (
+                          <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs">
+                            {minCapacity}+ people
+                          </span>
+                        )}
+                        {maxPrice && (
+                          <span className="px-2 py-1 rounded-lg bg-pink-500/20 text-pink-300 text-xs">
+                            Up to {maxPrice} PLN
                           </span>
                         )}
                       </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div>
-                        <span
-                          className="text-lg font-bold"
-                          style={{ color: tenant?.primaryColor }}
-                        >
-                          {formatPrice(booth.pricePerHour, booth.currency)}
-                        </span>
-                        <span className="text-gray-500 text-sm">{t('spaces.perHour')}</span>
-                      </div>
-                      <span
-                        className="text-sm font-medium"
-                        style={{ color: tenant?.primaryColor }}
-                      >
-                        {t('spaces.bookNow')} &rarr;
-                      </span>
                     </div>
+                  )}
+                </GlassCard>
+              </div>
+            </aside>
+
+            {/* Results Grid */}
+            <div className="flex-1">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden animate-pulse">
+                      <div className="aspect-video bg-white/5" />
+                      <div className="p-5 bg-slate-900/50 space-y-3">
+                        <div className="h-5 bg-white/10 rounded w-3/4" />
+                        <div className="h-4 bg-white/5 rounded w-1/2" />
+                        <div className="h-4 bg-white/5 rounded w-1/4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : booths.length === 0 ? (
+                <GlassCard className="p-12 text-center" hover={false}>
+                  <div className="w-20 h-20 rounded-full bg-violet-500/20 flex items-center justify-center mx-auto mb-6">
+                    <Search className="w-10 h-10 text-violet-400" />
                   </div>
-                </Link>
-              ))}
+                  <h3 className="text-xl font-semibold text-white mb-2">{t('spaces.noSpaces')}</h3>
+                  <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                    {t('spaces.noSpacesDesc')}
+                  </p>
+                  {hasFilters && (
+                    <NeonButton variant="outline" onClick={clearFilters}>
+                      <X className="w-4 h-4 mr-2" />
+                      {t('spaces.clearFilters')}
+                    </NeonButton>
+                  )}
+                </GlassCard>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {booths.map((booth) => (
+                    <Link
+                      key={booth.id}
+                      href={`/book/${tenantSlug}/spaces/${booth.id}`}
+                      className="group"
+                    >
+                      <GradientBorderCard className="overflow-hidden h-full">
+                        <div className="h-full flex flex-col">
+                          {/* Image */}
+                          <div className="aspect-video relative overflow-hidden">
+                            {booth.images?.[0] ? (
+                              <img
+                                src={booth.images[0]}
+                                alt={booth.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-violet-900/50 to-slate-900 flex items-center justify-center">
+                                <MapPin className="w-12 h-12 text-violet-400/50" />
+                              </div>
+                            )}
+                            {/* Overlay gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60" />
+
+                            {/* Type badge */}
+                            <div className="absolute top-3 left-3">
+                              <GlowBadge color="violet">
+                                {boothTypeKeys[booth.type] ? t(boothTypeKeys[booth.type] as 'type.focus_pod') : booth.type}
+                              </GlowBadge>
+                            </div>
+
+                            {/* Rating badge */}
+                            {booth.averageRating && (
+                              <div className="absolute top-3 right-3">
+                                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10">
+                                  <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                  <span className="text-xs text-white font-medium">{booth.averageRating.toFixed(1)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-5 flex-1 flex flex-col">
+                            <h3 className="font-semibold text-white text-lg mb-1 group-hover:text-violet-300 transition-colors">
+                              {booth.name}
+                            </h3>
+                            {booth.location && (
+                              <p className="text-sm text-slate-400 flex items-center gap-1 mb-3">
+                                <MapPin className="w-3 h-3 text-violet-400" />
+                                {booth.location.name}, {booth.location.city}
+                              </p>
+                            )}
+
+                            {booth.description && (
+                              <p className="text-sm text-slate-500 mb-4 line-clamp-2 flex-grow">
+                                {booth.description}
+                              </p>
+                            )}
+
+                            {/* Stats row */}
+                            <div className="flex items-center gap-4 text-sm text-slate-400 mb-4">
+                              <span className="flex items-center gap-1">
+                                <Users className="w-4 h-4 text-cyan-400" />
+                                {booth.capacity} {booth.capacity === 1 ? t('spaces.person') : t('spaces.people')}
+                              </span>
+                              {booth.reviewCount && booth.reviewCount > 0 && (
+                                <span className="text-slate-500">
+                                  ({booth.reviewCount} {t('detail.reviews').toLowerCase()})
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Amenities */}
+                            {booth.amenities?.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {booth.amenities.slice(0, 3).map((amenity) => (
+                                  <span
+                                    key={amenity}
+                                    className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-slate-400"
+                                  >
+                                    {amenity}
+                                  </span>
+                                ))}
+                                {booth.amenities.length > 3 && (
+                                  <span className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-slate-500">
+                                    +{booth.amenities.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Price and CTA */}
+                            <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+                              <div>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                                  {formatPrice(booth.pricePerHour, booth.currency)}
+                                </span>
+                                <span className="text-slate-500 text-sm ml-1">{t('spaces.perHour')}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-violet-400 group-hover:text-violet-300 transition-colors">
+                                <span className="text-sm font-medium">{t('spaces.bookNow')}</span>
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </GradientBorderCard>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

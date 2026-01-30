@@ -1,5 +1,5 @@
 // ===========================================
-// Booth Detail & Booking Screen
+// Booth Detail & Booking Screen - Futuristic Edition
 // ===========================================
 
 import { useState, useEffect } from 'react';
@@ -11,17 +11,20 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { boothsApi } from '../../src/lib/api';
 import { useBookingsStore } from '../../src/store/bookings';
 import { useAuthStore } from '../../src/store/auth';
 import { Button } from '../../src/components/ui/Button';
+import { colors, spacing, borderRadius, typography, shadows } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -141,7 +144,11 @@ export default function BoothDetailScreen() {
   if (loading || !booth) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <LinearGradient
+          colors={colors.gradients.aurora}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
@@ -151,6 +158,16 @@ export default function BoothDetailScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Background */}
+      <LinearGradient
+        colors={colors.gradients.aurora}
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+
       {/* Image Carousel */}
       <View style={styles.imageContainer}>
         <ScrollView
@@ -173,20 +190,26 @@ export default function BoothDetailScreen() {
         </ScrollView>
 
         <LinearGradient
-          colors={['rgba(0,0,0,0.4)', 'transparent', 'transparent']}
+          colors={['rgba(15, 12, 41, 0.8)', 'transparent', 'rgba(15, 12, 41, 0.95)']}
           style={styles.imageOverlay}
         />
 
         <SafeAreaView style={styles.headerButtons}>
           <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <BlurView intensity={20} style={styles.headerButtonBlur}>
+              <Ionicons name="arrow-back" size={22} color="#fff" />
+            </BlurView>
           </TouchableOpacity>
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.headerButton}>
-              <Ionicons name="share-outline" size={24} color="#fff" />
+              <BlurView intensity={20} style={styles.headerButtonBlur}>
+                <Ionicons name="share-outline" size={22} color="#fff" />
+              </BlurView>
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerButton}>
-              <Ionicons name="heart-outline" size={24} color="#fff" />
+              <BlurView intensity={20} style={styles.headerButtonBlur}>
+                <Ionicons name="heart-outline" size={22} color="#fff" />
+              </BlurView>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -214,22 +237,35 @@ export default function BoothDetailScreen() {
             <Text style={styles.boothName}>{booth.name}</Text>
             {booth.status === 'available' && (
               <View style={styles.availableBadge}>
+                <View style={styles.availableDot} />
                 <Text style={styles.availableText}>Available</Text>
               </View>
             )}
           </View>
           <TouchableOpacity style={styles.locationRow}>
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <Ionicons name="location-outline" size={16} color={colors.text.secondary} />
             <Text style={styles.locationText}>{booth.locations?.name}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Price */}
-        <View style={styles.priceRow}>
-          <Text style={styles.priceValue}>
-            {booth.price_per_15min} {booth.currency}
-          </Text>
-          <Text style={styles.priceUnit}>/ 15 min</Text>
+        <View style={styles.priceCard}>
+          <BlurView intensity={20} style={styles.priceCardBlur}>
+            <View style={styles.priceContent}>
+              <View>
+                <Text style={styles.priceLabel}>Price per session</Text>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceValue}>{booth.price_per_15min}</Text>
+                  <Text style={styles.priceCurrency}>{booth.currency}</Text>
+                  <Text style={styles.priceUnit}>/ 15 min</Text>
+                </View>
+              </View>
+              <View style={styles.ratingBadge}>
+                <Ionicons name="star" size={16} color={colors.accent[400]} />
+                <Text style={styles.ratingText}>4.8</Text>
+              </View>
+            </View>
+          </BlurView>
         </View>
 
         {/* Amenities */}
@@ -238,7 +274,9 @@ export default function BoothDetailScreen() {
           <View style={styles.amenitiesGrid}>
             {(booth.amenities || []).map((amenity: string) => (
               <View key={amenity} style={styles.amenityItem}>
-                <Ionicons name={getAmenityIcon(amenity)} size={20} color="#4F46E5" />
+                <View style={styles.amenityIconContainer}>
+                  <Ionicons name={getAmenityIcon(amenity)} size={20} color={colors.primary[400]} />
+                </View>
                 <Text style={styles.amenityText}>{amenity}</Text>
               </View>
             ))}
@@ -249,7 +287,11 @@ export default function BoothDetailScreen() {
         {booth.description && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.description}>{booth.description}</Text>
+            <View style={styles.descriptionCard}>
+              <BlurView intensity={15} style={styles.descriptionBlur}>
+                <Text style={styles.description}>{booth.description}</Text>
+              </BlurView>
+            </View>
           </View>
         )}
 
@@ -262,27 +304,31 @@ export default function BoothDetailScreen() {
             contentContainerStyle={styles.datesContainer}
           >
             {generateDates().map((date) => {
-              const isSelected =
-                date.toDateString() === selectedDate.toDateString();
+              const isSelected = date.toDateString() === selectedDate.toDateString();
               return (
                 <TouchableOpacity
                   key={date.toISOString()}
                   style={[styles.dateItem, isSelected && styles.dateItemSelected]}
                   onPress={() => setSelectedDate(date)}
                 >
-                  <Text
-                    style={[styles.dateDay, isSelected && styles.dateDaySelected]}
-                  >
-                    {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.dateNumber,
-                      isSelected && styles.dateNumberSelected,
-                    ]}
-                  >
-                    {date.getDate()}
-                  </Text>
+                  {isSelected ? (
+                    <LinearGradient
+                      colors={colors.gradients.neonPrimary}
+                      style={styles.dateGradient}
+                    >
+                      <Text style={styles.dateDaySelected}>
+                        {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                      </Text>
+                      <Text style={styles.dateNumberSelected}>{date.getDate()}</Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={styles.dateContent}>
+                      <Text style={styles.dateDay}>
+                        {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                      </Text>
+                      <Text style={styles.dateNumber}>{date.getDate()}</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -298,18 +344,10 @@ export default function BoothDetailScreen() {
               return (
                 <TouchableOpacity
                   key={dur.value}
-                  style={[
-                    styles.durationItem,
-                    isSelected && styles.durationItemSelected,
-                  ]}
+                  style={[styles.durationItem, isSelected && styles.durationItemSelected]}
                   onPress={() => setSelectedDuration(dur.value)}
                 >
-                  <Text
-                    style={[
-                      styles.durationText,
-                      isSelected && styles.durationTextSelected,
-                    ]}
-                  >
+                  <Text style={[styles.durationText, isSelected && styles.durationTextSelected]}>
                     {dur.label}
                   </Text>
                 </TouchableOpacity>
@@ -360,18 +398,27 @@ export default function BoothDetailScreen() {
 
       {/* Book Button */}
       <View style={styles.bookingBar}>
-        <View style={styles.bookingInfo}>
-          <Text style={styles.bookingTotal}>{price} {booth.currency}</Text>
-          <Text style={styles.bookingDuration}>{selectedDuration} min</Text>
-        </View>
-        <Button
-          title="Book Now"
-          onPress={handleBook}
-          loading={bookingLoading}
-          disabled={!selectedTime}
-          size="large"
-          style={styles.bookButton}
-        />
+        <BlurView intensity={30} style={styles.bookingBarBlur}>
+          <View style={styles.bookingBarContent}>
+            <View style={styles.bookingInfo}>
+              <Text style={styles.bookingLabel}>Total</Text>
+              <View style={styles.bookingTotalRow}>
+                <Text style={styles.bookingTotal}>{price}</Text>
+                <Text style={styles.bookingCurrency}>{booth.currency}</Text>
+              </View>
+              <Text style={styles.bookingDuration}>{selectedDuration} min</Text>
+            </View>
+            <Button
+              title="Book Now"
+              onPress={handleBook}
+              loading={bookingLoading}
+              disabled={!selectedTime}
+              size="large"
+              variant="neon"
+              style={styles.bookButton}
+            />
+          </View>
+        </BlurView>
       </View>
     </View>
   );
@@ -419,24 +466,29 @@ function getAmenityIcon(amenity: string): keyof typeof Ionicons.glyphMap {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  loadingText: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
+  },
+
+  // Image
   imageContainer: {
-    height: 300,
+    height: 320,
     position: 'relative',
   },
   image: {
     width,
-    height: 300,
+    height: 320,
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    height: 100,
   },
   headerButtons: {
     position: 'absolute',
@@ -445,242 +497,378 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: spacing.lg,
   },
   headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+  },
+  headerButtonBlur: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
   headerRight: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
   imageIndicators: {
     position: 'absolute',
-    bottom: 16,
+    bottom: spacing.lg,
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
+    gap: spacing.xs,
   },
   indicator: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.glass.white,
   },
   indicatorActive: {
     backgroundColor: '#fff',
-    width: 20,
+    width: 24,
   },
+
+  // Content
   content: {
     flex: 1,
+    marginTop: -spacing['3xl'],
   },
+
+  // Booth Header
   boothHeader: {
-    padding: 20,
-    paddingBottom: 0,
+    paddingHorizontal: spacing['2xl'],
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   boothTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   boothName: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    flex: 1,
   },
   availableBadge: {
-    backgroundColor: '#D1FAE5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 245, 212, 0.2)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.neon.green,
+    gap: spacing.xs,
+  },
+  availableDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.neon.green,
   },
   availableText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#059669',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neon.green,
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   locationText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+  },
+
+  // Price Card
+  priceCard: {
+    marginHorizontal: spacing['2xl'],
+    marginBottom: spacing.xl,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+  },
+  priceCardBlur: {
+    backgroundColor: colors.glass.dark,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
+  },
+  priceContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  priceLabel: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   priceValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#4F46E5',
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[400],
+  },
+  priceCurrency: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[400],
+    marginLeft: spacing.xs,
   },
   priceUnit: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginLeft: 4,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs,
   },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(6, 182, 212, 0.2)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.accent[500],
+    gap: spacing.xs,
+  },
+  ratingText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.accent[400],
+  },
+
+  // Sections
   section: {
-    padding: 20,
-    paddingBottom: 0,
+    paddingHorizontal: spacing['2xl'],
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 16,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
   },
+
+  // Amenities
   amenitiesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: spacing.md,
   },
   amenityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
-    gap: 8,
+    backgroundColor: colors.glass.white,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
+    gap: spacing.sm,
   },
-  amenityText: {
-    fontSize: 14,
-    color: '#4B5563',
-  },
-  description: {
-    fontSize: 15,
-    color: '#6B7280',
-    lineHeight: 24,
-  },
-  datesContainer: {
-    gap: 10,
-  },
-  dateItem: {
-    width: 56,
-    height: 72,
-    borderRadius: 14,
-    backgroundColor: '#F3F4F6',
+  amenityIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.md,
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  amenityText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
+  },
+
+  // Description
+  descriptionCard: {
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+  },
+  descriptionBlur: {
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
+    padding: spacing.lg,
+  },
+  description: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    lineHeight: 24,
+  },
+
+  // Dates
+  datesContainer: {
+    gap: spacing.md,
+  },
+  dateItem: {
+    width: 60,
+    height: 80,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
+  },
   dateItemSelected: {
-    backgroundColor: '#4F46E5',
+    borderColor: colors.primary[500],
+  },
+  dateGradient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dateDay: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginBottom: 4,
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   dateDaySelected: {
+    fontSize: typography.fontSize.xs,
     color: 'rgba(255,255,255,0.8)',
+    marginBottom: spacing.xs,
   },
   dateNumber: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
   },
   dateNumberSelected: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
     color: '#fff',
   },
+
+  // Durations
   durationsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: spacing.md,
   },
   durationItem: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#F3F4F6',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
   durationItemSelected: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary[600],
+    borderColor: colors.primary[500],
+    ...shadows.glow.primary,
   },
   durationText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#4B5563',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
   },
   durationTextSelected: {
     color: '#fff',
   },
+
+  // Times
   timesContainer: {
-    gap: 8,
-    paddingRight: 20,
+    gap: spacing.sm,
+    paddingRight: spacing['2xl'],
   },
   timeItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#F3F4F6',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
   timeItemSelected: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary[600],
+    borderColor: colors.primary[500],
   },
   timeItemDisabled: {
-    backgroundColor: '#F3F4F6',
     opacity: 0.4,
   },
   timeText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#4B5563',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
   },
   timeTextSelected: {
     color: '#fff',
   },
   timeTextDisabled: {
-    color: '#9CA3AF',
+    color: colors.text.disabled,
   },
   bottomPadding: {
-    height: 120,
+    height: 140,
   },
+
+  // Booking Bar
   bookingBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    overflow: 'hidden',
+  },
+  bookingBarBlur: {
+    backgroundColor: colors.glass.darkMedium,
+    borderTopWidth: 1,
+    borderTopColor: colors.glass.border,
+  },
+  bookingBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingBottom: 36,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
+    padding: spacing.xl,
+    paddingBottom: spacing['3xl'],
   },
   bookingInfo: {},
+  bookingLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
+  },
+  bookingTotalRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
   bookingTotal: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+  },
+  bookingCurrency: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs,
   },
   bookingDuration: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
   },
   bookButton: {
-    minWidth: 140,
+    minWidth: 150,
   },
 });

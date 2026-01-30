@@ -1,5 +1,5 @@
 // ===========================================
-// Login Screen
+// Login Screen - Futuristic Edition
 // ===========================================
 
 import { useState } from 'react';
@@ -14,11 +14,14 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
 import { useAuthStore } from '../../src/store/auth';
+import { colors, spacing, borderRadius, typography, shadows } from '../../src/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -60,191 +63,284 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      {/* Background */}
+      <LinearGradient
+        colors={colors.gradients.aurora}
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+
+      {/* Decorative orbs */}
+      <View style={styles.orb1}>
+        <LinearGradient
+          colors={['rgba(139, 92, 246, 0.3)', 'rgba(139, 92, 246, 0.05)']}
+          style={styles.orbGradient}
+        />
+      </View>
+      <View style={styles.orb2}>
+        <LinearGradient
+          colors={['rgba(6, 182, 212, 0.25)', 'rgba(6, 182, 212, 0.05)']}
+          style={styles.orbGradient}
+        />
+      </View>
+
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
         >
-          {/* Header */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Ionicons name="arrow-back" size={24} color="#1F2937" />
-          </TouchableOpacity>
-
-          <View style={styles.header}>
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>
-              Sign in to continue to Silentbox
-            </Text>
-          </View>
-
-          {/* Form */}
-          <View style={styles.form}>
-            <Input
-              label="Email"
-              placeholder="your@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoComplete="email"
-              leftIcon="mail-outline"
-              error={errors.email}
-            />
-
-            <Input
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-              leftIcon="lock-closed-outline"
-              error={errors.password}
-            />
-
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={() => router.push('/(auth)/forgot-password')}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            {/* Back button */}
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <BlurView intensity={20} style={styles.backButtonBlur}>
+                <Ionicons name="arrow-back" size={22} color="#fff" />
+              </BlurView>
             </TouchableOpacity>
 
-            <Button
-              title="Sign In"
-              onPress={handleLogin}
-              loading={isLoading}
-              size="large"
-              fullWidth
-            />
-          </View>
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Welcome back</Text>
+              <Text style={styles.subtitle}>Sign in to continue to Silentbox</Text>
+            </View>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
+            {/* Form */}
+            <View style={styles.form}>
+              <View style={styles.glassCard}>
+                <BlurView intensity={30} style={styles.formBlur}>
+                  <View style={styles.formContent}>
+                    <Input
+                      label="Email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType="email-address"
+                      autoComplete="email"
+                      leftIcon="mail-outline"
+                      error={errors.email}
+                    />
 
-          {/* Social Login */}
-          <View style={styles.socialButtons}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name="logo-google" size={24} color="#1F2937" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name="logo-apple" size={24} color="#1F2937" />
-            </TouchableOpacity>
-          </View>
+                    <Input
+                      label="Password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                      autoComplete="password"
+                      leftIcon="lock-closed-outline"
+                      error={errors.password}
+                    />
 
-          {/* Sign Up Link */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('/(auth)/register')}>
-              <Text style={styles.footerLink}>Sign up</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+                    <TouchableOpacity
+                      style={styles.forgotPassword}
+                      onPress={() => router.push('/(auth)/forgot-password')}
+                    >
+                      <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                    </TouchableOpacity>
+
+                    <Button
+                      title="Sign In"
+                      onPress={handleLogin}
+                      loading={isLoading}
+                      size="large"
+                      fullWidth
+                    />
+                  </View>
+                </BlurView>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Social Login */}
+            <View style={styles.socialButtons}>
+              <TouchableOpacity style={styles.socialButton}>
+                <BlurView intensity={20} style={styles.socialButtonBlur}>
+                  <Ionicons name="logo-google" size={24} color="#fff" />
+                </BlurView>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialButton}>
+                <BlurView intensity={20} style={styles.socialButtonBlur}>
+                  <Ionicons name="logo-apple" size={24} color="#fff" />
+                </BlurView>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sign Up Link */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => router.replace('/(auth)/register')}>
+                <Text style={styles.footerLink}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
+  },
+  safeArea: {
+    flex: 1,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingHorizontal: spacing['2xl'],
+    paddingBottom: spacing['2xl'],
   },
+
+  // Orbs
+  orb1: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    top: -50,
+    right: -80,
+    borderRadius: 9999,
+  },
+  orb2: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    bottom: '20%',
+    left: -60,
+    borderRadius: 9999,
+  },
+  orbGradient: {
+    flex: 1,
+    borderRadius: 9999,
+  },
+
+  // Back button
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    marginTop: spacing.sm,
+  },
+  backButtonBlur: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
+
+  // Header
   header: {
-    marginTop: 32,
-    marginBottom: 32,
+    marginTop: spacing['3xl'],
+    marginBottom: spacing['3xl'],
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 8,
+    fontSize: typography.fontSize['4xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: '#fff',
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: typography.fontSize.lg,
+    color: colors.text.secondary,
   },
+
+  // Form
   form: {
-    gap: 4,
+    marginBottom: spacing['2xl'],
+  },
+  glassCard: {
+    borderRadius: borderRadius['2xl'],
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.glass.border,
+  },
+  formBlur: {
+    backgroundColor: colors.glass.dark,
+  },
+  formContent: {
+    padding: spacing['2xl'],
+    gap: spacing.md,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
-    marginTop: -8,
+    marginTop: -spacing.sm,
   },
   forgotPasswordText: {
-    fontSize: 14,
-    color: '#4F46E5',
-    fontWeight: '500',
+    fontSize: typography.fontSize.sm,
+    color: colors.primary[400],
+    fontWeight: typography.fontWeight.medium,
   },
+
+  // Divider
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: spacing['2xl'],
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.glass.border,
   },
   dividerText: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginHorizontal: 16,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.disabled,
+    marginHorizontal: spacing.lg,
   },
+
+  // Social buttons
   socialButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
+    gap: spacing.lg,
   },
   socialButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
+    width: 60,
+    height: 60,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+  },
+  socialButtonBlur: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.glass.white,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
+
+  // Footer
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 'auto',
-    paddingTop: 24,
+    paddingTop: spacing['2xl'],
   },
   footerText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
   },
   footerLink: {
-    fontSize: 14,
-    color: '#4F46E5',
-    fontWeight: '600',
+    fontSize: typography.fontSize.base,
+    color: colors.primary[400],
+    fontWeight: typography.fontWeight.semibold,
   },
 });

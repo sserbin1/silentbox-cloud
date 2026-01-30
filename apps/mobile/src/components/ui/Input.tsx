@@ -1,5 +1,5 @@
 // ===========================================
-// Input Component - Silentbox Design System
+// Input Component - Futuristic Edition
 // ===========================================
 
 import React, { useState } from 'react';
@@ -10,7 +10,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ViewStyle,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, borderRadius, typography, spacing, shadows } from '../../theme';
@@ -87,7 +86,7 @@ export function Input({
             <Ionicons
               name={leftIcon}
               size={20}
-              color={isFocused ? colors.primary[600] : colors.gray[400]}
+              color={isFocused ? colors.primary[400] : colors.text.disabled}
             />
           </View>
         )}
@@ -102,7 +101,7 @@ export function Input({
             size === 'large' && styles.inputLarge,
           ]}
           placeholder={placeholder}
-          placeholderTextColor={colors.gray[400]}
+          placeholderTextColor={colors.text.disabled}
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={actualSecure}
@@ -114,7 +113,7 @@ export function Input({
           numberOfLines={numberOfLines}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          selectionColor={colors.primary[600]}
+          selectionColor={colors.primary[400]}
         />
 
         {isPassword && (
@@ -126,7 +125,7 @@ export function Input({
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={colors.gray[400]}
+              color={colors.text.disabled}
             />
           </TouchableOpacity>
         )}
@@ -138,7 +137,7 @@ export function Input({
             disabled={!onRightIconPress}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name={rightIcon} size={20} color={colors.gray[400]} />
+            <Ionicons name={rightIcon} size={20} color={colors.text.disabled} />
           </TouchableOpacity>
         )}
       </View>
@@ -168,27 +167,27 @@ const styles = StyleSheet.create({
   label: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
+    color: colors.text.secondary,
   },
 
   hint: {
     fontSize: typography.fontSize.xs,
-    color: colors.gray[400],
+    color: colors.text.disabled,
   },
 
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.glass.white,
     borderRadius: borderRadius.lg,
-    borderWidth: 1.5,
-    borderColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.glass.border,
     overflow: 'hidden',
   },
 
   inputFocused: {
-    borderColor: colors.primary[600],
-    backgroundColor: colors.surface,
+    borderColor: colors.primary[500],
+    backgroundColor: colors.glass.whiteMedium,
     ...shadows.sm,
   },
 
@@ -198,8 +197,8 @@ const styles = StyleSheet.create({
   },
 
   inputDisabled: {
-    backgroundColor: colors.gray[100],
-    opacity: 0.7,
+    backgroundColor: colors.glass.white,
+    opacity: 0.5,
   },
 
   input: {

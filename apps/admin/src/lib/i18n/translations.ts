@@ -29,8 +29,10 @@ export const translations = {
     'nav.signIn': 'Sign In',
     'nav.myBookings': 'My Bookings',
     'nav.signOut': 'Sign Out',
+    'nav.back': 'Back',
 
     // Hero
+    'hero.badge': 'Next Generation Workspace',
     'hero.title': 'Find Your Perfect Workspace',
     'hero.subtitle': 'Book private workspaces by the hour. Focus, create, succeed.',
     'hero.searchButton': 'Search Spaces',
@@ -43,7 +45,11 @@ export const translations = {
 
     // Spaces
     'spaces.title': 'Available Spaces',
+    'spaces.badge': 'Premium Spaces',
     'spaces.available': '{count} spaces available',
+    'spaces.findSpace': 'Find Your Space',
+    'spaces.spaceAvailable': 'space available',
+    'spaces.spacesAvailable': 'spaces available',
     'spaces.noSpaces': 'No spaces found',
     'spaces.noSpacesDesc': 'Try adjusting your filters or check back later.',
     'spaces.clearFilters': 'Clear all filters',
@@ -139,11 +145,22 @@ export const translations = {
     'password.noMatch': 'Passwords do not match',
 
     // Locations
+    'locations.badge': 'Global Network',
     'locations.title': 'Our Locations',
     'locations.spacesAvailable': '{count} spaces available',
 
+    // Stats
+    'stats.locations': 'Locations',
+    'stats.spaces': 'Spaces',
+    'stats.access': 'Access',
+
     // Features section
+    'features.badge': 'Why Choose Us',
     'features.title': 'Why Book With Us',
+    'features.smartAccess.title': 'Smart Access',
+    'features.smartAccess.desc': 'Digital keys delivered to your phone. No physical keys needed.',
+    'features.premium.title': 'Premium Spaces',
+    'features.premium.desc': 'Thoughtfully designed environments for maximum productivity.',
     'features.flexible.title': 'Flexible Hours',
     'features.flexible.desc': 'Book by the hour, day, or longer. Pay only for what you use.',
     'features.amenities.title': 'All Amenities Included',
@@ -197,8 +214,10 @@ export const translations = {
     'nav.signIn': 'Anmelden',
     'nav.myBookings': 'Meine Buchungen',
     'nav.signOut': 'Abmelden',
+    'nav.back': 'Zurück',
 
     // Hero
+    'hero.badge': 'Arbeitsplatz der nächsten Generation',
     'hero.title': 'Finden Sie Ihren perfekten Arbeitsplatz',
     'hero.subtitle': 'Buchen Sie private Arbeitsräume stundenweise. Fokussieren, erschaffen, erfolgreich sein.',
     'hero.searchButton': 'Räume suchen',
@@ -211,7 +230,11 @@ export const translations = {
 
     // Spaces
     'spaces.title': 'Verfügbare Räume',
+    'spaces.badge': 'Premium-Räume',
     'spaces.available': '{count} Räume verfügbar',
+    'spaces.findSpace': 'Finden Sie Ihren Raum',
+    'spaces.spaceAvailable': 'Raum verfügbar',
+    'spaces.spacesAvailable': 'Räume verfügbar',
     'spaces.noSpaces': 'Keine Räume gefunden',
     'spaces.noSpacesDesc': 'Versuchen Sie, Ihre Filter anzupassen oder schauen Sie später wieder vorbei.',
     'spaces.clearFilters': 'Alle Filter löschen',
@@ -307,11 +330,22 @@ export const translations = {
     'password.noMatch': 'Passwörter stimmen nicht überein',
 
     // Locations
+    'locations.badge': 'Globales Netzwerk',
     'locations.title': 'Unsere Standorte',
     'locations.spacesAvailable': '{count} Räume verfügbar',
 
+    // Stats
+    'stats.locations': 'Standorte',
+    'stats.spaces': 'Räume',
+    'stats.access': 'Zugang',
+
     // Features section
+    'features.badge': 'Warum uns wählen',
     'features.title': 'Warum bei uns buchen',
+    'features.smartAccess.title': 'Smarter Zugang',
+    'features.smartAccess.desc': 'Digitale Schlüssel direkt auf Ihr Handy. Keine physischen Schlüssel nötig.',
+    'features.premium.title': 'Premium-Räume',
+    'features.premium.desc': 'Durchdacht gestaltete Umgebungen für maximale Produktivität.',
     'features.flexible.title': 'Flexible Zeiten',
     'features.flexible.desc': 'Buchen Sie stundenweise, tageweise oder länger. Zahlen Sie nur für das, was Sie nutzen.',
     'features.amenities.title': 'Alle Annehmlichkeiten inklusive',
@@ -365,8 +399,10 @@ export const translations = {
     'nav.signIn': 'Увійти',
     'nav.myBookings': 'Мої бронювання',
     'nav.signOut': 'Вийти',
+    'nav.back': 'Назад',
 
     // Hero
+    'hero.badge': 'Робочий простір нового покоління',
     'hero.title': 'Знайдіть ідеальний робочий простір',
     'hero.subtitle': 'Бронюйте приватні робочі місця погодинно. Фокусуйтесь, створюйте, досягайте успіху.',
     'hero.searchButton': 'Шукати простори',
@@ -379,7 +415,11 @@ export const translations = {
 
     // Spaces
     'spaces.title': 'Доступні простори',
+    'spaces.badge': 'Преміум простори',
     'spaces.available': '{count} просторів доступно',
+    'spaces.findSpace': 'Знайдіть свій простір',
+    'spaces.spaceAvailable': 'простір доступний',
+    'spaces.spacesAvailable': 'просторів доступно',
     'spaces.noSpaces': 'Просторів не знайдено',
     'spaces.noSpacesDesc': 'Спробуйте змінити фільтри або поверніться пізніше.',
     'spaces.clearFilters': 'Очистити всі фільтри',
@@ -475,11 +515,22 @@ export const translations = {
     'password.noMatch': 'Паролі не збігаються',
 
     // Locations
+    'locations.badge': 'Глобальна мережа',
     'locations.title': 'Наші локації',
     'locations.spacesAvailable': '{count} просторів доступно',
 
+    // Stats
+    'stats.locations': 'Локацій',
+    'stats.spaces': 'Просторів',
+    'stats.access': 'Доступ',
+
     // Features section
+    'features.badge': 'Чому ми',
     'features.title': 'Чому варто бронювати у нас',
+    'features.smartAccess.title': 'Розумний доступ',
+    'features.smartAccess.desc': 'Цифрові ключі прямо на ваш телефон. Фізичні ключі не потрібні.',
+    'features.premium.title': 'Преміум простори',
+    'features.premium.desc': 'Продумане середовище для максимальної продуктивності.',
     'features.flexible.title': 'Гнучкий графік',
     'features.flexible.desc': 'Бронюйте погодинно, на день або довше. Платіть лише за те, що використовуєте.',
     'features.amenities.title': 'Всі зручності включені',
@@ -533,8 +584,10 @@ export const translations = {
     'nav.signIn': 'Se connecter',
     'nav.myBookings': 'Mes réservations',
     'nav.signOut': 'Se déconnecter',
+    'nav.back': 'Retour',
 
     // Hero
+    'hero.badge': 'Espace de travail nouvelle génération',
     'hero.title': 'Trouvez votre espace de travail idéal',
     'hero.subtitle': 'Réservez des espaces de travail privés à l\'heure. Concentrez-vous, créez, réussissez.',
     'hero.searchButton': 'Rechercher des espaces',
@@ -547,7 +600,11 @@ export const translations = {
 
     // Spaces
     'spaces.title': 'Espaces disponibles',
+    'spaces.badge': 'Espaces premium',
     'spaces.available': '{count} espaces disponibles',
+    'spaces.findSpace': 'Trouvez votre espace',
+    'spaces.spaceAvailable': 'espace disponible',
+    'spaces.spacesAvailable': 'espaces disponibles',
     'spaces.noSpaces': 'Aucun espace trouvé',
     'spaces.noSpacesDesc': 'Essayez d\'ajuster vos filtres ou revenez plus tard.',
     'spaces.clearFilters': 'Effacer tous les filtres',
@@ -643,11 +700,22 @@ export const translations = {
     'password.noMatch': 'Les mots de passe ne correspondent pas',
 
     // Locations
+    'locations.badge': 'Réseau mondial',
     'locations.title': 'Nos emplacements',
     'locations.spacesAvailable': '{count} espaces disponibles',
 
+    // Stats
+    'stats.locations': 'Emplacements',
+    'stats.spaces': 'Espaces',
+    'stats.access': 'Accès',
+
     // Features section
+    'features.badge': 'Pourquoi nous choisir',
     'features.title': 'Pourquoi réserver chez nous',
+    'features.smartAccess.title': 'Accès intelligent',
+    'features.smartAccess.desc': 'Clés numériques envoyées sur votre téléphone. Pas de clés physiques nécessaires.',
+    'features.premium.title': 'Espaces premium',
+    'features.premium.desc': 'Environnements soigneusement conçus pour une productivité maximale.',
     'features.flexible.title': 'Horaires flexibles',
     'features.flexible.desc': 'Réservez à l\'heure, à la journée ou plus. Payez uniquement ce que vous utilisez.',
     'features.amenities.title': 'Tous les équipements inclus',

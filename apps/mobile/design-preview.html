@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silentbox Mobile App - Design Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #0f0c29 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4, #ff006e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .screen-container {
+            text-align: center;
+        }
+
+        .screen-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .phone-frame {
+            width: 320px;
+            height: 680px;
+            background: #0f0c29;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow:
+                0 0 0 2px rgba(139, 92, 246, 0.3),
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(139, 92, 246, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Floating Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 200px;
+            height: 200px;
+            background: rgba(139, 92, 246, 0.3);
+            top: -50px;
+            right: -50px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 150px;
+            height: 150px;
+            background: rgba(6, 182, 212, 0.25);
+            bottom: 20%;
+            left: -40px;
+            animation-delay: -2s;
+        }
+
+        .orb-3 {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 0, 110, 0.2);
+            top: 40%;
+            right: -30px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen .logo-container {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .welcome-screen .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(139, 92, 246, 0.6); }
+        }
+
+        .welcome-screen .brand-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 16px;
+            letter-spacing: 1px;
+        }
+
+        .welcome-screen .tagline {
+            font-size: 10px;
+            font-weight: 600;
+            color: #06b6d4;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .welcome-screen .content {
+            padding: 30px 24px;
+            text-align: center;
+        }
+
+        .welcome-screen .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .welcome-screen .title span {
+            color: #06b6d4;
+        }
+
+        .welcome-screen .subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+        }
+
+        .welcome-screen .features {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .feature-icon.purple { background: rgba(139, 92, 246, 0.2); }
+        .feature-icon.cyan { background: rgba(6, 182, 212, 0.2); }
+        .feature-icon.green { background: rgba(0, 245, 212, 0.2); }
+
+        .feature-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .welcome-screen .buttons {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            border: none;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Login Screen */
+        .login-screen .back-btn {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .login-screen .header-text {
+            padding: 100px 24px 30px;
+        }
+
+        .login-screen .header-text h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .login-screen .header-text p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .login-screen .form-container {
+            margin: 0 20px;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            padding-left: 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 16px;
+        }
+
+        .forgot-link {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .forgot-link a {
+            color: #8b5cf6;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .login-screen .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 20px;
+            gap: 16px;
+        }
+
+        .login-screen .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .login-screen .divider-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 0 20px;
+        }
+
+        .social-btn {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .login-screen .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        .login-screen .footer span {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .login-screen .footer a {
+            color: #8b5cf6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Home Screen */
+        .home-screen .status-bar {
+            padding: 50px 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .home-screen .greeting h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .home-screen .greeting p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+
+        .home-screen .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            position: relative;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ff006e;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff006e;
+        }
+
+        .home-screen .search-bar {
+            margin: 0 20px 20px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+        }
+
+        .home-screen .quick-actions {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .quick-action {
+            flex: 1;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.3));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .quick-action span {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 12px;
+        }
+
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .section-header a {
+            font-size: 13px;
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+
+        .home-screen .booth-card {
+            margin: 0 20px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .booth-card-image {
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .booth-card-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.6));
+        }
+
+        .booth-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            background: rgba(0, 245, 212, 0.2);
+            border: 1px solid rgba(0, 245, 212, 0.3);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #00f5d4;
+        }
+
+        .booth-card-content {
+            padding: 14px;
+        }
+
+        .booth-card-content h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .booth-card-content .location {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .booth-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .booth-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .booth-price span {
+            font-size: 12px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-book {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 20px 24px;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+        }
+
+        .tab-item.active {
+            color: #8b5cf6;
+        }
+
+        .tab-item .tab-icon {
+            font-size: 20px;
+        }
+
+        /* Booth Detail Screen */
+        .booth-detail-screen .booth-image {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .booth-detail-screen .booth-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(transparent, #0f0c29);
+        }
+
+        .booth-detail-screen .back-btn {
+            position: absolute;
+            top: 50px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .booth-detail-screen .image-dots {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .image-dots .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .image-dots .dot.active {
+            width: 20px;
+            background: #fff;
+        }
+
+        .booth-detail-screen .content {
+            padding: 0 20px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .booth-detail-screen .price-card {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .price-card .price-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .price-card .price-info p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .price-card .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: rgba(255, 200, 0, 0.15);
+            border-radius: 10px;
+        }
+
+        .price-card .rating span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffc800;
+        }
+
+        .booth-detail-screen h4 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .booth-detail-screen .location-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .date-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .date-item {
+            min-width: 56px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .date-item.active {
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-color: transparent;
+        }
+
+        .date-item .day {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 2px;
+        }
+
+        .date-item.active .day {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .date-item .date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .time-slot {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .time-slot.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: #8b5cf6;
+            color: #fff;
+        }
+
+        .time-slot.unavailable {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+
+        .booth-detail-screen .booking-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px 28px;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .booking-bar .total {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .booking-bar .total-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .btn-neon {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Bookings Screen */
+        .bookings-screen .header {
+            padding: 50px 20px 16px;
+        }
+
+        .bookings-screen .header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .bookings-screen .header p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .bookings-screen .tabs {
+            display: flex;
+            margin: 0 20px 16px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .bookings-screen .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+
+        .bookings-screen .tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .bookings-screen .tab .badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            background: #8b5cf6;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .booking-item {
+            margin: 0 20px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .booking-item-image {
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            background: #ef4444;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .live-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .booking-item-content {
+            padding: 12px;
+        }
+
+        .booking-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .booking-item h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .booking-item .location {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .status-badge.confirmed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .booking-meta {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 8px;
+        }
+
+        .booking-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .booking-meta-item .icon {
+            width: 20px;
+            height: 20px;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #8b5cf6;
+        }
+
+        /* Session Screen */
+        .session-screen .session-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .session-screen .session-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(transparent, #0f0c29);
+        }
+
+        .session-screen .session-status {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .session-screen .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .session-screen .status-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .session-screen .booth-info {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            z-index: 2;
+        }
+
+        .session-screen .booth-info h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .session-screen .booth-info p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .session-screen .timer-card {
+            margin: 16px 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #8b5cf6;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .timer-card .timer-label {
+            font-size: 13px;
+            color: #8b5cf6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .timer-card .timer-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #8b5cf6;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .session-screen .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 0 20px;
+        }
+
+        .session-action {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .session-action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .session-action-icon.green { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .session-action-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .session-action-icon.cyan { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+        .session-action-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+        .session-action h5 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .session-action p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .session-screen .unlock-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px 28px;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-unlock {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Profile Screen */
+        .profile-screen .header {
+            padding: 50px 20px 16px;
+        }
+
+        .profile-screen .header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .profile-screen .profile-card {
+            margin: 0 20px 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h4 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .profile-info p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+
+        .profile-screen .credits-card {
+            margin: 0 20px 20px;
+            padding: 18px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .credits-info {
+            color: #fff;
+        }
+
+        .credits-info span {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .credits-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .btn-topup {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+        }
+
+        .profile-screen .menu {
+            margin: 0 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .menu-item span {
+            flex: 1;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .menu-item .arrow {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Map Screen */
+        .map-screen {
+            position: relative;
+        }
+
+        .map-screen .map-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0c29 100%);
+        }
+
+        .map-screen .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .map-screen .search-overlay {
+            position: absolute;
+            top: 50px;
+            left: 16px;
+            right: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        .map-screen .filter-chips {
+            position: absolute;
+            top: 110px;
+            left: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .filter-chip.active {
+            background: #8b5cf6;
+            color: #fff;
+        }
+
+        .map-screen .location-btn {
+            position: absolute;
+            top: 110px;
+            right: 16px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b5cf6;
+            font-size: 18px;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b5cf6;
+            font-size: 18px;
+        }
+
+        .map-marker.selected {
+            background: #8b5cf6;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+
+        .map-screen .location-card {
+            position: absolute;
+            bottom: 90px;
+            left: 16px;
+            right: 16px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+        }
+
+        .location-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .location-card-image {
+            width: 56px;
+            height: 56px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+        }
+
+        .location-card-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .location-card-info p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+
+        .btn-view {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+            text-align: center;
+        }
+
+        /* Credits Screen */
+        .credits-screen .header {
+            padding: 50px 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .credits-screen .back-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .credits-screen .header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .credits-screen .balance-card {
+            margin: 0 20px 16px;
+            padding: 24px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .balance-card span {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .balance-card h2 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            margin: 8px 0 4px;
+        }
+
+        .balance-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .credits-screen .info-card {
+            margin: 0 20px 20px;
+            padding: 14px;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #a78bfa;
+        }
+
+        .credits-screen .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 20px 12px;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 0 20px;
+        }
+
+        .package-card {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+        }
+
+        .package-card.popular {
+            border-color: #8b5cf6;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 10px;
+            background: #8b5cf6;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .package-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin: 8px 0 10px;
+        }
+
+        .package-credits {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .package-credits strong {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .bonus-badge {
+            padding: 2px 6px;
+            background: rgba(34, 197, 94, 0.2);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        .package-card .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .package-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 12px 0;
+        }
+
+        .package-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .btn-buy {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+        }
+
+        .package-card.popular .btn-buy {
+            background: #8b5cf6;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Silentbox Mobile</h1>
+        <p>Futuristic Design Preview - React Native / Expo</p>
+    </div>
+
+    <div class="screens-grid">
+        <!-- Welcome Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Welcome</div>
+            <div class="phone-frame">
+                <div class="phone-screen welcome-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+                    <div class="orb orb-3"></div>
+
+                    <div class="logo-container">
+                        <div class="logo">S</div>
+                        <div class="brand-name">Silentbox</div>
+                        <div class="tagline">THE FUTURE OF WORK</div>
+                    </div>
+
+                    <div class="content">
+                        <div class="title">Your private<br><span>workspace</span>,<br>anywhere</div>
+                        <p class="subtitle">Find and book premium silent work booths near you. Focus on what matters.</p>
+                    </div>
+
+                    <div class="features">
+                        <div class="feature-item">
+                            <div class="feature-icon purple">📍</div>
+                            <span class="feature-text">Find booths nearby</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon cyan">⚡</div>
+                            <span class="feature-text">Book in seconds</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon green">🔓</div>
+                            <span class="feature-text">Unlock with your phone</span>
+                        </div>
+                    </div>
+
+                    <div class="buttons">
+                        <button class="btn-primary">Get Started</button>
+                        <button class="btn-ghost">I already have an account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Login</div>
+            <div class="phone-frame">
+                <div class="phone-screen login-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+
+                    <div class="back-btn">←</div>
+
+                    <div class="header-text">
+                        <h2>Welcome back</h2>
+                        <p>Sign in to continue to Silentbox</p>
+                    </div>
+
+                    <div class="form-container">
+                        <div class="input-group">
+                            <label>Email</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">✉️</span>
+                                <input type="text" class="input-field" placeholder="your@email.com" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" class="input-field" placeholder="Enter your password" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                            </div>
+                        </div>
+
+                        <div class="forgot-link">
+                            <a href="#">Forgot password?</a>
+                        </div>
+
+                        <button class="btn-primary">Sign In</button>
+                    </div>
+
+                    <div class="divider">
+                        <div class="divider-line"></div>
+                        <span class="divider-text">or continue with</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="social-buttons">
+                        <div class="social-btn">G</div>
+                        <div class="social-btn"></div>
+                    </div>
+
+                    <div class="footer">
+                        <span>Don't have an account? </span>
+                        <a href="#">Sign up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Home / Explore</div>
+            <div class="phone-frame">
+                <div class="phone-screen home-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+
+                    <div class="status-bar">
+                        <div class="greeting">
+                            <h2>Hello, Alex 👋</h2>
+                            <p>Find your perfect workspace</p>
+                        </div>
+                        <div class="user-actions">
+                            <div class="icon-btn">
+                                🔔
+                                <div class="notification-dot"></div>
+                            </div>
+                            <div class="icon-btn">👤</div>
+                        </div>
+                    </div>
+
+                    <div class="search-bar">
+                        🔍 Search booths, locations...
+                    </div>
+
+                    <div class="quick-actions">
+                        <div class="quick-action">
+                            <div class="quick-action-icon">📍</div>
+                            <span>Nearby</span>
+                        </div>
+                        <div class="quick-action">
+                            <div class="quick-action-icon">⭐</div>
+                            <span>Top Rated</span>
+                        </div>
+                        <div class="quick-action">
+                            <div class="quick-action-icon">💰</div>
+                            <span>Credits</span>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h3>Near You</h3>
+                        <a href="#">See All →</a>
+                    </div>
+
+                    <div class="booth-card">
+                        <div class="booth-card-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop')">
+                            <div class="booth-badge">Available</div>
+                        </div>
+                        <div class="booth-card-content">
+                            <h4>Premium Booth A</h4>
+                            <div class="location">📍 WeWork Złote Tarasy</div>
+                            <div class="booth-card-footer">
+                                <div class="booth-price">25 PLN <span>/hour</span></div>
+                                <button class="btn-book">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab-item active">
+                            <span class="tab-icon">🏠</span>
+                            <span>Home</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">🗺️</span>
+                            <span>Map</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">📅</span>
+                            <span>Bookings</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">👤</span>
+                            <span>Profile</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booth Detail Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Booth Detail</div>
+            <div class="phone-frame">
+                <div class="phone-screen booth-detail-screen">
+                    <div class="booth-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop')">
+                        <div class="back-btn">←</div>
+                        <div class="image-dots">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <div class="price-card">
+                            <div class="price-info">
+                                <h3>25 PLN/hour</h3>
+                                <p>Premium workspace</p>
+                            </div>
+                            <div class="rating">
+                                ⭐ <span>4.9</span>
+                            </div>
+                        </div>
+
+                        <h4>Premium Booth A</h4>
+                        <div class="location-text">📍 WeWork Złote Tarasy, Warsaw</div>
+
+                        <div class="date-selector">
+                            <div class="date-item">
+                                <div class="day">Mon</div>
+                                <div class="date">27</div>
+                            </div>
+                            <div class="date-item active">
+                                <div class="day">Tue</div>
+                                <div class="date">28</div>
+                            </div>
+                            <div class="date-item">
+                                <div class="day">Wed</div>
+                                <div class="date">29</div>
+                            </div>
+                            <div class="date-item">
+                                <div class="day">Thu</div>
+                                <div class="date">30</div>
+                            </div>
+                            <div class="date-item">
+                                <div class="day">Fri</div>
+                                <div class="date">31</div>
+                            </div>
+                        </div>
+
+                        <div class="time-slots">
+                            <div class="time-slot">09:00</div>
+                            <div class="time-slot">10:00</div>
+                            <div class="time-slot active">11:00</div>
+                            <div class="time-slot active">12:00</div>
+                            <div class="time-slot unavailable">13:00</div>
+                            <div class="time-slot">14:00</div>
+                            <div class="time-slot">15:00</div>
+                        </div>
+                    </div>
+
+                    <div class="booking-bar">
+                        <div>
+                            <div class="total">Total (2 hours)</div>
+                            <div class="total-price">50 PLN</div>
+                        </div>
+                        <button class="btn-neon">Book Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Screen -->
+        <div class="screen-container">
+            <div class="screen-title">My Bookings</div>
+            <div class="phone-frame">
+                <div class="phone-screen bookings-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+
+                    <div class="header">
+                        <h2>My Bookings</h2>
+                        <p>Manage your reservations</p>
+                    </div>
+
+                    <div class="tabs">
+                        <div class="tab active">Upcoming <span class="badge">2</span></div>
+                        <div class="tab">Past</div>
+                    </div>
+
+                    <div class="booking-item">
+                        <div class="booking-item-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=200&fit=crop')">
+                            <div class="live-badge">Live</div>
+                        </div>
+                        <div class="booking-item-content">
+                            <div class="booking-item-header">
+                                <div>
+                                    <h4>Premium Booth A</h4>
+                                    <div class="location">📍 WeWork Złote Tarasy</div>
+                                </div>
+                                <div class="status-badge active">Active</div>
+                            </div>
+                            <div class="booking-meta">
+                                <div class="booking-meta-item">
+                                    <div class="icon">📅</div>
+                                    <span>Today</span>
+                                </div>
+                                <div class="booking-meta-item">
+                                    <div class="icon">🕐</div>
+                                    <span>11:00 - 13:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="booking-item">
+                        <div class="booking-item-image" style="background-image: url('https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400&h=200&fit=crop')">
+                        </div>
+                        <div class="booking-item-content">
+                            <div class="booking-item-header">
+                                <div>
+                                    <h4>Focus Pod B</h4>
+                                    <div class="location">📍 Hub Mokotów</div>
+                                </div>
+                                <div class="status-badge confirmed">Confirmed</div>
+                            </div>
+                            <div class="booking-meta">
+                                <div class="booking-meta-item">
+                                    <div class="icon">📅</div>
+                                    <span>Tomorrow</span>
+                                </div>
+                                <div class="booking-meta-item">
+                                    <div class="icon">🕐</div>
+                                    <span>09:00 - 12:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab-item">
+                            <span class="tab-icon">🏠</span>
+                            <span>Home</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">🗺️</span>
+                            <span>Map</span>
+                        </div>
+                        <div class="tab-item active">
+                            <span class="tab-icon">📅</span>
+                            <span>Bookings</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">👤</span>
+                            <span>Profile</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Session Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Active Session</div>
+            <div class="phone-frame">
+                <div class="phone-screen session-screen">
+                    <div class="session-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop')">
+                        <div class="session-status">
+                            <div class="status-dot"></div>
+                            <span class="status-text">Session Active</span>
+                        </div>
+                        <div class="booth-info">
+                            <h3>Premium Booth A</h3>
+                            <p>WeWork Złote Tarasy</p>
+                        </div>
+                    </div>
+
+                    <div class="timer-card">
+                        <div class="timer-label">⏱️ Time Remaining</div>
+                        <div class="timer-value">1:42:36</div>
+                    </div>
+
+                    <div class="actions-grid">
+                        <div class="session-action">
+                            <div class="session-action-icon green">🔓</div>
+                            <h5>Unlock Door</h5>
+                            <p>Remote unlock</p>
+                        </div>
+                        <div class="session-action">
+                            <div class="session-action-icon purple">⌨️</div>
+                            <h5>Access Code</h5>
+                            <p>Manual entry</p>
+                        </div>
+                        <div class="session-action">
+                            <div class="session-action-icon cyan">⏰</div>
+                            <h5>Extend</h5>
+                            <p>Add time</p>
+                        </div>
+                        <div class="session-action">
+                            <div class="session-action-icon blue">📱</div>
+                            <h5>Full Access</h5>
+                            <p>All options</p>
+                        </div>
+                    </div>
+
+                    <div class="unlock-bar">
+                        <button class="btn-unlock">🔓 Unlock Door</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Profile</div>
+            <div class="phone-frame">
+                <div class="phone-screen profile-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+
+                    <div class="header">
+                        <h2>Profile</h2>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="profile-avatar">A</div>
+                        <div class="profile-info">
+                            <h4>Alex Johnson</h4>
+                            <p>alex@example.com</p>
+                        </div>
+                        <div class="icon-btn" style="background: rgba(139, 92, 246, 0.2);">✏️</div>
+                    </div>
+
+                    <div class="credits-card">
+                        <div class="credits-info">
+                            <span>Available Credits</span>
+                            <h3>150</h3>
+                        </div>
+                        <button class="btn-topup">Top Up</button>
+                    </div>
+
+                    <div class="menu">
+                        <div class="menu-item">
+                            <div class="menu-icon">👤</div>
+                            <span>Edit Profile</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">💳</div>
+                            <span>Payment Methods</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">🔔</div>
+                            <span>Notifications</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">🌐</div>
+                            <span>Language</span>
+                            <span class="arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">❓</div>
+                            <span>Help & Support</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab-item">
+                            <span class="tab-icon">🏠</span>
+                            <span>Home</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">🗺️</span>
+                            <span>Map</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">📅</span>
+                            <span>Bookings</span>
+                        </div>
+                        <div class="tab-item active">
+                            <span class="tab-icon">👤</span>
+                            <span>Profile</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Map</div>
+            <div class="phone-frame">
+                <div class="phone-screen map-screen">
+                    <div class="map-bg"></div>
+                    <div class="map-grid"></div>
+
+                    <div class="map-marker" style="top: 35%; left: 30%;">📍</div>
+                    <div class="map-marker selected" style="top: 50%; left: 55%;">📍</div>
+                    <div class="map-marker" style="top: 65%; left: 35%;">📍</div>
+
+                    <div class="search-overlay">
+                        🔍 Search locations...
+                    </div>
+
+                    <div class="filter-chips">
+                        <div class="filter-chip active">Available Now</div>
+                        <div class="filter-chip">Nearby</div>
+                    </div>
+
+                    <div class="location-btn">📍</div>
+
+                    <div class="location-card">
+                        <div class="location-card-content">
+                            <div class="location-card-image" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=100&h=100&fit=crop')"></div>
+                            <div class="location-card-info">
+                                <h4>WeWork Złote Tarasy</h4>
+                                <p>Złota 59, Warsaw</p>
+                            </div>
+                        </div>
+                        <button class="btn-view">View Booths</button>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab-item">
+                            <span class="tab-icon">🏠</span>
+                            <span>Home</span>
+                        </div>
+                        <div class="tab-item active">
+                            <span class="tab-icon">🗺️</span>
+                            <span>Map</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">📅</span>
+                            <span>Bookings</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">👤</span>
+                            <span>Profile</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits Screen -->
+        <div class="screen-container">
+            <div class="screen-title">Buy Credits</div>
+            <div class="phone-frame">
+                <div class="phone-screen credits-screen">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+
+                    <div class="header">
+                        <div class="back-btn">←</div>
+                        <h2>Buy Credits</h2>
+                    </div>
+
+                    <div class="balance-card">
+                        <span>Current Balance</span>
+                        <h2>150</h2>
+                        <p>credits</p>
+                    </div>
+
+                    <div class="info-card">
+                        ℹ️ 1 credit = 1 PLN. Use credits to book booths.
+                    </div>
+
+                    <div class="section-title">Choose a Package</div>
+
+                    <div class="packages-grid">
+                        <div class="package-card">
+                            <h4>Starter</h4>
+                            <div class="package-credits">
+                                <strong>50</strong>
+                            </div>
+                            <div class="label">credits</div>
+                            <div class="package-divider"></div>
+                            <div class="package-price">50 PLN</div>
+                            <button class="btn-buy">Buy Now</button>
+                        </div>
+
+                        <div class="package-card popular">
+                            <div class="popular-badge">Most Popular</div>
+                            <h4>Standard</h4>
+                            <div class="package-credits">
+                                <strong>100</strong>
+                                <span class="bonus-badge">+10</span>
+                            </div>
+                            <div class="label">credits</div>
+                            <div class="package-divider"></div>
+                            <div class="package-price">100 PLN</div>
+                            <button class="btn-buy">Buy Now</button>
+                        </div>
+
+                        <div class="package-card">
+                            <h4>Premium</h4>
+                            <div class="package-credits">
+                                <strong>200</strong>
+                                <span class="bonus-badge">+30</span>
+                            </div>
+                            <div class="label">credits</div>
+                            <div class="package-divider"></div>
+                            <div class="package-price">200 PLN</div>
+                            <button class="btn-buy">Buy Now</button>
+                        </div>
+
+                        <div class="package-card">
+                            <h4>Pro</h4>
+                            <div class="package-credits">
+                                <strong>500</strong>
+                                <span class="bonus-badge">+100</span>
+                            </div>
+                            <div class="label">credits</div>
+                            <div class="package-divider"></div>
+                            <div class="package-price">500 PLN</div>
+                            <button class="btn-buy">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

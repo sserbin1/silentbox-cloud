@@ -5,19 +5,22 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
-import { LanguageSelector } from '@/components/booking/LanguageSelector';
+import { HeaderNav } from '@/components/booking/HeaderNav';
+import { FooterPoweredBy } from '@/components/booking/FooterPoweredBy';
+import { getTranslation, detectBrowserLanguage } from '@/lib/i18n/translations';
 
 interface TenantBranding {
   name: string;
   slug: string;
-  logoUrl?: string;
+  logo?: string | null;
   primaryColor: string;
-  secondaryColor: string;
   accentColor?: string;
   features: {
     allowGuestBooking: boolean;
     requirePhone: boolean;
-    showPrices: boolean;
+    showPricing: boolean;
+    showReviews?: boolean;
+    showMap?: boolean;
   };
   contact?: {
     email?: string;
@@ -110,11 +113,12 @@ export default function BookingLayout({ children }: { children: React.ReactNode 
   }
 
   if (!tenant) {
+    const lang = detectBrowserLanguage();
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Workspace Not Found</h1>
-          <p className="text-gray-600">The booking portal you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{getTranslation(lang, 'error.workspaceNotFound')}</h1>
+          <p className="text-gray-600">{getTranslation(lang, 'error.workspaceNotFoundDesc')}</p>
         </div>
       </div>
     );
@@ -126,89 +130,68 @@ export default function BookingLayout({ children }: { children: React.ReactNode 
         {/* Inject branding CSS */}
         <style dangerouslySetInnerHTML={{ __html: generateBrandingCSS(tenant) }} />
 
-        <div className="min-h-screen flex flex-col bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Link href={`/book/${tenantSlug}`} className="flex items-center gap-3">
-                {tenant.logoUrl ? (
-                  <img src={tenant.logoUrl} alt={tenant.name} className="h-8 w-auto" />
-                ) : (
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold"
-                    style={{ backgroundColor: tenant.primaryColor }}
-                  >
-                    {tenant.name.charAt(0)}
-                  </div>
-                )}
-                <span className="font-semibold text-gray-900">{tenant.name}</span>
-              </Link>
+        <div className="min-h-screen flex flex-col bg-slate-950">
+        {/* Header - Floating Glassmorphism */}
+        <header className="fixed top-4 left-4 right-4 z-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl px-6 shadow-[0_0_30px_rgba(139,92,246,0.15)]">
+              <div className="flex justify-between items-center h-16">
+                <Link href={`/book/${tenantSlug}`} className="flex items-center gap-3 group">
+                  {tenant.logo ? (
+                    <img src={tenant.logo} alt={tenant.name} className="h-8 w-auto" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-[0_0_20px_rgba(139,92,246,0.4)] group-hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] transition-all">
+                      {tenant.name.charAt(0)}
+                    </div>
+                  )}
+                  <span className="font-semibold text-white group-hover:text-violet-300 transition-colors">{tenant.name}</span>
+                </Link>
 
-              <nav className="flex items-center gap-4">
-                <Link
-                  href={`/book/${tenantSlug}/spaces`}
-                  className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-                >
-                  Browse Spaces
-                </Link>
-                <LanguageSelector variant="compact" />
-                <Link
-                  href={`/book/${tenantSlug}/login`}
-                  className="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                  style={{
-                    backgroundColor: tenant.primaryColor,
-                    color: 'white'
-                  }}
-                >
-                  Sign In
-                </Link>
-              </nav>
+                <HeaderNav tenantSlug={tenantSlug} primaryColor={tenant.primaryColor} />
+              </div>
             </div>
           </div>
         </header>
+
+        {/* Spacer for fixed header */}
+        <div className="h-24" />
 
         {/* Main Content */}
         <main className="flex-1">
           {children}
         </main>
 
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-8">
+        {/* Footer - Dark Glassmorphism */}
+        <footer className="bg-slate-900/80 backdrop-blur-xl border-t border-white/10 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
-                {tenant.logoUrl ? (
-                  <img src={tenant.logoUrl} alt={tenant.name} className="h-6 w-auto" />
+                {tenant.logo ? (
+                  <img src={tenant.logo} alt={tenant.name} className="h-6 w-auto" />
                 ) : (
-                  <div
-                    className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: tenant.primaryColor }}
-                  >
+                  <div className="w-6 h-6 rounded bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
                     {tenant.name.charAt(0)}
                   </div>
                 )}
-                <span className="text-gray-600 text-sm">{tenant.name}</span>
+                <span className="text-slate-400 text-sm">{tenant.name}</span>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-6 text-sm text-slate-500">
                 {tenant.contact?.email && (
-                  <a href={`mailto:${tenant.contact.email}`} className="flex items-center gap-1 hover:text-gray-700">
+                  <a href={`mailto:${tenant.contact.email}`} className="flex items-center gap-1 hover:text-violet-400 transition-colors">
                     <Mail className="w-4 h-4" />
                     {tenant.contact.email}
                   </a>
                 )}
                 {tenant.contact?.phone && (
-                  <a href={`tel:${tenant.contact.phone}`} className="flex items-center gap-1 hover:text-gray-700">
+                  <a href={`tel:${tenant.contact.phone}`} className="flex items-center gap-1 hover:text-violet-400 transition-colors">
                     <Phone className="w-4 h-4" />
                     {tenant.contact.phone}
                   </a>
                 )}
               </div>
 
-              <div className="text-sm text-gray-400">
-                Powered by <a href="https://silent-box.com" className="hover:text-gray-600">Silentbox</a>
-              </div>
+              <FooterPoweredBy />
             </div>
           </div>
         </footer>
