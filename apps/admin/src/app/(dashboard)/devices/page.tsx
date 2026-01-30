@@ -5,9 +5,9 @@ import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search,
-  Plus,
   Lock,
   Unlock,
   Battery,
@@ -16,95 +16,121 @@ import {
   RefreshCw,
   Settings,
   AlertTriangle,
+  AlertCircle,
+  Smartphone,
 } from 'lucide-react';
-
-const devices = [
-  {
-    id: '1',
-    name: 'Lock A1-001',
-    booth: 'Booth A1',
-    location: 'Warsaw Central',
-    type: 'ttlock',
-    status: 'online',
-    lockStatus: 'locked',
-    battery: 85,
-    lastSeen: '2 minutes ago',
-    firmware: 'v3.2.1',
-  },
-  {
-    id: '2',
-    name: 'Lock B2-001',
-    booth: 'Booth B2',
-    location: 'Warsaw Central',
-    type: 'ttlock',
-    status: 'online',
-    lockStatus: 'unlocked',
-    battery: 62,
-    lastSeen: '1 minute ago',
-    firmware: 'v3.2.1',
-  },
-  {
-    id: '3',
-    name: 'Lock C1-001',
-    booth: 'Booth C1',
-    location: 'Krakow Mall',
-    type: 'ttlock',
-    status: 'offline',
-    lockStatus: 'unknown',
-    battery: 15,
-    lastSeen: '3 hours ago',
-    firmware: 'v3.1.0',
-  },
-  {
-    id: '4',
-    name: 'Lock D1-001',
-    booth: 'Booth D1',
-    location: 'Gdansk Station',
-    type: 'ttlock',
-    status: 'online',
-    lockStatus: 'locked',
-    battery: 92,
-    lastSeen: '30 seconds ago',
-    firmware: 'v3.2.1',
-  },
-  {
-    id: '5',
-    name: 'Lock A2-001',
-    booth: 'Booth A2',
-    location: 'Warsaw Central',
-    type: 'ttlock',
-    status: 'online',
-    lockStatus: 'locked',
-    battery: 78,
-    lastSeen: '5 minutes ago',
-    firmware: 'v3.2.0',
-  },
-];
+import { useDevices } from '@/hooks/use-devices';
+import { formatDistanceToNow } from 'date-fns';
 
 const statusColors: Record<string, string> = {
   online: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
   offline: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+  unknown: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
-const getBatteryColor = (level: number) => {
+const getBatteryColor = (level: number | null | undefined) => {
+  if (level === null || level === undefined) return 'text-muted-foreground';
   if (level > 50) return 'text-green-500';
   if (level > 20) return 'text-yellow-500';
   return 'text-red-500';
 };
 
+const getDeviceStatus = (lastSeen: string | null | undefined): 'online' | 'offline' | 'unknown' => {
+  if (!lastSeen) return 'unknown';
+  const lastSeenDate = new Date(lastSeen);
+  const now = new Date();
+  const diffMinutes = (now.getTime() - lastSeenDate.getTime()) / (1000 * 60);
+  if (diffMinutes < 5) return 'online';
+  if (diffMinutes < 60) return 'offline';
+  return 'offline';
+};
+
+const formatLastSeen = (lastSeen: string | null | undefined): string => {
+  if (!lastSeen) return 'Never';
+  try {
+    return formatDistanceToNow(new Date(lastSeen), { addSuffix: true });
+  } catch {
+    return 'Unknown';
+  }
+};
+
+function DeviceCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-16" />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-36" />
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-8 flex-1" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatsCardSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-4 flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-12" />
+        </div>
+        <Skeleton className="h-8 w-8 rounded" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+      <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+      <p className="text-muted-foreground mb-4">{message}</p>
+      {onRetry && (
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export default function DevicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: devices, isLoading, error, refetch } = useDevices();
 
-  const filteredDevices = devices.filter(
+  const filteredDevices = devices?.filter(
     (device) =>
-      device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      device.booth.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      device.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      device.external_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      device.device_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      device.booths?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      device.booths?.locations?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
-  const onlineCount = devices.filter((d) => d.status === 'online').length;
-  const offlineCount = devices.filter((d) => d.status === 'offline').length;
-  const lowBatteryCount = devices.filter((d) => d.battery < 20).length;
+  const devicesWithStatus = filteredDevices.map(device => ({
+    ...device,
+    computedStatus: getDeviceStatus(device.last_seen),
+  }));
+
+  const onlineCount = devicesWithStatus.filter((d) => d.computedStatus === 'online').length;
+  const offlineCount = devicesWithStatus.filter((d) => d.computedStatus === 'offline').length;
+  const lowBatteryCount = devicesWithStatus.filter((d) => (d.battery_level ?? 100) < 20).length;
 
   return (
     <>
@@ -113,42 +139,53 @@ export default function DevicesPage() {
       <div className="p-6 space-y-6">
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Devices</p>
-                <p className="text-2xl font-bold">{devices.length}</p>
-              </div>
-              <Lock className="h-8 w-8 text-muted-foreground" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Online</p>
-                <p className="text-2xl font-bold text-green-600">{onlineCount}</p>
-              </div>
-              <Wifi className="h-8 w-8 text-green-500" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Offline</p>
-                <p className="text-2xl font-bold text-red-600">{offlineCount}</p>
-              </div>
-              <WifiOff className="h-8 w-8 text-red-500" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Low Battery</p>
-                <p className="text-2xl font-bold text-yellow-600">{lowBatteryCount}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-yellow-500" />
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            <>
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </>
+          ) : (
+            <>
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Devices</p>
+                    <p className="text-2xl font-bold">{devices?.length || 0}</p>
+                  </div>
+                  <Lock className="h-8 w-8 text-muted-foreground" />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Online</p>
+                    <p className="text-2xl font-bold text-green-600">{onlineCount}</p>
+                  </div>
+                  <Wifi className="h-8 w-8 text-green-500" />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Offline</p>
+                    <p className="text-2xl font-bold text-red-600">{offlineCount}</p>
+                  </div>
+                  <WifiOff className="h-8 w-8 text-red-500" />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Low Battery</p>
+                    <p className="text-2xl font-bold text-yellow-600">{lowBatteryCount}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Actions Bar */}
@@ -163,85 +200,113 @@ export default function DevicesPage() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Sync All
-            </Button>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Device
+              Refresh
             </Button>
           </div>
         </div>
 
         {/* Devices Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredDevices.map((device) => (
-            <Card key={device.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {device.lockStatus === 'locked' ? (
-                        <Lock className="h-4 w-4" />
-                      ) : device.lockStatus === 'unlocked' ? (
-                        <Unlock className="h-4 w-4 text-green-500" />
+          {isLoading ? (
+            <>
+              <DeviceCardSkeleton />
+              <DeviceCardSkeleton />
+              <DeviceCardSkeleton />
+              <DeviceCardSkeleton />
+              <DeviceCardSkeleton />
+              <DeviceCardSkeleton />
+            </>
+          ) : error ? (
+            <ErrorCard message="Failed to load devices" onRetry={() => refetch()} />
+          ) : devicesWithStatus.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+              <Smartphone className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">
+                {searchQuery ? 'No devices match your search' : 'No devices configured yet'}
+              </p>
+            </div>
+          ) : (
+            devicesWithStatus.map((device) => (
+              <Card key={device.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {device.status === 'locked' ? (
+                          <Lock className="h-4 w-4" />
+                        ) : device.status === 'unlocked' ? (
+                          <Unlock className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Lock className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        {device.external_id || `Device ${device.id.slice(0, 8)}`}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {device.booths?.name || 'Unassigned'}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        statusColors[device.computedStatus]
+                      }`}
+                    >
+                      {device.computedStatus}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    {device.booths?.locations?.name || 'No location'}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Battery className={`h-4 w-4 ${getBatteryColor(device.battery_level)}`} />
+                      <span className={getBatteryColor(device.battery_level)}>
+                        {device.battery_level !== null && device.battery_level !== undefined
+                          ? `${device.battery_level}%`
+                          : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {device.computedStatus === 'online' ? (
+                        <Wifi className="h-4 w-4 text-green-500" />
                       ) : (
-                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        <WifiOff className="h-4 w-4 text-red-500" />
                       )}
-                      {device.name}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">{device.booth}</p>
+                      <span className="text-sm text-muted-foreground">
+                        {formatLastSeen(device.last_seen)}
+                      </span>
+                    </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      statusColors[device.status]
-                    }`}
-                  >
-                    {device.status}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-sm text-muted-foreground">{device.location}</div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Battery className={`h-4 w-4 ${getBatteryColor(device.battery)}`} />
-                    <span className={getBatteryColor(device.battery)}>{device.battery}%</span>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    Type: {device.device_type || 'Unknown'}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {device.status === 'online' ? (
-                      <Wifi className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <WifiOff className="h-4 w-4 text-red-500" />
-                    )}
-                    <span className="text-sm text-muted-foreground">{device.lastSeen}</span>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={device.computedStatus === 'offline'}
+                    >
+                      <Unlock className="h-4 w-4 mr-1" />
+                      Unlock
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
-
-                <div className="text-xs text-muted-foreground">Firmware: {device.firmware}</div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    disabled={device.status === 'offline'}
-                  >
-                    <Unlock className="h-4 w-4 mr-1" />
-                    Unlock
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </>

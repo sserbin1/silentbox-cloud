@@ -6,85 +6,143 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Plus, MoreHorizontal, Mail, Phone, CreditCard } from 'lucide-react';
-
-const users = [
-  {
-    id: '1',
-    name: 'Jan Kowalski',
-    email: 'jan@example.com',
-    phone: '+48 123 456 789',
-    credits: 150,
-    totalBookings: 24,
-    totalSpent: '720 PLN',
-    role: 'user',
-    createdAt: '2024-01-15',
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Anna Nowak',
-    email: 'anna@example.com',
-    phone: '+48 987 654 321',
-    credits: 75,
-    totalBookings: 12,
-    totalSpent: '360 PLN',
-    role: 'user',
-    createdAt: '2024-01-10',
-    status: 'active',
-  },
-  {
-    id: '3',
-    name: 'Piotr Wisniewski',
-    email: 'piotr@example.com',
-    phone: '+48 555 666 777',
-    credits: 0,
-    totalBookings: 5,
-    totalSpent: '150 PLN',
-    role: 'user',
-    createdAt: '2024-01-05',
-    status: 'active',
-  },
-  {
-    id: '4',
-    name: 'Maria Lewandowska',
-    email: 'maria@example.com',
-    phone: '+48 111 222 333',
-    credits: 300,
-    totalBookings: 48,
-    totalSpent: '1,440 PLN',
-    role: 'user',
-    createdAt: '2023-12-20',
-    status: 'active',
-  },
-  {
-    id: '5',
-    name: 'Admin User',
-    email: 'admin@silentbox.pl',
-    phone: '+48 000 000 000',
-    credits: 0,
-    totalBookings: 0,
-    totalSpent: '0 PLN',
-    role: 'admin',
-    createdAt: '2023-12-01',
-    status: 'active',
-  },
-];
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Search,
+  MoreHorizontal,
+  Mail,
+  Phone,
+  CreditCard,
+  Plus,
+  Minus,
+  AlertCircle,
+  RefreshCw,
+  Loader2,
+  Users,
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useUsers, useAddCredits } from '@/hooks/use-users';
+import { format } from 'date-fns';
 
 const roleColors: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   operator: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
   user: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  super_admin: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
 };
+
+function UserCardSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-16" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+      <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+      <p className="text-muted-foreground mb-4">{message}</p>
+      {onRetry && (
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreditsDialogOpen, setIsCreditsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [creditsAmount, setCreditsAmount] = useState('');
+  const [creditsReason, setCreditsReason] = useState('');
+  const [isDeducting, setIsDeducting] = useState(false);
 
-  const filteredUsers = users.filter(
+  const { data: users, isLoading, error, refetch } = useUsers();
+  const addCreditsMutation = useAddCredits();
+
+  const filteredUsers = users?.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const handleAddCreditsClick = (user: any) => {
+    setSelectedUser(user);
+    setCreditsAmount('');
+    setCreditsReason('');
+    setIsDeducting(false);
+    setIsCreditsDialogOpen(true);
+  };
+
+  const handleDeductCreditsClick = (user: any) => {
+    setSelectedUser(user);
+    setCreditsAmount('');
+    setCreditsReason('');
+    setIsDeducting(true);
+    setIsCreditsDialogOpen(true);
+  };
+
+  const handleCreditsSubmit = async () => {
+    if (!selectedUser || !creditsAmount) return;
+    try {
+      const amount = parseFloat(creditsAmount);
+      await addCreditsMutation.mutateAsync({
+        userId: selectedUser.id,
+        amount: isDeducting ? -amount : amount,
+        reason: creditsReason || undefined,
+      });
+      setIsCreditsDialogOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Failed to adjust credits:', error);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '??';
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch {
+      return '--';
+    }
+  };
 
   return (
     <>
@@ -102,91 +160,148 @@ export default function UsersPage() {
               className="pl-9"
             />
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add User
-          </Button>
+          <div className="text-sm text-muted-foreground">
+            {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
+          </div>
         </div>
 
-        {/* Users Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b bg-muted/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">User</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Contact</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Credits</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Bookings</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Total Spent</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Role</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Joined</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-muted/50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src="" />
-                            <AvatarFallback>
-                              {user.name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{user.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="space-y-1">
-                          <p className="flex items-center gap-1 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            {user.email}
-                          </p>
-                          <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Phone className="h-3 w-3" />
-                            {user.phone}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          <span className={user.credits === 0 ? 'text-red-500' : ''}>
-                            {user.credits}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">{user.totalBookings}</td>
-                      <td className="px-4 py-3 font-medium">{user.totalSpent}</td>
-                      <td className="px-4 py-3">
+        {/* Users Grid */}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {isLoading ? (
+            <>
+              <UserCardSkeleton />
+              <UserCardSkeleton />
+              <UserCardSkeleton />
+              <UserCardSkeleton />
+              <UserCardSkeleton />
+              <UserCardSkeleton />
+            </>
+          ) : error ? (
+            <ErrorCard message="Failed to load users" onRetry={() => refetch()} />
+          ) : filteredUsers.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+              <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">
+                {searchQuery ? 'No users match your search' : 'No users yet'}
+              </p>
+            </div>
+          ) : (
+            filteredUsers.map((user) => (
+              <Card key={user.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.avatar_url} alt={user.full_name} />
+                      <AvatarFallback>{getInitials(user.full_name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold truncate">{user.full_name || 'No name'}</h3>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-                            roleColors[user.role]
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                            roleColors[user.role] || roleColors.user
                           }`}
                         >
                           {user.role}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{user.createdAt}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                      </div>
+                      <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1 truncate">
+                          <Mail className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{user.email}</span>
+                        </div>
+                        {user.phone && (
+                          <div className="flex items-center gap-1">
+                            <Phone className="h-3 w-3 flex-shrink-0" />
+                            <span>{user.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <CreditCard className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-semibold">{user.credits || 0}</span>
+                          <span className="text-sm text-muted-foreground">credits</span>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleAddCreditsClick(user)}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Credits
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeductCreditsClick(user)}>
+                              <Minus className="h-4 w-4 mr-2" />
+                              Deduct Credits
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Joined {formatDate(user.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
+
+      {/* Add/Deduct Credits Dialog */}
+      <Dialog open={isCreditsDialogOpen} onOpenChange={setIsCreditsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isDeducting ? 'Deduct' : 'Add'} Credits
+            </DialogTitle>
+            <DialogDescription>
+              {isDeducting ? 'Deduct' : 'Add'} credits{' '}
+              {isDeducting ? 'from' : 'to'} {selectedUser?.full_name || selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                min="1"
+                value={creditsAmount}
+                onChange={(e) => setCreditsAmount(e.target.value)}
+                placeholder="Enter amount"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="reason">Reason (optional)</Label>
+              <Input
+                id="reason"
+                value={creditsReason}
+                onChange={(e) => setCreditsReason(e.target.value)}
+                placeholder="e.g., Promotional credit, Refund"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreditsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreditsSubmit}
+              disabled={addCreditsMutation.isPending || !creditsAmount}
+              variant={isDeducting ? 'destructive' : 'default'}
+            >
+              {addCreditsMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isDeducting ? 'Deduct' : 'Add'} Credits
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
