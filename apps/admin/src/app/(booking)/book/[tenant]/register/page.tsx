@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useBookingContext } from '../layout';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Mail, Lock, User, Phone, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -12,6 +13,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { tenant, tenantSlug } = useBookingContext();
+  const { t } = useLanguage();
   const redirect = searchParams.get('redirect') || `/book/${tenantSlug}`;
 
   const [name, setName] = useState('');
@@ -88,15 +90,15 @@ export default function RegisterPage() {
                 {tenant?.name?.charAt(0)}
               </div>
             )}
-            <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
-            <p className="text-gray-600 mt-1">Start booking workspaces today</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('register.title')}</h1>
+            <p className="text-gray-600 mt-1">{t('register.subtitle')}</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
+                {t('register.fullName')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -113,7 +115,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t('auth.email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -130,7 +132,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone {!tenant?.features?.requirePhone && <span className="text-gray-400">(optional)</span>}
+                {t('register.phone')} {!tenant?.features?.requirePhone && <span className="text-gray-400">({t('register.optional')})</span>}
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -147,7 +149,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -155,7 +157,7 @@ export default function RegisterPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password"
+                  placeholder="••••••••"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
@@ -165,10 +167,10 @@ export default function RegisterPage() {
               {password && (
                 <div className="mt-2 space-y-1">
                   {[
-                    { key: 'length', label: 'At least 8 characters' },
-                    { key: 'uppercase', label: 'One uppercase letter' },
-                    { key: 'lowercase', label: 'One lowercase letter' },
-                    { key: 'number', label: 'One number' },
+                    { key: 'length', label: t('password.minLength') },
+                    { key: 'uppercase', label: t('password.uppercase') },
+                    { key: 'lowercase', label: t('password.lowercase') },
+                    { key: 'number', label: t('password.number') },
                   ].map(({ key, label }) => (
                     <div
                       key={key}
@@ -188,7 +190,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
+                {t('register.confirmPassword')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -196,13 +198,13 @@ export default function RegisterPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your password"
+                  placeholder="••••••••"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
               {confirmPassword && !passwordsMatch && (
-                <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
+                <p className="mt-1 text-xs text-red-500">{t('password.noMatch')}</p>
               )}
             </div>
 
@@ -219,19 +221,19 @@ export default function RegisterPage() {
               className="w-full py-3 rounded-lg font-semibold text-white disabled:opacity-50 transition-colors"
               style={{ backgroundColor: tenant?.primaryColor || '#6366F1' }}
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {isLoading ? t('register.creating') : t('register.create')}
             </button>
           </form>
 
           {/* Login Link */}
           <p className="text-center text-sm text-gray-600 mt-6">
-            Already have an account?{' '}
+            {t('register.haveAccount')}{' '}
             <Link
               href={`/book/${tenantSlug}/login${redirect !== `/book/${tenantSlug}` ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
               className="font-medium"
               style={{ color: tenant?.primaryColor }}
             >
-              Sign in
+              {t('register.signIn')}
             </Link>
           </p>
         </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useBookingContext } from '../layout';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { MapPin, Users, Star, Filter, X } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -58,6 +59,7 @@ const boothTypes = [
 
 export default function SpacesPage() {
   const { tenant, tenantSlug } = useBookingContext();
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
 
   const [booths, setBooths] = useState<Booth[]>([]);
@@ -115,9 +117,9 @@ export default function SpacesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Available Spaces</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('spaces.title')}</h1>
           <p className="text-gray-600">
-            {booths.length} {booths.length === 1 ? 'space' : 'spaces'} available
+            {booths.length} {t('spaces.person')}
           </p>
         </div>
 
@@ -126,7 +128,7 @@ export default function SpacesPage() {
           className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 md:hidden"
         >
           <Filter className="w-4 h-4" />
-          Filters
+          {t('spaces.filters')}
           {hasFilters && (
             <span
               className="w-5 h-5 rounded-full text-xs text-white flex items-center justify-center"
@@ -145,14 +147,14 @@ export default function SpacesPage() {
         >
           <div className="bg-white rounded-xl border border-gray-200 p-4 sticky top-24">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Filters</h2>
+              <h2 className="font-semibold text-gray-900">{t('spaces.filters')}</h2>
               {hasFilters && (
                 <button
                   onClick={clearFilters}
                   className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
                 >
                   <X className="w-3 h-3" />
-                  Clear
+                  {t('spaces.clear')}
                 </button>
               )}
             </div>
@@ -161,14 +163,14 @@ export default function SpacesPage() {
               {/* Location */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
+                  {t('search.location')}
                 </label>
                 <select
                   value={locationId}
                   onChange={(e) => setLocationId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">All Locations</option>
+                  <option value="">{t('search.allLocations')}</option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>
                       {loc.name}
@@ -180,7 +182,7 @@ export default function SpacesPage() {
               {/* Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Space Type
+                  {t('spaces.spaceType')}
                 </label>
                 <select
                   value={boothType}
@@ -198,36 +200,36 @@ export default function SpacesPage() {
               {/* Capacity */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Capacity
+                  {t('spaces.minCapacity')}
                 </label>
                 <select
                   value={minCapacity}
                   onChange={(e) => setMinCapacity(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">Any</option>
-                  <option value="1">1+ person</option>
-                  <option value="2">2+ people</option>
-                  <option value="4">4+ people</option>
-                  <option value="6">6+ people</option>
+                  <option value="">{t('spaces.any')}</option>
+                  <option value="1">1+ {t('spaces.person')}</option>
+                  <option value="2">2+ {t('spaces.people')}</option>
+                  <option value="4">4+ {t('spaces.people')}</option>
+                  <option value="6">6+ {t('spaces.people')}</option>
                 </select>
               </div>
 
               {/* Max Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Price/Hour
+                  {t('spaces.maxPrice')}
                 </label>
                 <select
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">Any</option>
-                  <option value="50">Up to 50 PLN</option>
-                  <option value="100">Up to 100 PLN</option>
-                  <option value="150">Up to 150 PLN</option>
-                  <option value="200">Up to 200 PLN</option>
+                  <option value="">{t('spaces.any')}</option>
+                  <option value="50">{t('spaces.upTo')} 50 PLN</option>
+                  <option value="100">{t('spaces.upTo')} 100 PLN</option>
+                  <option value="150">{t('spaces.upTo')} 150 PLN</option>
+                  <option value="200">{t('spaces.upTo')} 200 PLN</option>
                 </select>
               </div>
             </div>
@@ -252,9 +254,9 @@ export default function SpacesPage() {
           ) : booths.length === 0 ? (
             <div className="text-center py-12">
               <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No spaces found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('spaces.noSpaces')}</h3>
               <p className="text-gray-500 mb-4">
-                Try adjusting your filters or check back later.
+                {t('spaces.noSpacesDesc')}
               </p>
               {hasFilters && (
                 <button
@@ -262,7 +264,7 @@ export default function SpacesPage() {
                   className="text-sm font-medium"
                   style={{ color: tenant?.primaryColor }}
                 >
-                  Clear all filters
+                  {t('spaces.clearFilters')}
                 </button>
               )}
             </div>
@@ -311,7 +313,7 @@ export default function SpacesPage() {
                     <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {booth.capacity} {booth.capacity === 1 ? 'person' : 'people'}
+                        {booth.capacity} {booth.capacity === 1 ? t('spaces.person') : t('spaces.people')}
                       </span>
                       {booth.averageRating && (
                         <span className="flex items-center gap-1">
@@ -350,13 +352,13 @@ export default function SpacesPage() {
                         >
                           {formatPrice(booth.pricePerHour, booth.currency)}
                         </span>
-                        <span className="text-gray-500 text-sm"> /hour</span>
+                        <span className="text-gray-500 text-sm">{t('spaces.perHour')}</span>
                       </div>
                       <span
                         className="text-sm font-medium"
                         style={{ color: tenant?.primaryColor }}
                       >
-                        Book now &rarr;
+                        {t('spaces.bookNow')} &rarr;
                       </span>
                     </div>
                   </div>

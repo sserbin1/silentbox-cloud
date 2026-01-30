@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import { LanguageSelector } from '@/components/booking/LanguageSelector';
 
 interface TenantBranding {
   name: string;
@@ -119,11 +121,12 @@ export default function BookingLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <BookingContext.Provider value={{ tenant, tenantSlug, isLoading }}>
-      {/* Inject branding CSS */}
-      <style dangerouslySetInnerHTML={{ __html: generateBrandingCSS(tenant) }} />
+    <LanguageProvider tenantSlug={tenantSlug}>
+      <BookingContext.Provider value={{ tenant, tenantSlug, isLoading }}>
+        {/* Inject branding CSS */}
+        <style dangerouslySetInnerHTML={{ __html: generateBrandingCSS(tenant) }} />
 
-      <div className="min-h-screen flex flex-col bg-gray-50">
+        <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,6 +152,7 @@ export default function BookingLayout({ children }: { children: React.ReactNode 
                 >
                   Browse Spaces
                 </Link>
+                <LanguageSelector variant="compact" />
                 <Link
                   href={`/book/${tenantSlug}/login`}
                   className="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
@@ -209,6 +213,7 @@ export default function BookingLayout({ children }: { children: React.ReactNode 
           </div>
         </footer>
       </div>
-    </BookingContext.Provider>
+      </BookingContext.Provider>
+    </LanguageProvider>
   );
 }

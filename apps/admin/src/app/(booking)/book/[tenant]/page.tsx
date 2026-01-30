@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useBookingContext } from './layout';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Search, MapPin, Clock, Users, Wifi, Coffee, ArrowRight, Star } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -48,6 +49,7 @@ const boothTypeLabels: Record<string, string> = {
 
 export default function BookingLandingPage() {
   const { tenant, tenantSlug } = useBookingContext();
+  const { t } = useLanguage();
   const [locations, setLocations] = useState<Location[]>([]);
   const [featuredBooths, setFeaturedBooths] = useState<Booth[]>([]);
   const [searchDate, setSearchDate] = useState('');
@@ -85,10 +87,10 @@ export default function BookingLandingPage() {
       >
         <div className="max-w-5xl mx-auto text-center text-white">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Find Your Perfect Workspace
+            {t('hero.title')}
           </h1>
           <p className="text-xl opacity-90 mb-8">
-            Book private workspaces by the hour. Focus, create, succeed.
+            {t('hero.subtitle')}
           </p>
 
           {/* Search Form */}
@@ -96,14 +98,14 @@ export default function BookingLandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                  Location
+                  {t('search.location')}
                 </label>
                 <select
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="">All Locations</option>
+                  <option value="">{t('search.allLocations')}</option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>
                       {loc.name} - {loc.city}
@@ -114,7 +116,7 @@ export default function BookingLandingPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                  Date
+                  {t('search.date')}
                 </label>
                 <input
                   type="date"
@@ -132,7 +134,7 @@ export default function BookingLandingPage() {
                   style={{ backgroundColor: tenant?.primaryColor || '#6366F1' }}
                 >
                   <Search className="w-5 h-5" />
-                  Search Spaces
+                  {t('hero.searchButton')}
                 </Link>
               </div>
             </div>
@@ -145,13 +147,13 @@ export default function BookingLandingPage() {
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Featured Spaces</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('spaces.title')}</h2>
               <Link
                 href={`/book/${tenantSlug}/spaces`}
                 className="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"
                 style={{ color: tenant?.primaryColor || '#6366F1' }}
               >
-                View all <ArrowRight className="w-4 h-4" />
+                {t('cta.button')} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
@@ -208,13 +210,13 @@ export default function BookingLandingPage() {
                         <span className="text-lg font-bold" style={{ color: tenant?.primaryColor }}>
                           {formatPrice(booth.pricePerHour, booth.currency)}
                         </span>
-                        <span className="text-gray-500 text-sm"> /hour</span>
+                        <span className="text-gray-500 text-sm">{t('spaces.perHour')}</span>
                       </div>
                       <span
                         className="text-sm font-medium"
                         style={{ color: tenant?.primaryColor }}
                       >
-                        Book now
+                        {t('spaces.bookNow')}
                       </span>
                     </div>
                   </div>
@@ -229,7 +231,7 @@ export default function BookingLandingPage() {
       {locations.length > 0 && (
         <section className="py-16 px-4 bg-gray-100">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Our Locations</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">{t('locations.title')}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {locations.map((location) => (
@@ -251,7 +253,7 @@ export default function BookingLandingPage() {
                       <p className="text-sm text-gray-400 mt-1">{location.address}</p>
                       {location.boothCount !== undefined && (
                         <p className="text-sm mt-2" style={{ color: tenant?.primaryColor }}>
-                          {location.boothCount} spaces available
+                          {location.boothCount} {t('spaces.person')}
                         </p>
                       )}
                     </div>
@@ -267,7 +269,7 @@ export default function BookingLandingPage() {
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
-            Why Book With Us
+            {t('features.title')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -278,9 +280,9 @@ export default function BookingLandingPage() {
               >
                 <Clock className="w-8 h-8" style={{ color: tenant?.primaryColor }} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Flexible Hours</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('features.flexible.title')}</h3>
               <p className="text-gray-600">
-                Book by the hour, day, or longer. Pay only for what you use.
+                {t('features.flexible.desc')}
               </p>
             </div>
 
@@ -291,9 +293,9 @@ export default function BookingLandingPage() {
               >
                 <Wifi className="w-8 h-8" style={{ color: tenant?.primaryColor }} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">All Amenities Included</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('features.amenities.title')}</h3>
               <p className="text-gray-600">
-                High-speed WiFi, power outlets, and comfortable seating.
+                {t('features.amenities.desc')}
               </p>
             </div>
 
@@ -304,9 +306,9 @@ export default function BookingLandingPage() {
               >
                 <Coffee className="w-8 h-8" style={{ color: tenant?.primaryColor }} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Premium Environment</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('features.environment.title')}</h3>
               <p className="text-gray-600">
-                Clean, quiet spaces designed for productivity.
+                {t('features.environment.desc')}
               </p>
             </div>
           </div>
@@ -319,16 +321,16 @@ export default function BookingLandingPage() {
         style={{ backgroundColor: tenant?.primaryColor || '#6366F1' }}
       >
         <div className="max-w-3xl mx-auto text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('cta.title')}</h2>
           <p className="text-xl opacity-90 mb-8">
-            Find and book your perfect workspace in minutes.
+            {t('cta.subtitle')}
           </p>
           <Link
             href={`/book/${tenantSlug}/spaces`}
             className="inline-flex items-center gap-2 px-8 py-4 bg-white rounded-lg font-semibold transition-transform hover:scale-105"
             style={{ color: tenant?.primaryColor }}
           >
-            Browse Available Spaces
+            {t('cta.button')}
             <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
