@@ -216,19 +216,15 @@ export default function BookingLandingPage() {
                     <div className="p-1">
                       {/* Image */}
                       <div className="aspect-video rounded-t-xl overflow-hidden relative">
-                        {booth.images?.[0] ? (
-                          <img
-                            src={booth.images[0]}
-                            alt={booth.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-2xl bg-violet-500/20 flex items-center justify-center">
-                              <MapPin className="w-8 h-8 text-violet-400" />
-                            </div>
-                          </div>
-                        )}
+                        <img
+                          src={booth.images?.[0] || `https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop&q=80&sig=${booth.id}`}
+                          alt={booth.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop&q=80';
+                          }}
+                        />
                         {/* Overlay gradient */}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
                         {/* Badge */}
