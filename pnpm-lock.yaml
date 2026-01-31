@@ -147,6 +147,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fastify/cookie':
+        specifier: ^11.0.2
+        version: 11.0.2
       '@fastify/cors':
         specifier: ^9.0.0
         version: 9.0.1
@@ -199,9 +202,6 @@ importers:
         specifier: ^3.22.0
         version: 3.25.76
     devDependencies:
-      '@fastify/cookie':
-        specifier: ^11.0.2
-        version: 11.0.2
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
