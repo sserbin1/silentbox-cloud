@@ -83,7 +83,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function PricingPage() {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');

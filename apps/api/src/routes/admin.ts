@@ -2,9 +2,86 @@
 // Admin API Routes (Tenant Admin Dashboard)
 // ===========================================
 
-import { FastifyPluginAsync } from 'fastify';
+import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { supabaseAdmin as supabase } from '../lib/supabase.js';
 import { logger } from '../lib/logger.js';
+import { z } from 'zod';
+import * as jose from 'jose';
+import { env } from '../lib/env.js';
+
+// ===========================================
+// Schemas
+// ===========================================
+const settingsSchema = z.object({
+  business_name: z.string().min(1).max(200).optional(),
+  contact_email: z.string().email().optional(),
+  contact_phone: z.string().max(50).optional(),
+  address: z.string().max(500).optional(),
+  notifications: z.object({
+    email_booking_confirmation: z.boolean().optional(),
+    email_booking_reminder: z.boolean().optional(),
+    email_booking_cancellation: z.boolean().optional(),
+    sms_booking_confirmation: z.boolean().optional(),
+    sms_booking_reminder: z.boolean().optional(),
+  }).optional(),
+  integrations: z.object({
+    google_calendar_enabled: z.boolean().optional(),
+    ttlock_enabled: z.boolean().optional(),
+    push_notifications_enabled: z.boolean().optional(),
+  }).optional(),
+});
+
+const discountSchema = z.object({
+  name: z.string().min(1).max(100),
+  type: z.enum(['percentage', 'fixed']),
+  value: z.number().min(0),
+  conditions: z.record(z.unknown()).optional(),
+  valid_from: z.string().datetime().optional(),
+  valid_until: z.string().datetime().optional(),
+  is_active: z.boolean().optional(),
+});
+
+const peakHoursSchema = z.object({
+  day_of_week: z.number().min(0).max(6),
+  start_time: z.string().regex(/^\d{2}:\d{2}$/),
+  end_time: z.string().regex(/^\d{2}:\d{2}$/),
+  multiplier: z.number().min(1).max(5),
+});
+
+const creditPackageSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  credits: z.number().min(1),
+  price: z.number().min(0),
+  currency: z.string().length(3).default('PLN'),
+  bonus_credits: z.number().min(0).default(0),
+  is_popular: z.boolean().default(false),
+  sort_order: z.number().optional(),
+});
+
+// Audit log helper
+const logAuditEvent = async (
+  tenantId: string,
+  userId: string | null,
+  action: string,
+  resource: string,
+  resourceId: string | null,
+  details: Record<string, unknown> = {}
+) => {
+  try {
+    await supabase.from('audit_logs').insert({
+      tenant_id: tenantId,
+      user_id: userId,
+      action,
+      resource,
+      resource_id: resourceId,
+      details,
+      created_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err, action, resource }, 'Failed to log audit event');
+  }
+};
 
 // Admin middleware - verify admin or operator role
 // Also supports X-Tenant-ID header for development/testing
@@ -627,6 +704,996 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(500).send({
         success: false,
         error: 'Failed to get transaction report',
+      });
+    }
+  });
+
+  // ===========================================
+  // Settings Management (Task 10)
+  // ===========================================
+
+  // Get tenant settings
+  app.get('/settings', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+
+    try {
+      const { data: tenant, error } = await supabase
+        .from('tenants')
+        .select('id, name, settings, contact_email, contact_phone, address, city, country')
+        .eq('id', tenantId)
+        .single();
+
+      if (error || !tenant) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Tenant not found',
+        });
+      }
+
+      return {
+        success: true,
+        data: {
+          business_name: tenant.name,
+          contact_email: tenant.contact_email,
+          contact_phone: tenant.contact_phone,
+          address: tenant.address,
+          city: tenant.city,
+          country: tenant.country,
+          ...tenant.settings,
+        },
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get settings');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get settings',
+      });
+    }
+  });
+
+  // Update tenant settings
+  app.patch('/settings', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+
+    const validation = settingsSchema.safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const updates: Record<string, unknown> = {};
+      const settingsUpdates: Record<string, unknown> = {};
+
+      // Separate top-level fields from settings
+      if (validation.data.business_name !== undefined) {
+        updates.name = validation.data.business_name;
+      }
+      if (validation.data.contact_email !== undefined) {
+        updates.contact_email = validation.data.contact_email;
+      }
+      if (validation.data.contact_phone !== undefined) {
+        updates.contact_phone = validation.data.contact_phone;
+      }
+      if (validation.data.address !== undefined) {
+        updates.address = validation.data.address;
+      }
+      if (validation.data.notifications !== undefined) {
+        settingsUpdates.notifications = validation.data.notifications;
+      }
+      if (validation.data.integrations !== undefined) {
+        settingsUpdates.integrations = validation.data.integrations;
+      }
+
+      // Get current settings and merge
+      if (Object.keys(settingsUpdates).length > 0) {
+        const { data: tenant } = await supabase
+          .from('tenants')
+          .select('settings')
+          .eq('id', tenantId)
+          .single();
+
+        updates.settings = {
+          ...(tenant?.settings || {}),
+          ...settingsUpdates,
+        };
+      }
+
+      const { error } = await supabase
+        .from('tenants')
+        .update(updates)
+        .eq('id', tenantId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Log audit event
+      await logAuditEvent(tenantId, userId, 'settings_update', 'tenant', tenantId, { updates });
+
+      logger.info({ tenantId }, 'Tenant settings updated');
+
+      return { success: true, message: 'Settings updated' };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to update settings');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to update settings',
+      });
+    }
+  });
+
+  // ===========================================
+  // Pricing Management (Tasks 11-14)
+  // ===========================================
+
+  // GET /pricing - combined pricing config (Task 11)
+  app.get('/pricing', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+
+    try {
+      // Get general pricing from booths (base prices)
+      const { data: booths } = await supabase
+        .from('booths')
+        .select('id, name, price_per_15min, currency')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true);
+
+      // Get discounts
+      const { data: discounts } = await supabase
+        .from('discounts')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false });
+
+      // Get peak hours
+      const { data: peakHours } = await supabase
+        .from('peak_hours')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('day_of_week', { ascending: true });
+
+      // Get credit packages
+      const { data: packages } = await supabase
+        .from('credit_packages')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('sort_order', { ascending: true });
+
+      return {
+        success: true,
+        data: {
+          general: {
+            booths: booths || [],
+          },
+          discounts: discounts || [],
+          peak_hours: peakHours || [],
+          packages: packages || [],
+        },
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get pricing');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get pricing configuration',
+      });
+    }
+  });
+
+  // Discounts CRUD (Task 12)
+  app.post('/pricing/discounts', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+
+    const validation = discountSchema.safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('discounts')
+        .insert({
+          tenant_id: tenantId,
+          ...validation.data,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'discount_create', 'discount', data.id, validation.data);
+
+      return reply.code(201).send({ success: true, data });
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to create discount');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to create discount',
+      });
+    }
+  });
+
+  app.patch<{ Params: { id: string } }>('/pricing/discounts/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    const validation = discountSchema.partial().safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('discounts')
+        .update(validation.data)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'discount_update', 'discount', id, validation.data);
+
+      return { success: true, data };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to update discount');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to update discount',
+      });
+    }
+  });
+
+  app.delete<{ Params: { id: string } }>('/pricing/discounts/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    try {
+      const { error } = await supabase
+        .from('discounts')
+        .delete()
+        .eq('id', id)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'discount_delete', 'discount', id, {});
+
+      return { success: true, message: 'Discount deleted' };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to delete discount');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to delete discount',
+      });
+    }
+  });
+
+  // Peak Hours CRUD (Task 13)
+  app.post('/pricing/peak-hours', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+
+    const validation = peakHoursSchema.safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('peak_hours')
+        .insert({
+          tenant_id: tenantId,
+          ...validation.data,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'peak_hours_create', 'peak_hours', data.id, validation.data);
+
+      return reply.code(201).send({ success: true, data });
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to create peak hours');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to create peak hours',
+      });
+    }
+  });
+
+  app.patch<{ Params: { id: string } }>('/pricing/peak-hours/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    const validation = peakHoursSchema.partial().safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('peak_hours')
+        .update(validation.data)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'peak_hours_update', 'peak_hours', id, validation.data);
+
+      return { success: true, data };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to update peak hours');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to update peak hours',
+      });
+    }
+  });
+
+  app.delete<{ Params: { id: string } }>('/pricing/peak-hours/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    try {
+      const { error } = await supabase
+        .from('peak_hours')
+        .delete()
+        .eq('id', id)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'peak_hours_delete', 'peak_hours', id, {});
+
+      return { success: true, message: 'Peak hours config deleted' };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to delete peak hours');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to delete peak hours',
+      });
+    }
+  });
+
+  // Credit Packages CRUD (Task 14)
+  app.post('/pricing/packages', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+
+    const validation = creditPackageSchema.safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('credit_packages')
+        .insert({
+          tenant_id: tenantId,
+          ...validation.data,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'package_create', 'credit_package', data.id, validation.data);
+
+      return reply.code(201).send({ success: true, data });
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to create credit package');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to create credit package',
+      });
+    }
+  });
+
+  app.patch<{ Params: { id: string } }>('/pricing/packages/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    const validation = creditPackageSchema.partial().safeParse(request.body);
+    if (!validation.success) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Validation failed',
+        details: validation.error.errors,
+      });
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('credit_packages')
+        .update(validation.data)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'package_update', 'credit_package', id, validation.data);
+
+      return { success: true, data };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to update credit package');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to update credit package',
+      });
+    }
+  });
+
+  app.delete<{ Params: { id: string } }>('/pricing/packages/:id', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    try {
+      const { error } = await supabase
+        .from('credit_packages')
+        .delete()
+        .eq('id', id)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      await logAuditEvent(tenantId, userId, 'package_delete', 'credit_package', id, {});
+
+      return { success: true, message: 'Credit package deleted' };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to delete credit package');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to delete credit package',
+      });
+    }
+  });
+
+  // ===========================================
+  // Transactions (Task 15)
+  // ===========================================
+
+  // Get transactions with pagination
+  app.get<{
+    Querystring: {
+      page?: string;
+      limit?: string;
+      date_from?: string;
+      date_to?: string;
+      type?: string;
+      search?: string;
+    };
+  }>('/transactions', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const {
+      page = '1',
+      limit = '20',
+      date_from,
+      date_to,
+      type,
+      search,
+    } = request.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const offset = (pageNum - 1) * limitNum;
+
+    try {
+      // Build query
+      let query = supabase
+        .from('transactions')
+        .select(`
+          id,
+          type,
+          amount,
+          currency,
+          payment_provider,
+          status,
+          metadata,
+          created_at,
+          users(id, email, full_name)
+        `, { count: 'exact' })
+        .eq('tenant_id', tenantId);
+
+      if (date_from) {
+        query = query.gte('created_at', date_from);
+      }
+      if (date_to) {
+        query = query.lte('created_at', date_to);
+      }
+      if (type) {
+        query = query.eq('type', type);
+      }
+
+      // Get total for pagination
+      const { count: total } = await query;
+
+      // Apply pagination and ordering
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
+
+      if (error) throw error;
+
+      // Filter by search (user email) - done in JS since Supabase nested search is limited
+      let filteredData = data || [];
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredData = filteredData.filter((tx: any) =>
+          tx.users?.email?.toLowerCase().includes(searchLower) ||
+          tx.users?.full_name?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Calculate summary
+      const completedTxs = (data || []).filter((tx: any) => tx.status === 'completed');
+      const summary = {
+        total_amount: completedTxs.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0),
+        count_by_type: (data || []).reduce((acc: Record<string, number>, tx: any) => {
+          acc[tx.type] = (acc[tx.type] || 0) + 1;
+          return acc;
+        }, {}),
+      };
+
+      return {
+        success: true,
+        data: filteredData,
+        meta: {
+          total: total || 0,
+          page: pageNum,
+          limit: limitNum,
+          summary,
+        },
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get transactions');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get transactions',
+      });
+    }
+  });
+
+  // Export transactions as CSV
+  app.get<{
+    Querystring: {
+      format?: string;
+      date_from?: string;
+      date_to?: string;
+      type?: string;
+    };
+  }>('/transactions/export', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const { format = 'csv', date_from, date_to, type } = request.query;
+
+    if (format !== 'csv') {
+      return reply.code(400).send({
+        success: false,
+        error: 'Only CSV format is supported',
+      });
+    }
+
+    try {
+      let query = supabase
+        .from('transactions')
+        .select(`
+          id,
+          type,
+          amount,
+          currency,
+          payment_provider,
+          status,
+          created_at,
+          users(email, full_name)
+        `)
+        .eq('tenant_id', tenantId);
+
+      if (date_from) {
+        query = query.gte('created_at', date_from);
+      }
+      if (date_to) {
+        query = query.lte('created_at', date_to);
+      }
+      if (type) {
+        query = query.eq('type', type);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Generate CSV
+      const headers = ['ID', 'Type', 'Amount', 'Currency', 'Provider', 'Status', 'User Email', 'User Name', 'Created At'];
+      const rows = (data || []).map((tx: any) => [
+        tx.id,
+        tx.type,
+        tx.amount,
+        tx.currency,
+        tx.payment_provider || '',
+        tx.status,
+        tx.users?.email || '',
+        tx.users?.full_name || '',
+        tx.created_at,
+      ]);
+
+      const csv = [
+        headers.join(','),
+        ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+      ].join('\n');
+
+      reply.header('Content-Type', 'text/csv');
+      reply.header('Content-Disposition', `attachment; filename="transactions-${new Date().toISOString().split('T')[0]}.csv"`);
+
+      return csv;
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to export transactions');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to export transactions',
+      });
+    }
+  });
+
+  // ===========================================
+  // Analytics (Task 19)
+  // ===========================================
+
+  // Get bookings analytics
+  app.get<{ Querystring: { period?: string } }>('/analytics/bookings', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const period = request.query.period || '7d';
+
+    try {
+      const days = period === '90d' ? 90 : period === '30d' ? 30 : 7;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, status, created_at')
+        .eq('tenant_id', tenantId)
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Group by date
+      const byDate: Record<string, { date: string; total: number; completed: number; cancelled: number }> = {};
+
+      (data || []).forEach((booking: any) => {
+        const date = new Date(booking.created_at).toISOString().split('T')[0];
+        if (!byDate[date]) {
+          byDate[date] = { date, total: 0, completed: 0, cancelled: 0 };
+        }
+        byDate[date].total++;
+        if (booking.status === 'completed') byDate[date].completed++;
+        if (booking.status === 'cancelled') byDate[date].cancelled++;
+      });
+
+      return {
+        success: true,
+        data: Object.values(byDate),
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get bookings analytics');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get bookings analytics',
+      });
+    }
+  });
+
+  // Get revenue analytics
+  app.get<{ Querystring: { period?: string } }>('/analytics/revenue', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const period = request.query.period || '7d';
+
+    try {
+      const days = period === '90d' ? 90 : period === '30d' ? 30 : 7;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('amount, created_at')
+        .eq('tenant_id', tenantId)
+        .eq('type', 'credit_purchase')
+        .eq('status', 'completed')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Group by date
+      const byDate: Record<string, { date: string; revenue: number; count: number }> = {};
+
+      (data || []).forEach((tx: any) => {
+        const date = new Date(tx.created_at).toISOString().split('T')[0];
+        if (!byDate[date]) {
+          byDate[date] = { date, revenue: 0, count: 0 };
+        }
+        byDate[date].revenue += tx.amount || 0;
+        byDate[date].count++;
+      });
+
+      return {
+        success: true,
+        data: Object.values(byDate),
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get revenue analytics');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get revenue analytics',
+      });
+    }
+  });
+
+  // Get occupancy analytics
+  app.get('/analytics/occupancy', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+
+    try {
+      // Get last 30 days of bookings
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('booth_id, start_time, end_time, duration_minutes')
+        .eq('tenant_id', tenantId)
+        .in('status', ['confirmed', 'active', 'completed'])
+        .gte('start_time', startDate.toISOString());
+
+      // Get booths
+      const { data: booths } = await supabase
+        .from('booths')
+        .select('id, name')
+        .eq('tenant_id', tenantId)
+        .eq('is_active', true);
+
+      // Calculate occupancy per booth
+      const boothOccupancy = (booths || []).map((booth: any) => {
+        const boothBookings = (bookings || []).filter((b: any) => b.booth_id === booth.id);
+        const totalMinutes = boothBookings.reduce((sum: number, b: any) => sum + (b.duration_minutes || 0), 0);
+        // Assume 12 hours of operation per day (720 minutes)
+        const maxMinutes = 30 * 720;
+        const occupancyRate = maxMinutes > 0 ? (totalMinutes / maxMinutes) * 100 : 0;
+
+        return {
+          booth_id: booth.id,
+          booth_name: booth.name,
+          total_bookings: boothBookings.length,
+          total_minutes: totalMinutes,
+          occupancy_rate: Math.round(occupancyRate * 10) / 10,
+        };
+      });
+
+      return {
+        success: true,
+        data: boothOccupancy,
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get occupancy analytics');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get occupancy analytics',
+      });
+    }
+  });
+
+  // ===========================================
+  // Device Actions (Task 20)
+  // ===========================================
+
+  // Unlock device
+  app.post<{ Params: { id: string } }>('/devices/:id/unlock', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    try {
+      // Verify device belongs to tenant
+      const { data: device, error: deviceError } = await supabase
+        .from('devices')
+        .select('id, external_id, device_type, booth_id')
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (deviceError || !device) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Device not found',
+        });
+      }
+
+      // Import TTLock service dynamically to avoid circular deps
+      const { ttlockService } = await import('../services/ttlock.js');
+
+      // Send unlock command with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const result = await ttlockService.unlockDevice(device.external_id);
+
+        clearTimeout(timeoutId);
+
+        // Log audit event
+        await logAuditEvent(tenantId, userId, 'device_unlock', 'device', id, {
+          device_type: device.device_type,
+          booth_id: device.booth_id,
+          result: result.success ? 'success' : 'failed',
+        });
+
+        if (!result.success) {
+          return reply.code(400).send({
+            success: false,
+            error: result.error || 'Failed to unlock device',
+          });
+        }
+
+        logger.info({ deviceId: id, tenantId }, 'Device unlocked by admin');
+
+        return { success: true, message: 'Device unlocked successfully' };
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+
+        if (err.name === 'AbortError') {
+          return reply.code(504).send({
+            success: false,
+            error: 'TTLock operation timed out',
+          });
+        }
+        throw err;
+      }
+    } catch (error: any) {
+      logger.error({ error, tenantId, deviceId: id }, 'Failed to unlock device');
+
+      // Handle TTLock unavailable
+      if (error.message?.includes('TTLock') || error.code === 'ECONNREFUSED') {
+        return reply.code(503).send({
+          success: false,
+          error: 'TTLock service unavailable. Please try again later.',
+        });
+      }
+
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to unlock device',
+      });
+    }
+  });
+
+  // Sync device status
+  app.post<{ Params: { id: string } }>('/devices/:id/sync', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const userId = request.user?.sub || null;
+    const { id } = request.params;
+
+    try {
+      // Verify device belongs to tenant
+      const { data: device, error: deviceError } = await supabase
+        .from('devices')
+        .select('id, external_id, device_type')
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (deviceError || !device) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Device not found',
+        });
+      }
+
+      // Import TTLock service dynamically
+      const { ttlockService } = await import('../services/ttlock.js');
+
+      // Sync with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const status = await ttlockService.getDeviceStatus(device.external_id);
+
+        clearTimeout(timeoutId);
+
+        // Update device status in database
+        const { error: updateError } = await supabase
+          .from('devices')
+          .update({
+            status: status.locked ? 'locked' : 'unlocked',
+            battery_level: status.batteryLevel,
+            last_seen: new Date().toISOString(),
+          })
+          .eq('id', id);
+
+        if (updateError) {
+          logger.warn({ updateError, deviceId: id }, 'Failed to update device status in DB');
+        }
+
+        // Log audit event
+        await logAuditEvent(tenantId, userId, 'device_sync', 'device', id, {
+          device_type: device.device_type,
+          status: status,
+        });
+
+        logger.info({ deviceId: id, tenantId, status }, 'Device status synced');
+
+        return {
+          success: true,
+          message: 'Device synced successfully',
+          data: {
+            status: status.locked ? 'locked' : 'unlocked',
+            battery_level: status.batteryLevel,
+            last_seen: new Date().toISOString(),
+          },
+        };
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+
+        if (err.name === 'AbortError') {
+          return reply.code(504).send({
+            success: false,
+            error: 'TTLock operation timed out',
+          });
+        }
+        throw err;
+      }
+    } catch (error: any) {
+      logger.error({ error, tenantId, deviceId: id }, 'Failed to sync device');
+
+      // Handle TTLock unavailable
+      if (error.message?.includes('TTLock') || error.code === 'ECONNREFUSED') {
+        return reply.code(503).send({
+          success: false,
+          error: 'TTLock service unavailable. Please try again later.',
+        });
+      }
+
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to sync device status',
       });
     }
   });

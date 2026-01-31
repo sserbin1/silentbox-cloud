@@ -8,6 +8,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
+import cookie from '@fastify/cookie';
 import { Server } from 'socket.io';
 
 import { env } from './lib/env.js';
@@ -71,6 +72,12 @@ await app.register(rateLimit, {
 
 await app.register(jwt, {
   secret: env.JWT_SECRET,
+});
+
+// Cookie support for httpOnly auth tokens
+await app.register(cookie, {
+  secret: env.JWT_SECRET, // Use same secret for signed cookies
+  parseOptions: {},
 });
 
 // Global error handler

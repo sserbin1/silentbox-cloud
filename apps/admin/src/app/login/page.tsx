@@ -2,15 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Loader2 } from 'lucide-react';
+import { Box, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { authApi } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,12 +25,42 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // TODO: Implement actual login
-      // For now, just redirect to dashboard
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/dashboard');
+      const result = await authApi.login({ email, password, rememberMe });
+
+      if (!result.success || !result.data) {
+        // Handle specific error cases
+        const errorMsg = result.error || 'Login failed';
+
+        if (errorMsg.includes('rate limit') || errorMsg.includes('Too many')) {
+          setError('Too many login attempts. Please wait a minute and try again.');
+        } else if (errorMsg.includes('Invalid credentials') || errorMsg.includes('not found')) {
+          setError('Invalid email or password.');
+        } else if (errorMsg.includes('disabled') || errorMsg.includes('suspended')) {
+          setError('Your account has been disabled. Contact support.');
+        } else {
+          setError(errorMsg);
+        }
+        return;
+      }
+
+      // Store user in Zustand (tokens are in httpOnly cookies)
+      setUser({
+        id: result.data.user.id,
+        email: result.data.user.email,
+        full_name: result.data.user.full_name,
+        role: result.data.user.role,
+        tenant_id: result.data.user.tenant_id,
+      });
+
+      // Redirect based on role
+      if (result.data.user.role === 'super_admin') {
+        router.push('/super');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
-      setError('Invalid credentials');
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -55,7 +90,9 @@ export default function LoginPage() {
                 placeholder="admin@silentbox.pl"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
                 required
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -68,17 +105,46 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
                 required
+                autoComplete="current-password"
               />
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={loading}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none"
+              >
+                Remember me for 30 days
+              </label>
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
           </form>
+
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            <p>Demo credentials:</p>
+            <p className="font-mono text-xs mt-1">admin@meetpoint.pro / demo123</p>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -11,6 +11,15 @@ interface ApiResponse<T> {
   message?: string;
 }
 
+/**
+ * Get CSRF token from cookie
+ */
+function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/csrf_token=([^;]+)/);
+  return match ? match[1] : null;
+}
+
 class AdminApiClient {
   private token: string | null = null;
   private tenantId: string | null = null;
@@ -36,6 +45,16 @@ class AdminApiClient {
       ...options.headers,
     };
 
+    // Add CSRF token for mutating requests
+    const method = options.method?.toUpperCase() || 'GET';
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        (headers as Record<string, string>)['X-CSRF-Token'] = csrfToken;
+      }
+    }
+
+    // Legacy token support (for transition, will be removed)
     if (this.token) {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
     }
@@ -49,14 +68,24 @@ class AdminApiClient {
       const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers,
+        credentials: 'include', // Include cookies for httpOnly auth
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        // Check for auth errors
+        if (response.status === 401) {
+          // Token expired or invalid - could trigger refresh here
+          return {
+            success: false,
+            error: data.error?.message || data.error || 'Authentication required',
+          };
+        }
+
         return {
           success: false,
-          error: data.error || data.message || 'Request failed',
+          error: data.error?.message || data.error || data.message || 'Request failed',
         };
       }
 
@@ -110,6 +139,52 @@ class AdminApiClient {
 }
 
 export const adminApi = new AdminApiClient();
+
+// ===========================================
+// Auth API
+// ===========================================
+
+interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+interface LoginResponse {
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+    role: 'admin' | 'operator' | 'super_admin';
+    tenant_id: string | null;
+  };
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface RefreshResponse {
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+    role: string;
+    tenant_id: string | null;
+  };
+}
+
+export const authApi = {
+  login: (data: LoginRequest) =>
+    adminApi.post<LoginResponse>('/api/auth/admin/login', data),
+
+  logout: () =>
+    adminApi.post<{ success: boolean }>('/api/auth/admin/logout', {}),
+
+  refresh: () =>
+    adminApi.post<RefreshResponse>('/api/auth/admin/refresh', {}),
+
+  me: () =>
+    adminApi.get<LoginResponse['user']>('/api/auth/admin/me'),
+};
 
 // API endpoints
 export const dashboardApi = {

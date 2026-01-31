@@ -2,11 +2,13 @@
 // Super Admin Routes (Platform Management)
 // ===========================================
 
-import { FastifyPluginAsync } from 'fastify';
+import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { tenantsService } from '../services/tenants.js';
 import { supabaseAdmin as supabase } from '../lib/supabase.js';
 import { logger } from '../lib/logger.js';
+import * as jose from 'jose';
+import { env } from '../lib/env.js';
 
 // Schema definitions
 const createTenantSchema = z.object({
@@ -31,39 +33,139 @@ const updateTenantSchema = z.object({
   status: z.enum(['active', 'suspended', 'pending']).optional(),
 });
 
-// Super Admin middleware - verify super admin role
-const verifySuperAdmin = async (request: any, reply: any) => {
+// ===========================================
+// Audit Logging Helper
+// ===========================================
+const logAuditEvent = async (
+  userId: string,
+  action: string,
+  resource: string,
+  resourceId: string | null,
+  details: Record<string, unknown> = {},
+  ipAddress: string | null = null
+) => {
   try {
-    await request.jwtVerify();
+    await supabase.from('audit_logs').insert({
+      user_id: userId,
+      action,
+      resource,
+      resource_id: resourceId,
+      details,
+      ip_address: ipAddress,
+      created_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err, action, resource }, 'Failed to log audit event');
+  }
+};
 
-    // Check if user is super admin
+// ===========================================
+// Super Admin middleware - verify super admin role
+// Supports both cookie-based and header-based auth
+// ===========================================
+const verifySuperAdmin = async (request: FastifyRequest, reply: FastifyReply) => {
+  const ipAddress = request.ip || request.headers['x-forwarded-for']?.toString() || null;
+
+  try {
+    // Try cookie-based auth first (admin_token), then fall back to Authorization header
+    const cookieToken = request.cookies?.admin_token;
+    const authHeader = request.headers.authorization;
+
+    let token: string | null = null;
+
+    if (cookieToken) {
+      token = cookieToken;
+    } else if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+
+    if (!token) {
+      logger.warn({ ip: ipAddress }, 'Super admin access attempt without token');
+      return reply.code(401).send({
+        success: false,
+        error: 'Authentication required',
+      });
+    }
+
+    // Verify JWT using jose (edge-compatible)
+    const secret = new TextEncoder().encode(env.JWT_SECRET);
+    let payload: jose.JWTPayload;
+
+    try {
+      const { payload: verifiedPayload } = await jose.jwtVerify(token, secret);
+      payload = verifiedPayload;
+    } catch (jwtErr) {
+      logger.warn({ ip: ipAddress, error: (jwtErr as Error).message }, 'Invalid JWT in super admin request');
+      return reply.code(401).send({
+        success: false,
+        error: 'Invalid or expired token',
+      });
+    }
+
+    const userId = payload.sub as string;
+
+    if (!userId) {
+      return reply.code(401).send({
+        success: false,
+        error: 'Invalid token payload',
+      });
+    }
+
+    // Check if user exists and is super admin
     const { data: user, error } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', request.user.sub)
+      .select('id, role, email, full_name')
+      .eq('id', userId)
       .single();
 
-    if (error || user?.role !== 'super_admin') {
+    if (error || !user) {
+      logger.warn({ userId, ip: ipAddress }, 'Super admin access attempt - user not found');
+      await logAuditEvent(userId, 'superadmin_access_denied', 'auth', null, { reason: 'user_not_found' }, ipAddress);
+      return reply.code(401).send({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    if (user.role !== 'super_admin') {
+      logger.warn({ userId, role: user.role, ip: ipAddress }, 'Super admin access attempt with insufficient role');
+      await logAuditEvent(userId, 'superadmin_access_denied', 'auth', null, { reason: 'insufficient_role', actualRole: user.role }, ipAddress);
       return reply.code(403).send({
         success: false,
         error: 'Super admin access required',
       });
     }
+
+    // Attach user info to request for downstream handlers
+    (request as any).superAdmin = {
+      id: user.id,
+      email: user.email,
+      fullName: user.full_name,
+      role: user.role,
+    };
+
+    // Log successful access (only for write operations to avoid log spam)
+    const method = request.method.toUpperCase();
+    if (method !== 'GET') {
+      await logAuditEvent(userId, `superadmin_${method.toLowerCase()}`, request.url, null, {}, ipAddress);
+    }
+
   } catch (err) {
-    return reply.code(401).send({
+    logger.error({ error: err, ip: ipAddress }, 'Super admin auth middleware error');
+    return reply.code(500).send({
       success: false,
-      error: 'Authentication required',
+      error: 'Authentication error',
     });
   }
 };
 
 export const superadminRoutes: FastifyPluginAsync = async (app) => {
   // ===========================================
-  // Public Read Routes (for dashboard display)
+  // Protected Read Routes (require super admin auth)
   // ===========================================
 
-  // Get platform overview (public for now - TODO: add auth when login is implemented)
-  app.get('/stats/overview', async (request, reply) => {
+  // Get platform overview
+  app.get('/stats/overview', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       // Get total tenants
       const { count: tenantsCount } = await supabase
@@ -141,8 +243,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Get recent activity (public for now)
-  app.get('/activity', async (request, reply) => {
+  // Get recent activity
+  app.get('/activity', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       const activities: Array<{
         id: string;
@@ -205,8 +307,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Get all tenants (public read for listing)
-  app.get('/tenants', async (request, reply) => {
+  // Get all tenants
+  app.get('/tenants', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       const { data, error } = await supabase
         .from('tenants')
@@ -235,8 +337,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Get tenant by ID (public read)
-  app.get<{ Params: { id: string } }>('/tenants/:id', async (request, reply) => {
+  // Get tenant by ID
+  app.get<{ Params: { id: string } }>('/tenants/:id', { preHandler: verifySuperAdmin }, async (request, reply) => {
     const result = await tenantsService.getTenantById(request.params.id);
 
     if (!result.success) {
@@ -246,8 +348,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     return result;
   });
 
-  // Get tenant statistics (public read)
-  app.get<{ Params: { id: string } }>('/tenants/:id/stats', async (request, reply) => {
+  // Get tenant statistics
+  app.get<{ Params: { id: string } }>('/tenants/:id/stats', { preHandler: verifySuperAdmin }, async (request, reply) => {
     const result = await tenantsService.getTenantStats(request.params.id);
 
     if (!result.success) {
@@ -352,7 +454,7 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
   // ===========================================
 
   // Get all super admins
-  app.get('/admins', async (request, reply) => {
+  app.get('/admins', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -375,8 +477,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Promote user to super admin
-  app.post<{ Params: { userId: string } }>('/admins/:userId/promote', async (request, reply) => {
+  // Promote user to super admin (protected)
+  app.post<{ Params: { userId: string } }>('/admins/:userId/promote', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       const { error } = await supabase
         .from('users')
@@ -400,8 +502,8 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
-  // Demote super admin
-  app.post<{ Params: { userId: string } }>('/admins/:userId/demote', async (request, reply) => {
+  // Demote super admin (protected)
+  app.post<{ Params: { userId: string } }>('/admins/:userId/demote', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {
       const { error } = await supabase
         .from('users')
