@@ -232,8 +232,233 @@ export const usersApi = {
 export const devicesApi = {
   getAll: () => adminApi.get<Device[]>('/api/devices'),
   getById: (id: string) => adminApi.get<Device>(`/api/devices/${id}`),
-  unlock: (id: string) => adminApi.post(`/api/devices/${id}/unlock`, {}),
-  sync: (id: string) => adminApi.post(`/api/devices/${id}/sync`, {}),
+  unlock: (id: string) => adminApi.post<{ message: string }>(`/api/admin/devices/${id}/unlock`, {}),
+  sync: (id: string) => adminApi.post<{ status: string; battery_level: number; last_seen: string }>(`/api/admin/devices/${id}/sync`, {}),
+};
+
+// ===========================================
+// Settings API
+// ===========================================
+
+export interface TenantSettings {
+  business_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  notifications?: {
+    email_booking_confirmation?: boolean;
+    email_booking_reminder?: boolean;
+    email_booking_cancellation?: boolean;
+    sms_booking_confirmation?: boolean;
+    sms_booking_reminder?: boolean;
+  };
+  integrations?: {
+    google_calendar_enabled?: boolean;
+    ttlock_enabled?: boolean;
+    push_notifications_enabled?: boolean;
+  };
+  pricing?: {
+    base_price_per_hour?: number;
+    currency?: string;
+    min_booking_minutes?: number;
+    max_booking_hours?: number;
+    grace_period_minutes?: number;
+    no_show_penalty_percent?: number;
+    free_cancellation_hours?: number;
+  };
+}
+
+export const settingsApi = {
+  get: () => adminApi.get<TenantSettings>('/api/admin/settings'),
+  update: (data: Partial<TenantSettings>) => adminApi.patch<{ message: string }>('/api/admin/settings', data),
+};
+
+// ===========================================
+// Pricing API
+// ===========================================
+
+export interface Discount {
+  id: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  min_hours?: number;
+  applies_to?: 'all' | 'weekdays' | 'weekends';
+  conditions?: Record<string, unknown>;
+  valid_from?: string;
+  valid_until?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface PeakHours {
+  id: string;
+  day_of_week: number;
+  start_time?: string;
+  end_time?: string;
+  start_hour?: number;
+  end_hour?: number;
+  multiplier: number;
+  is_active?: boolean;
+}
+
+export interface CreditPackage {
+  id: string;
+  name: string;
+  description?: string;
+  credits: number;
+  price: number;
+  currency?: string;
+  bonus_credits: number;
+  is_popular: boolean;
+  is_active?: boolean;
+  sort_order?: number;
+}
+
+export interface BoothPricing {
+  id: string;
+  name: string;
+  price_per_15min: number;
+  currency: string;
+}
+
+export interface PricingConfig {
+  general: {
+    booths: BoothPricing[];
+  };
+  discounts: Discount[];
+  peak_hours: PeakHours[];
+  packages: CreditPackage[];
+}
+
+export const pricingApi = {
+  get: () => adminApi.get<PricingConfig>('/api/admin/pricing'),
+
+  // Discounts
+  createDiscount: (data: Omit<Discount, 'id' | 'created_at'>) =>
+    adminApi.post<Discount>('/api/admin/pricing/discounts', data),
+  updateDiscount: (id: string, data: Partial<Discount>) =>
+    adminApi.patch<Discount>(`/api/admin/pricing/discounts/${id}`, data),
+  deleteDiscount: (id: string) =>
+    adminApi.delete(`/api/admin/pricing/discounts/${id}`),
+
+  // Peak Hours
+  createPeakHours: (data: Omit<PeakHours, 'id'>) =>
+    adminApi.post<PeakHours>('/api/admin/pricing/peak-hours', data),
+  updatePeakHours: (id: string, data: Partial<PeakHours>) =>
+    adminApi.patch<PeakHours>(`/api/admin/pricing/peak-hours/${id}`, data),
+  deletePeakHours: (id: string) =>
+    adminApi.delete(`/api/admin/pricing/peak-hours/${id}`),
+
+  // Credit Packages
+  createPackage: (data: Omit<CreditPackage, 'id'>) =>
+    adminApi.post<CreditPackage>('/api/admin/pricing/packages', data),
+  updatePackage: (id: string, data: Partial<CreditPackage>) =>
+    adminApi.patch<CreditPackage>(`/api/admin/pricing/packages/${id}`, data),
+  deletePackage: (id: string) =>
+    adminApi.delete(`/api/admin/pricing/packages/${id}`),
+};
+
+// ===========================================
+// Transactions API
+// ===========================================
+
+export interface Transaction {
+  id: string;
+  type: string;
+  amount: number;
+  currency: string;
+  credits?: number;
+  method?: string;
+  payment_provider?: string;
+  status: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  user_name?: string;
+  user_email?: string;
+  users?: {
+    id: string;
+    email: string;
+    full_name: string;
+  };
+}
+
+export interface TransactionsMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  summary?: {
+    total_amount: number;
+    count_by_type: Record<string, number>;
+  };
+}
+
+export interface TransactionsParams {
+  page?: number;
+  limit?: number;
+  date_from?: string;
+  date_to?: string;
+  type?: string;
+  search?: string;
+}
+
+export const transactionsApi = {
+  getAll: (params?: TransactionsParams) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set('page', params.page.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.date_from) searchParams.set('date_from', params.date_from);
+    if (params?.date_to) searchParams.set('date_to', params.date_to);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.search) searchParams.set('search', params.search);
+    const queryString = searchParams.toString();
+    return adminApi.get<Transaction[]>(`/api/admin/transactions${queryString ? `?${queryString}` : ''}`);
+  },
+  export: (params?: { date_from?: string; date_to?: string; type?: string }) => {
+    const searchParams = new URLSearchParams();
+    searchParams.set('format', 'csv');
+    if (params?.date_from) searchParams.set('date_from', params.date_from);
+    if (params?.date_to) searchParams.set('date_to', params.date_to);
+    if (params?.type) searchParams.set('type', params.type);
+    return `${API_URL}/api/admin/transactions/export?${searchParams.toString()}`;
+  },
+};
+
+// ===========================================
+// Analytics API
+// ===========================================
+
+export interface BookingAnalytics {
+  date: string;
+  total: number;
+  completed: number;
+  cancelled: number;
+}
+
+export interface RevenueAnalytics {
+  date: string;
+  revenue: number;
+  count: number;
+}
+
+export interface OccupancyAnalytics {
+  booth_id: string;
+  booth_name: string;
+  total_bookings: number;
+  total_minutes: number;
+  occupancy_rate: number;
+}
+
+export const analyticsApi = {
+  getBookings: (period: '7d' | '30d' | '90d' = '7d') =>
+    adminApi.get<BookingAnalytics[]>(`/api/admin/analytics/bookings?period=${period}`),
+  getRevenue: (period: '7d' | '30d' | '90d' = '7d') =>
+    adminApi.get<RevenueAnalytics[]>(`/api/admin/analytics/revenue?period=${period}`),
+  getOccupancy: () =>
+    adminApi.get<OccupancyAnalytics[]>('/api/admin/analytics/occupancy'),
 };
 
 // Types

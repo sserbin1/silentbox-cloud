@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/lib/api';
 
 interface Device {
@@ -45,5 +45,68 @@ export function useDevice(id: string) {
       return response.data;
     },
     enabled: !!id,
+  });
+}
+
+// Unlock device
+export function useUnlockDevice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (deviceId: string) => {
+      const response = await adminApi.post<{ success: boolean; message: string }>(
+        `/api/admin/devices/${deviceId}/unlock`,
+        {}
+      );
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to unlock device');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
+    },
+  });
+}
+
+// Lock device
+export function useLockDevice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (deviceId: string) => {
+      const response = await adminApi.post<{ success: boolean; message: string }>(
+        `/api/admin/devices/${deviceId}/lock`,
+        {}
+      );
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to lock device');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
+    },
+  });
+}
+
+// Sync device
+export function useSyncDevice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (deviceId: string) => {
+      const response = await adminApi.post<{ success: boolean; message: string }>(
+        `/api/admin/devices/${deviceId}/sync`,
+        {}
+      );
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to sync device');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
+    },
   });
 }

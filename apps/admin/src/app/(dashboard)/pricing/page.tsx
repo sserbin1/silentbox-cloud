@@ -35,195 +35,232 @@ import {
   Loader2,
   Plus,
   Trash2,
-  Calendar,
-  Zap,
+  RefreshCw,
 } from 'lucide-react';
-import { useAuthStore } from '@/store/auth';
-
-interface PricingTier {
-  id: string;
-  name: string;
-  price_per_15min: number;
-  min_duration: number;
-  max_duration: number;
-  is_active: boolean;
-}
-
-interface DiscountRule {
-  id: string;
-  name: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  min_hours: number;
-  applies_to: 'all' | 'weekdays' | 'weekends';
-  is_active: boolean;
-}
-
-interface PeakHourRate {
-  id: string;
-  day_of_week: number;
-  start_hour: number;
-  end_hour: number;
-  multiplier: number;
-  is_active: boolean;
-}
-
-interface CreditPackage {
-  id: string;
-  name: string;
-  credits: number;
-  price: number;
-  bonus_credits: number;
-  is_popular: boolean;
-  is_active: boolean;
-}
+import {
+  usePricing,
+  useCreateDiscount,
+  useUpdateDiscount,
+  useDeleteDiscount,
+  useCreatePeakHours,
+  useUpdatePeakHours,
+  useDeletePeakHours,
+  useCreatePackage,
+  useUpdatePackage,
+  useDeletePackage,
+} from '@/hooks/use-pricing';
+import { useSettings, useUpdateSettings } from '@/hooks/use-settings';
+import { Discount, PeakHours, CreditPackage } from '@/lib/api';
 
 const DAYS_OF_WEEK = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 ];
 
 export default function PricingPage() {
-  const { isAuthenticated } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
 
-  // General pricing settings
-  const [basePricePerHour, setBasePricePerHour] = useState('30');
-  const [currency, setCurrency] = useState('PLN');
-  const [minBookingMinutes, setMinBookingMinutes] = useState('30');
-  const [maxBookingHours, setMaxBookingHours] = useState('8');
-  const [gracePeriodMinutes, setGracePeriodMinutes] = useState('15');
-  const [noShowPenaltyPercent, setNoShowPenaltyPercent] = useState('50');
-  const [cancellationHours, setCancellationHours] = useState('1');
+  // Fetch pricing data
+  const { data: pricing, isLoading, error, refetch } = usePricing();
+  const { data: settings, isLoading: settingsLoading } = useSettings();
+  const updateSettings = useUpdateSettings();
 
-  // Discount rules
-  const [discountRules, setDiscountRules] = useState<DiscountRule[]>([
-    {
-      id: '1',
-      name: '2+ Hours Discount',
-      type: 'percentage',
-      value: 10,
-      min_hours: 2,
-      applies_to: 'all',
-      is_active: true,
-    },
-    {
-      id: '2',
-      name: 'Full Day Discount',
-      type: 'percentage',
-      value: 20,
-      min_hours: 8,
-      applies_to: 'all',
-      is_active: true,
-    },
-    {
-      id: '3',
-      name: 'Weekend Special',
-      type: 'percentage',
-      value: 15,
-      min_hours: 1,
-      applies_to: 'weekends',
-      is_active: false,
-    },
-  ]);
+  // Discount mutations
+  const createDiscount = useCreateDiscount();
+  const updateDiscount = useUpdateDiscount();
+  const deleteDiscount = useDeleteDiscount();
 
-  // Peak hour rates
-  const [peakHourRates, setPeakHourRates] = useState<PeakHourRate[]>([
-    { id: '1', day_of_week: 1, start_hour: 9, end_hour: 12, multiplier: 1.2, is_active: true },
-    { id: '2', day_of_week: 1, start_hour: 17, end_hour: 19, multiplier: 1.3, is_active: true },
-    { id: '3', day_of_week: 2, start_hour: 9, end_hour: 12, multiplier: 1.2, is_active: true },
-    { id: '4', day_of_week: 2, start_hour: 17, end_hour: 19, multiplier: 1.3, is_active: true },
-  ]);
+  // Peak hours mutations
+  const createPeakHours = useCreatePeakHours();
+  const updatePeakHours = useUpdatePeakHours();
+  const deletePeakHours = useDeletePeakHours();
 
-  // Credit packages
-  const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([
-    { id: '1', name: 'Starter', credits: 50, price: 50, bonus_credits: 0, is_popular: false, is_active: true },
-    { id: '2', name: 'Basic', credits: 100, price: 95, bonus_credits: 5, is_popular: false, is_active: true },
-    { id: '3', name: 'Pro', credits: 200, price: 180, bonus_credits: 20, is_popular: true, is_active: true },
-    { id: '4', name: 'Business', credits: 500, price: 425, bonus_credits: 75, is_popular: false, is_active: true },
-  ]);
+  // Package mutations
+  const createPackage = useCreatePackage();
+  const updatePackage = useUpdatePackage();
+  const deletePackage = useDeletePackage();
+
+  // Local state for general settings form
+  const [generalForm, setGeneralForm] = useState({
+    base_price_per_hour: settings?.pricing?.base_price_per_hour?.toString() || '30',
+    currency: settings?.pricing?.currency || 'PLN',
+    min_booking_minutes: settings?.pricing?.min_booking_minutes?.toString() || '30',
+    max_booking_hours: settings?.pricing?.max_booking_hours?.toString() || '8',
+    grace_period_minutes: settings?.pricing?.grace_period_minutes?.toString() || '15',
+    no_show_penalty_percent: settings?.pricing?.no_show_penalty_percent?.toString() || '50',
+    free_cancellation_hours: settings?.pricing?.free_cancellation_hours?.toString() || '1',
+  });
+
+  // Update local form when settings load
+  useEffect(() => {
+    if (settings?.pricing) {
+      setGeneralForm({
+        base_price_per_hour: settings.pricing.base_price_per_hour?.toString() || '30',
+        currency: settings.pricing.currency || 'PLN',
+        min_booking_minutes: settings.pricing.min_booking_minutes?.toString() || '30',
+        max_booking_hours: settings.pricing.max_booking_hours?.toString() || '8',
+        grace_period_minutes: settings.pricing.grace_period_minutes?.toString() || '15',
+        no_show_penalty_percent: settings.pricing.no_show_penalty_percent?.toString() || '50',
+        free_cancellation_hours: settings.pricing.free_cancellation_hours?.toString() || '1',
+      });
+    }
+  }, [settings]);
 
   const handleSaveGeneral = async () => {
-    setIsSaving(true);
     try {
-      // API call would go here
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await updateSettings.mutateAsync({
+        pricing: {
+          base_price_per_hour: parseFloat(generalForm.base_price_per_hour),
+          currency: generalForm.currency,
+          min_booking_minutes: parseInt(generalForm.min_booking_minutes),
+          max_booking_hours: parseInt(generalForm.max_booking_hours),
+          grace_period_minutes: parseInt(generalForm.grace_period_minutes),
+          no_show_penalty_percent: parseInt(generalForm.no_show_penalty_percent),
+          free_cancellation_hours: parseInt(generalForm.free_cancellation_hours),
+        },
+      });
       toast.success('Pricing settings saved successfully');
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to save settings');
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  const handleAddDiscount = () => {
-    const newDiscount: DiscountRule = {
-      id: Date.now().toString(),
-      name: 'New Discount',
-      type: 'percentage',
-      value: 10,
-      min_hours: 1,
-      applies_to: 'all',
-      is_active: false,
-    };
-    setDiscountRules([...discountRules, newDiscount]);
+  const handleAddDiscount = async () => {
+    try {
+      await createDiscount.mutateAsync({
+        name: 'New Discount',
+        type: 'percentage',
+        value: 10,
+        min_hours: 1,
+        applies_to: 'all',
+        is_active: false,
+      });
+      toast.success('Discount created');
+    } catch (err) {
+      toast.error('Failed to create discount');
+    }
   };
 
-  const handleRemoveDiscount = (id: string) => {
-    setDiscountRules(discountRules.filter(d => d.id !== id));
+  const handleRemoveDiscount = async (id: string) => {
+    try {
+      await deleteDiscount.mutateAsync(id);
+      toast.success('Discount deleted');
+    } catch (err) {
+      toast.error('Failed to delete discount');
+    }
   };
 
-  const handleUpdateDiscount = (id: string, updates: Partial<DiscountRule>) => {
-    setDiscountRules(discountRules.map(d =>
-      d.id === id ? { ...d, ...updates } : d
-    ));
+  const handleUpdateDiscountField = async (id: string, updates: Partial<Discount>) => {
+    try {
+      await updateDiscount.mutateAsync({ id, data: updates });
+    } catch (err) {
+      toast.error('Failed to update discount');
+    }
   };
 
-  const handleAddPackage = () => {
-    const newPackage: CreditPackage = {
-      id: Date.now().toString(),
-      name: 'New Package',
-      credits: 100,
-      price: 100,
-      bonus_credits: 0,
-      is_popular: false,
-      is_active: false,
-    };
-    setCreditPackages([...creditPackages, newPackage]);
+  const handleAddPeakHour = async () => {
+    try {
+      await createPeakHours.mutateAsync({
+        day_of_week: 1,
+        start_hour: 9,
+        end_hour: 17,
+        multiplier: 1.2,
+        is_active: false,
+      });
+      toast.success('Peak hour created');
+    } catch (err) {
+      toast.error('Failed to create peak hour');
+    }
   };
 
-  const handleRemovePackage = (id: string) => {
-    setCreditPackages(creditPackages.filter(p => p.id !== id));
+  const handleRemovePeakHour = async (id: string) => {
+    try {
+      await deletePeakHours.mutateAsync(id);
+      toast.success('Peak hour deleted');
+    } catch (err) {
+      toast.error('Failed to delete peak hour');
+    }
   };
 
-  const handleUpdatePackage = (id: string, updates: Partial<CreditPackage>) => {
-    setCreditPackages(creditPackages.map(p =>
-      p.id === id ? { ...p, ...updates } : p
-    ));
+  const handleUpdatePeakHourField = async (id: string, updates: Partial<PeakHours>) => {
+    try {
+      await updatePeakHours.mutateAsync({ id, data: updates });
+    } catch (err) {
+      toast.error('Failed to update peak hour');
+    }
   };
 
-  const handleAddPeakHour = () => {
-    const newPeakHour: PeakHourRate = {
-      id: Date.now().toString(),
-      day_of_week: 1,
-      start_hour: 9,
-      end_hour: 17,
-      multiplier: 1.2,
-      is_active: false,
-    };
-    setPeakHourRates([...peakHourRates, newPeakHour]);
+  const handleAddPackage = async () => {
+    try {
+      await createPackage.mutateAsync({
+        name: 'New Package',
+        credits: 100,
+        price: 100,
+        bonus_credits: 0,
+        is_popular: false,
+        is_active: false,
+      });
+      toast.success('Package created');
+    } catch (err) {
+      toast.error('Failed to create package');
+    }
   };
 
-  const handleRemovePeakHour = (id: string) => {
-    setPeakHourRates(peakHourRates.filter(p => p.id !== id));
+  const handleRemovePackage = async (id: string) => {
+    try {
+      await deletePackage.mutateAsync(id);
+      toast.success('Package deleted');
+    } catch (err) {
+      toast.error('Failed to delete package');
+    }
   };
 
-  const handleUpdatePeakHour = (id: string, updates: Partial<PeakHourRate>) => {
-    setPeakHourRates(peakHourRates.map(p =>
-      p.id === id ? { ...p, ...updates } : p
-    ));
+  const handleUpdatePackageField = async (id: string, updates: Partial<CreditPackage>) => {
+    try {
+      await updatePackage.mutateAsync({ id, data: updates });
+    } catch (err) {
+      toast.error('Failed to update package');
+    }
   };
+
+  // Loading state
+  if (isLoading || settingsLoading) {
+    return (
+      <>
+        <Header title="Pricing Configuration" />
+        <div className="p-6 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <>
+        <Header title="Pricing Configuration" />
+        <div className="p-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center text-red-600">
+                <p>Failed to load pricing configuration</p>
+                <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+                <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  const discounts = pricing?.discounts || [];
+  const peakHours = pricing?.peak_hours || [];
+  const packages = pricing?.packages || [];
+  const currency = generalForm.currency;
 
   return (
     <>
@@ -267,11 +304,14 @@ export default function PricingPage() {
                       <Input
                         id="basePrice"
                         type="number"
-                        value={basePricePerHour}
-                        onChange={(e) => setBasePricePerHour(e.target.value)}
+                        value={generalForm.base_price_per_hour}
+                        onChange={(e) => setGeneralForm({ ...generalForm, base_price_per_hour: e.target.value })}
                         className="flex-1"
                       />
-                      <Select value={currency} onValueChange={setCurrency}>
+                      <Select
+                        value={generalForm.currency}
+                        onValueChange={(value) => setGeneralForm({ ...generalForm, currency: value })}
+                      >
                         <SelectTrigger className="w-24">
                           <SelectValue />
                         </SelectTrigger>
@@ -284,13 +324,16 @@ export default function PricingPage() {
                       </Select>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Equivalent to {(parseFloat(basePricePerHour) / 4).toFixed(2)} {currency} per 15 minutes
+                      Equivalent to {(parseFloat(generalForm.base_price_per_hour) / 4).toFixed(2)} {currency} per 15 minutes
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="minBooking">Minimum Booking Duration</Label>
-                    <Select value={minBookingMinutes} onValueChange={setMinBookingMinutes}>
+                    <Select
+                      value={generalForm.min_booking_minutes}
+                      onValueChange={(value) => setGeneralForm({ ...generalForm, min_booking_minutes: value })}
+                    >
                       <SelectTrigger id="minBooking">
                         <SelectValue />
                       </SelectTrigger>
@@ -304,7 +347,10 @@ export default function PricingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="maxBooking">Maximum Booking Duration</Label>
-                    <Select value={maxBookingHours} onValueChange={setMaxBookingHours}>
+                    <Select
+                      value={generalForm.max_booking_hours}
+                      onValueChange={(value) => setGeneralForm({ ...generalForm, max_booking_hours: value })}
+                    >
                       <SelectTrigger id="maxBooking">
                         <SelectValue />
                       </SelectTrigger>
@@ -319,7 +365,10 @@ export default function PricingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="gracePeriod">Grace Period</Label>
-                    <Select value={gracePeriodMinutes} onValueChange={setGracePeriodMinutes}>
+                    <Select
+                      value={generalForm.grace_period_minutes}
+                      onValueChange={(value) => setGeneralForm({ ...generalForm, grace_period_minutes: value })}
+                    >
                       <SelectTrigger id="gracePeriod">
                         <SelectValue />
                       </SelectTrigger>
@@ -345,8 +394,8 @@ export default function PricingPage() {
                       <Input
                         id="noShowPenalty"
                         type="number"
-                        value={noShowPenaltyPercent}
-                        onChange={(e) => setNoShowPenaltyPercent(e.target.value)}
+                        value={generalForm.no_show_penalty_percent}
+                        onChange={(e) => setGeneralForm({ ...generalForm, no_show_penalty_percent: e.target.value })}
                         className="w-20"
                       />
                       <span className="text-muted-foreground">% of booking price</span>
@@ -359,21 +408,21 @@ export default function PricingPage() {
                       <Input
                         id="cancellation"
                         type="number"
-                        value={cancellationHours}
-                        onChange={(e) => setCancellationHours(e.target.value)}
+                        value={generalForm.free_cancellation_hours}
+                        onChange={(e) => setGeneralForm({ ...generalForm, free_cancellation_hours: e.target.value })}
                         className="w-20"
                       />
                       <span className="text-muted-foreground">hours before start</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Full refund if cancelled at least {cancellationHours} hour(s) before
+                      Full refund if cancelled at least {generalForm.free_cancellation_hours} hour(s) before
                     </p>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveGeneral} disabled={isSaving}>
-                    {isSaving ? (
+                  <Button onClick={handleSaveGeneral} disabled={updateSettings.isPending}>
+                    {updateSettings.isPending ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Save className="h-4 w-4 mr-2" />
@@ -396,124 +445,124 @@ export default function PricingPage() {
                       Configure automatic discounts based on booking duration or time of week.
                     </CardDescription>
                   </div>
-                  <Button onClick={handleAddDiscount}>
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button onClick={handleAddDiscount} disabled={createDiscount.isPending}>
+                    {createDiscount.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
                     Add Discount
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead>Min Hours</TableHead>
-                      <TableHead>Applies To</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {discountRules.map((discount) => (
-                      <TableRow key={discount.id}>
-                        <TableCell>
-                          <Input
-                            value={discount.name}
-                            onChange={(e) => handleUpdateDiscount(discount.id, { name: e.target.value })}
-                            className="w-40"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={discount.type}
-                            onValueChange={(value: 'percentage' | 'fixed') =>
-                              handleUpdateDiscount(discount.id, { type: value })
-                            }
-                          >
-                            <SelectTrigger className="w-28">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">Percent</SelectItem>
-                              <SelectItem value="fixed">Fixed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
+                {discounts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No discounts configured. Click "Add Discount" to create one.
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Value</TableHead>
+                        <TableHead>Min Hours</TableHead>
+                        <TableHead>Applies To</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {discounts.map((discount) => (
+                        <TableRow key={discount.id}>
+                          <TableCell>
+                            <Input
+                              value={discount.name}
+                              onChange={(e) => handleUpdateDiscountField(discount.id, { name: e.target.value })}
+                              className="w-40"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={discount.type}
+                              onValueChange={(value: 'percentage' | 'fixed') =>
+                                handleUpdateDiscountField(discount.id, { type: value })
+                              }
+                            >
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="percentage">Percent</SelectItem>
+                                <SelectItem value="fixed">Fixed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                value={discount.value}
+                                onChange={(e) =>
+                                  handleUpdateDiscountField(discount.id, { value: parseFloat(e.target.value) })
+                                }
+                                className="w-16"
+                              />
+                              <span>{discount.type === 'percentage' ? '%' : currency}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
                             <Input
                               type="number"
-                              value={discount.value}
+                              value={discount.min_hours}
                               onChange={(e) =>
-                                handleUpdateDiscount(discount.id, { value: parseFloat(e.target.value) })
+                                handleUpdateDiscountField(discount.id, { min_hours: parseFloat(e.target.value) })
                               }
                               className="w-16"
                             />
-                            <span>{discount.type === 'percentage' ? '%' : currency}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={discount.min_hours}
-                            onChange={(e) =>
-                              handleUpdateDiscount(discount.id, { min_hours: parseFloat(e.target.value) })
-                            }
-                            className="w-16"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={discount.applies_to}
-                            onValueChange={(value: 'all' | 'weekdays' | 'weekends') =>
-                              handleUpdateDiscount(discount.id, { applies_to: value })
-                            }
-                          >
-                            <SelectTrigger className="w-28">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all">All Days</SelectItem>
-                              <SelectItem value="weekdays">Weekdays</SelectItem>
-                              <SelectItem value="weekends">Weekends</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Switch
-                            checked={discount.is_active}
-                            onCheckedChange={(checked) =>
-                              handleUpdateDiscount(discount.id, { is_active: checked })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => handleRemoveDiscount(discount.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-
-                <div className="flex justify-end mt-4">
-                  <Button onClick={handleSaveGeneral} disabled={isSaving}>
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save Discounts
-                  </Button>
-                </div>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={discount.applies_to}
+                              onValueChange={(value: 'all' | 'weekdays' | 'weekends') =>
+                                handleUpdateDiscountField(discount.id, { applies_to: value })
+                              }
+                            >
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All Days</SelectItem>
+                                <SelectItem value="weekdays">Weekdays</SelectItem>
+                                <SelectItem value="weekends">Weekends</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={discount.is_active}
+                              onCheckedChange={(checked) =>
+                                handleUpdateDiscountField(discount.id, { is_active: checked })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleRemoveDiscount(discount.id)}
+                              disabled={deleteDiscount.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -529,131 +578,131 @@ export default function PricingPage() {
                       Set price multipliers for high-demand time slots.
                     </CardDescription>
                   </div>
-                  <Button onClick={handleAddPeakHour}>
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button onClick={handleAddPeakHour} disabled={createPeakHours.isPending}>
+                    {createPeakHours.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
                     Add Peak Hour
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Day</TableHead>
-                      <TableHead>Start</TableHead>
-                      <TableHead>End</TableHead>
-                      <TableHead>Multiplier</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {peakHourRates.map((rate) => (
-                      <TableRow key={rate.id}>
-                        <TableCell>
-                          <Select
-                            value={rate.day_of_week.toString()}
-                            onValueChange={(value) =>
-                              handleUpdatePeakHour(rate.id, { day_of_week: parseInt(value) })
-                            }
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DAYS_OF_WEEK.map((day, index) => (
-                                <SelectItem key={index} value={index.toString()}>
-                                  {day}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={rate.start_hour.toString()}
-                            onValueChange={(value) =>
-                              handleUpdatePeakHour(rate.id, { start_hour: parseInt(value) })
-                            }
-                          >
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: 24 }, (_, i) => (
-                                <SelectItem key={i} value={i.toString()}>
-                                  {i.toString().padStart(2, '0')}:00
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={rate.end_hour.toString()}
-                            onValueChange={(value) =>
-                              handleUpdatePeakHour(rate.id, { end_hour: parseInt(value) })
-                            }
-                          >
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: 24 }, (_, i) => (
-                                <SelectItem key={i} value={i.toString()}>
-                                  {i.toString().padStart(2, '0')}:00
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Input
-                              type="number"
-                              step="0.1"
-                              value={rate.multiplier}
-                              onChange={(e) =>
-                                handleUpdatePeakHour(rate.id, { multiplier: parseFloat(e.target.value) })
-                              }
-                              className="w-20"
-                            />
-                            <span>x</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Switch
-                            checked={rate.is_active}
-                            onCheckedChange={(checked) =>
-                              handleUpdatePeakHour(rate.id, { is_active: checked })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => handleRemovePeakHour(rate.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
+                {peakHours.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No peak hours configured. Click "Add Peak Hour" to create one.
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Day</TableHead>
+                        <TableHead>Start</TableHead>
+                        <TableHead>End</TableHead>
+                        <TableHead>Multiplier</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-
-                <div className="flex justify-end mt-4">
-                  <Button onClick={handleSaveGeneral} disabled={isSaving}>
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save Peak Hours
-                  </Button>
-                </div>
+                    </TableHeader>
+                    <TableBody>
+                      {peakHours.map((rate) => (
+                        <TableRow key={rate.id}>
+                          <TableCell>
+                            <Select
+                              value={rate.day_of_week.toString()}
+                              onValueChange={(value) =>
+                                handleUpdatePeakHourField(rate.id, { day_of_week: parseInt(value) })
+                              }
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DAYS_OF_WEEK.map((day, index) => (
+                                  <SelectItem key={index} value={index.toString()}>
+                                    {day}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={(rate.start_hour ?? 0).toString()}
+                              onValueChange={(value) =>
+                                handleUpdatePeakHourField(rate.id, { start_hour: parseInt(value) })
+                              }
+                            >
+                              <SelectTrigger className="w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <SelectItem key={i} value={i.toString()}>
+                                    {i.toString().padStart(2, '0')}:00
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={(rate.end_hour ?? 0).toString()}
+                              onValueChange={(value) =>
+                                handleUpdatePeakHourField(rate.id, { end_hour: parseInt(value) })
+                              }
+                            >
+                              <SelectTrigger className="w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                  <SelectItem key={i} value={i.toString()}>
+                                    {i.toString().padStart(2, '0')}:00
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={rate.multiplier}
+                                onChange={(e) =>
+                                  handleUpdatePeakHourField(rate.id, { multiplier: parseFloat(e.target.value) })
+                                }
+                                className="w-20"
+                              />
+                              <span>x</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={rate.is_active}
+                              onCheckedChange={(checked) =>
+                                handleUpdatePeakHourField(rate.id, { is_active: checked })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleRemovePeakHour(rate.id)}
+                              disabled={deletePeakHours.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -669,113 +718,113 @@ export default function PricingPage() {
                       Configure credit packages that users can purchase. 1 credit = 1 {currency}.
                     </CardDescription>
                   </div>
-                  <Button onClick={handleAddPackage}>
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button onClick={handleAddPackage} disabled={createPackage.isPending}>
+                    {createPackage.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
                     Add Package
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {creditPackages.map((pkg) => (
-                    <Card key={pkg.id} className={pkg.is_popular ? 'border-primary' : ''}>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <Input
-                            value={pkg.name}
-                            onChange={(e) => handleUpdatePackage(pkg.id, { name: e.target.value })}
-                            className="font-semibold text-lg border-0 p-0 h-auto focus-visible:ring-0"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive -mr-2 -mt-2"
-                            onClick={() => handleRemovePackage(pkg.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        {pkg.is_popular && (
-                          <Badge className="w-fit">Most Popular</Badge>
-                        )}
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs text-muted-foreground">Credits</Label>
-                          <Input
-                            type="number"
-                            value={pkg.credits}
-                            onChange={(e) =>
-                              handleUpdatePackage(pkg.id, { credits: parseInt(e.target.value) })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs text-muted-foreground">Price ({currency})</Label>
-                          <Input
-                            type="number"
-                            value={pkg.price}
-                            onChange={(e) =>
-                              handleUpdatePackage(pkg.id, { price: parseFloat(e.target.value) })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs text-muted-foreground">Bonus Credits</Label>
-                          <Input
-                            type="number"
-                            value={pkg.bonus_credits}
-                            onChange={(e) =>
-                              handleUpdatePackage(pkg.id, { bonus_credits: parseInt(e.target.value) })
-                            }
-                          />
-                        </div>
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={pkg.is_popular}
-                              onCheckedChange={(checked) =>
-                                handleUpdatePackage(pkg.id, { is_popular: checked })
+                {packages.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No packages configured. Click "Add Package" to create one.
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {packages.map((pkg) => (
+                      <Card key={pkg.id} className={pkg.is_popular ? 'border-primary' : ''}>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <Input
+                              value={pkg.name}
+                              onChange={(e) => handleUpdatePackageField(pkg.id, { name: e.target.value })}
+                              className="font-semibold text-lg border-0 p-0 h-auto focus-visible:ring-0"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive -mr-2 -mt-2"
+                              onClick={() => handleRemovePackage(pkg.id)}
+                              disabled={deletePackage.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {pkg.is_popular && (
+                            <Badge className="w-fit">Most Popular</Badge>
+                          )}
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Credits</Label>
+                            <Input
+                              type="number"
+                              value={pkg.credits}
+                              onChange={(e) =>
+                                handleUpdatePackageField(pkg.id, { credits: parseInt(e.target.value) })
                               }
                             />
-                            <Label className="text-xs">Popular</Label>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={pkg.is_active}
-                              onCheckedChange={(checked) =>
-                                handleUpdatePackage(pkg.id, { is_active: checked })
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Price ({currency})</Label>
+                            <Input
+                              type="number"
+                              value={pkg.price}
+                              onChange={(e) =>
+                                handleUpdatePackageField(pkg.id, { price: parseFloat(e.target.value) })
                               }
                             />
-                            <Label className="text-xs">Active</Label>
                           </div>
-                        </div>
-                        <div className="pt-2 text-center">
-                          <p className="text-sm text-muted-foreground">
-                            {pkg.bonus_credits > 0 && (
-                              <span className="text-green-600 font-medium">
-                                +{pkg.bonus_credits} bonus •{' '}
-                              </span>
-                            )}
-                            {((pkg.credits + pkg.bonus_credits) / pkg.price * 100 - 100).toFixed(0)}% value
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                <div className="flex justify-end mt-6">
-                  <Button onClick={handleSaveGeneral} disabled={isSaving}>
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save Packages
-                  </Button>
-                </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Bonus Credits</Label>
+                            <Input
+                              type="number"
+                              value={pkg.bonus_credits}
+                              onChange={(e) =>
+                                handleUpdatePackageField(pkg.id, { bonus_credits: parseInt(e.target.value) })
+                              }
+                            />
+                          </div>
+                          <Separator />
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={pkg.is_popular}
+                                onCheckedChange={(checked) =>
+                                  handleUpdatePackageField(pkg.id, { is_popular: checked })
+                                }
+                              />
+                              <Label className="text-xs">Popular</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={pkg.is_active}
+                                onCheckedChange={(checked) =>
+                                  handleUpdatePackageField(pkg.id, { is_active: checked })
+                                }
+                              />
+                              <Label className="text-xs">Active</Label>
+                            </div>
+                          </div>
+                          <div className="pt-2 text-center">
+                            <p className="text-sm text-muted-foreground">
+                              {pkg.bonus_credits > 0 && (
+                                <span className="text-green-600 font-medium">
+                                  +{pkg.bonus_credits} bonus •{' '}
+                                </span>
+                              )}
+                              {((pkg.credits + pkg.bonus_credits) / pkg.price * 100 - 100).toFixed(0)}% value
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

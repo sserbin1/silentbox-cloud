@@ -18,9 +18,11 @@ import {
   AlertTriangle,
   AlertCircle,
   Smartphone,
+  Loader2,
 } from 'lucide-react';
-import { useDevices } from '@/hooks/use-devices';
+import { useDevices, useUnlockDevice, useLockDevice, useSyncDevice } from '@/hooks/use-devices';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
 const statusColors: Record<string, string> = {
   online: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -113,7 +115,13 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void
 
 export default function DevicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: devices, isLoading, error, refetch } = useDevices();
+  const [loadingDeviceId, setLoadingDeviceId] = useState<string | null>(null);
+  const [loadingAction, setLoadingAction] = useState<'unlock' | 'lock' | 'sync' | null>(null);
+
+  const { data: devices, isLoading, error, refetch, isRefetching } = useDevices();
+  const unlockDevice = useUnlockDevice();
+  const lockDevice = useLockDevice();
+  const syncDevice = useSyncDevice();
 
   const filteredDevices = devices?.filter(
     (device) =>
@@ -131,6 +139,48 @@ export default function DevicesPage() {
   const onlineCount = devicesWithStatus.filter((d) => d.computedStatus === 'online').length;
   const offlineCount = devicesWithStatus.filter((d) => d.computedStatus === 'offline').length;
   const lowBatteryCount = devicesWithStatus.filter((d) => (d.battery_level ?? 100) < 20).length;
+
+  const handleUnlock = async (deviceId: string, deviceName: string) => {
+    setLoadingDeviceId(deviceId);
+    setLoadingAction('unlock');
+    try {
+      await unlockDevice.mutateAsync(deviceId);
+      toast.success(`${deviceName} unlocked successfully`);
+    } catch (err) {
+      toast.error(`Failed to unlock ${deviceName}`);
+    } finally {
+      setLoadingDeviceId(null);
+      setLoadingAction(null);
+    }
+  };
+
+  const handleLock = async (deviceId: string, deviceName: string) => {
+    setLoadingDeviceId(deviceId);
+    setLoadingAction('lock');
+    try {
+      await lockDevice.mutateAsync(deviceId);
+      toast.success(`${deviceName} locked successfully`);
+    } catch (err) {
+      toast.error(`Failed to lock ${deviceName}`);
+    } finally {
+      setLoadingDeviceId(null);
+      setLoadingAction(null);
+    }
+  };
+
+  const handleSync = async (deviceId: string, deviceName: string) => {
+    setLoadingDeviceId(deviceId);
+    setLoadingAction('sync');
+    try {
+      await syncDevice.mutateAsync(deviceId);
+      toast.success(`${deviceName} synced successfully`);
+    } catch (err) {
+      toast.error(`Failed to sync ${deviceName}`);
+    } finally {
+      setLoadingDeviceId(null);
+      setLoadingAction(null);
+    }
+  };
 
   return (
     <>
@@ -200,8 +250,12 @@ export default function DevicesPage() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={() => refetch()} disabled={isRefetching}>
+              {isRefetching ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
               Refresh
             </Button>
           </div>
@@ -228,84 +282,122 @@ export default function DevicesPage() {
               </p>
             </div>
           ) : (
-            devicesWithStatus.map((device) => (
-              <Card key={device.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {device.status === 'locked' ? (
-                          <Lock className="h-4 w-4" />
-                        ) : device.status === 'unlocked' ? (
-                          <Unlock className="h-4 w-4 text-green-500" />
+            devicesWithStatus.map((device) => {
+              const deviceName = device.external_id || `Device ${device.id.slice(0, 8)}`;
+              const isDeviceLoading = loadingDeviceId === device.id;
+              const isLocked = device.status === 'locked';
+
+              return (
+                <Card key={device.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {device.status === 'locked' ? (
+                            <Lock className="h-4 w-4" />
+                          ) : device.status === 'unlocked' ? (
+                            <Unlock className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          {deviceName}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {device.booths?.name || 'Unassigned'}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          statusColors[device.computedStatus]
+                        }`}
+                      >
+                        {device.computedStatus}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-sm text-muted-foreground">
+                      {device.booths?.locations?.name || 'No location'}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <Battery className={`h-4 w-4 ${getBatteryColor(device.battery_level)}`} />
+                        <span className={getBatteryColor(device.battery_level)}>
+                          {device.battery_level !== null && device.battery_level !== undefined
+                            ? `${device.battery_level}%`
+                            : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {device.computedStatus === 'online' ? (
+                          <Wifi className="h-4 w-4 text-green-500" />
                         ) : (
-                          <Lock className="h-4 w-4 text-muted-foreground" />
+                          <WifiOff className="h-4 w-4 text-red-500" />
                         )}
-                        {device.external_id || `Device ${device.id.slice(0, 8)}`}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {device.booths?.name || 'Unassigned'}
-                      </p>
+                        <span className="text-sm text-muted-foreground">
+                          {formatLastSeen(device.last_seen)}
+                        </span>
+                      </div>
                     </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        statusColors[device.computedStatus]
-                      }`}
-                    >
-                      {device.computedStatus}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    {device.booths?.locations?.name || 'No location'}
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Battery className={`h-4 w-4 ${getBatteryColor(device.battery_level)}`} />
-                      <span className={getBatteryColor(device.battery_level)}>
-                        {device.battery_level !== null && device.battery_level !== undefined
-                          ? `${device.battery_level}%`
-                          : 'N/A'}
-                      </span>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      Type: {device.device_type || 'Unknown'}
                     </div>
-                    <div className="flex items-center gap-2">
-                      {device.computedStatus === 'online' ? (
-                        <Wifi className="h-4 w-4 text-green-500" />
+
+                    <div className="flex gap-2">
+                      {isLocked ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          disabled={device.computedStatus === 'offline' || isDeviceLoading}
+                          onClick={() => handleUnlock(device.id, deviceName)}
+                        >
+                          {isDeviceLoading && loadingAction === 'unlock' ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Unlock className="h-4 w-4 mr-1" />
+                          )}
+                          Unlock
+                        </Button>
                       ) : (
-                        <WifiOff className="h-4 w-4 text-red-500" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          disabled={device.computedStatus === 'offline' || isDeviceLoading}
+                          onClick={() => handleLock(device.id, deviceName)}
+                        >
+                          {isDeviceLoading && loadingAction === 'lock' ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Lock className="h-4 w-4 mr-1" />
+                          )}
+                          Lock
+                        </Button>
                       )}
-                      <span className="text-sm text-muted-foreground">
-                        {formatLastSeen(device.last_seen)}
-                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={device.computedStatus === 'offline' || isDeviceLoading}
+                        onClick={() => handleSync(device.id, deviceName)}
+                        title="Sync device"
+                      >
+                        {isDeviceLoading && loadingAction === 'sync' ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button variant="outline" size="sm" title="Device settings">
+                        <Settings className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground capitalize">
-                    Type: {device.device_type || 'Unknown'}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      disabled={device.computedStatus === 'offline'}
-                    >
-                      <Unlock className="h-4 w-4 mr-1" />
-                      Unlock
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       </div>
