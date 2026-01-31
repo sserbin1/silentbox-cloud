@@ -44,22 +44,11 @@ const nextConfig = {
       },
     ],
   },
-  // Enable subdomain routing
+  // Custom domain routing (tenants use their own domains, no subdomains)
   async rewrites() {
     return {
       beforeFiles: [
-        // Handle tenant subdomains - rewrite to include tenant slug
-        {
-          source: '/:path*',
-          has: [
-            {
-              type: 'host',
-              value: '(?<tenant>[^.]+)\\.silentbox\\.io',
-            },
-          ],
-          destination: '/:path*?tenant=:tenant',
-        },
-        // Handle custom domains via header (set by reverse proxy)
+        // Handle custom domains via header (set by reverse proxy like Nginx)
         {
           source: '/:path*',
           has: [

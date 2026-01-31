@@ -5,12 +5,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 /**
  * Get tenant slug from request context
- * Checks: subdomain, custom domain header, query param
+ * Tenants use custom domains only (no subdomains)
+ * Custom domain is set by reverse proxy via x-tenant-domain header
  */
 export async function getTenantSlug(): Promise<string | null> {
   const headersList = headers();
 
-  // Check for custom domain header (set by reverse proxy like Caddy/Nginx)
+  // Check for custom domain header (set by reverse proxy like Nginx)
   const customDomain = headersList.get('x-tenant-domain');
   if (customDomain) {
     // Resolve custom domain to tenant slug via API
@@ -18,17 +19,13 @@ export async function getTenantSlug(): Promise<string | null> {
     return tenant?.slug || null;
   }
 
-  // Check host header for subdomain
+  // Check host directly as custom domain
   const host = headersList.get('host') || '';
-
-  // Pattern: {tenant}.silentbox.io or {tenant}.localhost:3002
-  const subdomainMatch = host.match(/^([^.]+)\.(silentbox\.io|localhost)/);
-  if (subdomainMatch && subdomainMatch[1] !== 'www' && subdomainMatch[1] !== 'booking') {
-    return subdomainMatch[1];
+  // Skip if it's our main domains
+  if (host && !host.includes('silent-box.com') && !host.includes('localhost')) {
+    const tenant = await getTenantByCustomDomain(host.split(':')[0]);
+    return tenant?.slug || null;
   }
-
-  // Fallback: check for tenant in URL search params (for development)
-  // This would be handled by middleware in production
 
   return null;
 }
@@ -132,12 +129,12 @@ export function generateBrandingCSS(branding: TenantBranding): string {
  * Default branding for when no tenant is found (demo/preview mode)
  */
 export const DEFAULT_BRANDING: TenantBranding = {
-  id: 'demo',
-  slug: 'demo',
-  name: 'Silentbox',
+  id: 'meetpoint',
+  slug: 'meetpoint',
+  name: 'MeetPoint',
   tagline: 'Book private workspaces instantly',
   description: 'Find and book quiet, private workspaces near you. Perfect for focused work, calls, or meetings.',
-  primaryColor: '#6366F1',
+  primaryColor: '#4F46E5',
   accentColor: '#F59E0B',
   features: {
     showPricing: true,

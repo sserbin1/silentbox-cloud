@@ -104,15 +104,14 @@ export const tenantMiddleware = async (request: FastifyRequest, reply: FastifyRe
     }
   }
 
-  // 4. From subdomain (e.g., my-network.silentbox.cloud)
+  // 4. From custom domain (set by reverse proxy via x-tenant-domain header)
   if (!tenantId) {
-    const host = request.headers.host || '';
-    const subdomain = host.split('.')[0];
-    if (subdomain && subdomain !== 'api' && subdomain !== 'www' && subdomain !== 'localhost') {
+    const customDomain = request.headers['x-tenant-domain'] as string;
+    if (customDomain) {
       const { data: tenant, error } = await supabaseAdmin
         .from('tenants')
         .select('id, status')
-        .eq('slug', subdomain)
+        .eq('domain', customDomain)
         .single();
 
       if (!error && tenant) {

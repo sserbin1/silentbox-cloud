@@ -9,9 +9,9 @@
 INSERT INTO tenants (id, name, slug, domain, primary_color, payment_providers, default_currency, default_timezone, settings)
 VALUES (
     '00000000-0000-0000-0000-000000000001',
-    'Silentbox Demo',
-    'demo',
-    'demo.silentbox.cloud',
+    'MeetPoint',
+    'meetpoint',
+    'meetpoint.pro',
     '#4F46E5',
     ARRAY['przelewy24', 'monobank'],
     'PLN',
@@ -39,9 +39,9 @@ INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, credits
 VALUES (
     '00000000-0000-0000-0000-000000000002',
     '00000000-0000-0000-0000-000000000001',
-    'admin@demo.silentbox.cloud',
+    'admin@meetpoint.pro',
     '$2b$10$OXSiJDrpkIlxTChJQ6RR1u0OG4dRo6Ib.lxCQIcjFGY5IcTfrer6i', -- demo123
-    'Demo Admin',
+    'MeetPoint Admin',
     'admin',
     1000.00,
     true
@@ -54,9 +54,9 @@ INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, credits
 VALUES (
     '00000000-0000-0000-0000-000000000003',
     '00000000-0000-0000-0000-000000000001',
-    'user@demo.silentbox.cloud',
+    'user@meetpoint.pro',
     '$2b$10$OXSiJDrpkIlxTChJQ6RR1u0OG4dRo6Ib.lxCQIcjFGY5IcTfrer6i', -- demo123
-    'Demo User',
+    'Test User',
     'user',
     100.00,
     true
