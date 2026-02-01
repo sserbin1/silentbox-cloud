@@ -233,3 +233,88 @@ export function useBillingStats() {
     refetchInterval: 60000,
   });
 }
+
+// Invoices hook
+export function useInvoices() {
+  return useQuery({
+    queryKey: ['super', 'billing', 'invoices'],
+    queryFn: async () => {
+      const response = await superAdminApi.getInvoices();
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch invoices');
+      }
+      return response.data;
+    },
+  });
+}
+
+// Create invoice mutation
+export function useCreateInvoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      tenant_id: string;
+      amount: number;
+      due_date: string;
+      description?: string;
+      items: { description: string; quantity: number; unit_price: number }[];
+    }) => {
+      const response = await superAdminApi.createInvoice(data);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to create invoice');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super', 'billing'] });
+    },
+  });
+}
+
+// Update invoice status mutation
+export function useUpdateInvoiceStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled' }) => {
+      const response = await superAdminApi.updateInvoiceStatus(id, status);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to update invoice status');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['super', 'billing'] });
+    },
+  });
+}
+
+// Subscription plans hook
+export function useSubscriptionPlans() {
+  return useQuery({
+    queryKey: ['super', 'billing', 'plans'],
+    queryFn: async () => {
+      const response = await superAdminApi.getSubscriptionPlans();
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch subscription plans');
+      }
+      return response.data;
+    },
+  });
+}
+
+// Tenant activity hook
+export function useTenantActivity(tenantId: string) {
+  return useQuery({
+    queryKey: ['super', 'tenants', tenantId, 'activity'],
+    queryFn: async () => {
+      const response = await superAdminApi.getTenantActivity(tenantId);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch tenant activity');
+      }
+      return response.data;
+    },
+    enabled: !!tenantId,
+  });
+}

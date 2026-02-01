@@ -32,28 +32,73 @@ function useHealthCheck() {
       ttlock: 'checking',
     });
 
-    // Check API
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.silent-box.com';
+
+    // Check API and Database
     try {
-      const apiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.silent-box.com'}/health`, {
+      const apiResponse = await fetch(`${apiUrl}/health`, {
         method: 'GET',
         cache: 'no-store',
       });
-      setHealth(prev => ({ ...prev, api: apiResponse.ok ? 'operational' : 'degraded' }));
 
-      // If API is up, database is likely healthy too
-      setHealth(prev => ({ ...prev, database: apiResponse.ok ? 'healthy' : 'degraded' }));
+      if (apiResponse.ok) {
+        const healthData = await apiResponse.json();
+        setHealth(prev => ({
+          ...prev,
+          api: 'operational',
+          database: healthData.database === 'connected' ? 'healthy' : 'degraded',
+        }));
+      } else {
+        setHealth(prev => ({ ...prev, api: 'degraded', database: 'degraded' }));
+      }
     } catch {
       setHealth(prev => ({ ...prev, api: 'down', database: 'down' }));
     }
 
-    // Payments - check if configured (we'll assume active if API is up)
-    setHealth(prev => ({
-      ...prev,
-      payments: prev.api === 'operational' ? 'active' : 'degraded',
-    }));
+    // Check Payment Processor (Stripe)
+    try {
+      const paymentResponse = await fetch(`${apiUrl}/health/payments`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-    // TTLock - typically degraded until gateway is configured
-    setHealth(prev => ({ ...prev, ttlock: 'degraded' }));
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        setHealth(prev => ({
+          ...prev,
+          payments: paymentData.configured ? 'active' : 'degraded',
+        }));
+      } else {
+        setHealth(prev => ({ ...prev, payments: 'degraded' }));
+      }
+    } catch {
+      // If endpoint doesn't exist, assume active if API is up
+      setHealth(prev => ({
+        ...prev,
+        payments: prev.api === 'operational' ? 'active' : 'degraded',
+      }));
+    }
+
+    // Check TTLock Integration
+    try {
+      const ttlockResponse = await fetch(`${apiUrl}/health/ttlock`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (ttlockResponse.ok) {
+        const ttlockData = await ttlockResponse.json();
+        setHealth(prev => ({
+          ...prev,
+          ttlock: ttlockData.connected ? 'active' : 'degraded',
+        }));
+      } else {
+        setHealth(prev => ({ ...prev, ttlock: 'degraded' }));
+      }
+    } catch {
+      // If endpoint doesn't exist, show degraded
+      setHealth(prev => ({ ...prev, ttlock: 'degraded' }));
+    }
 
     setIsChecking(false);
   };

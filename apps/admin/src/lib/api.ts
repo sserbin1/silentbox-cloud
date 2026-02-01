@@ -624,6 +624,14 @@ export const superAdminApi = {
 
   // Billing
   getBillingStats: () => adminApi.get<BillingStats>('/api/super/billing/stats'),
+  getInvoices: () => adminApi.get<Invoice[]>('/api/super/billing/invoices'),
+  createInvoice: (data: CreateInvoiceData) => adminApi.post<Invoice>('/api/super/billing/invoices', data),
+  updateInvoiceStatus: (id: string, status: Invoice['status']) =>
+    adminApi.put<Invoice>(`/api/super/billing/invoices/${id}/status`, { status }),
+  getSubscriptionPlans: () => adminApi.get<SubscriptionPlanStats[]>('/api/super/billing/plans'),
+
+  // Tenant Activity
+  getTenantActivity: (tenantId: string) => adminApi.get<TenantActivityItem[]>(`/api/super/tenants/${tenantId}/activity`),
 
   // Admins
   getSuperAdmins: () => adminApi.get<User[]>('/api/super/admins'),
@@ -736,3 +744,50 @@ interface PlatformActivityItem {
 }
 
 type PlatformActivity = PlatformActivityItem[];
+
+// Invoice types
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  tenant_id: string;
+  tenant_name: string;
+  amount: number;
+  currency: string;
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled';
+  due_date: string;
+  paid_at?: string;
+  description?: string;
+  items: InvoiceItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoiceItem {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+}
+
+export interface CreateInvoiceData {
+  tenant_id: string;
+  amount: number;
+  due_date: string;
+  description?: string;
+  items: Omit<InvoiceItem, 'total'>[];
+}
+
+export interface SubscriptionPlanStats {
+  plan: string;
+  price: number;
+  tenants_count: number;
+}
+
+export interface TenantActivityItem {
+  id: string;
+  type: 'booking_created' | 'user_added' | 'location_created' | 'payment_received' | 'settings_updated' | string;
+  message: string;
+  actor?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}

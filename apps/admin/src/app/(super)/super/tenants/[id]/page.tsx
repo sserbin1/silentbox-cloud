@@ -36,9 +36,10 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useTenant, useTenantStats, useActivateTenant, useSuspendTenant, useDeleteTenant } from '@/hooks/use-super-admin';
+import { useTenant, useTenantStats, useTenantActivity, useActivateTenant, useSuspendTenant, useDeleteTenant } from '@/hooks/use-super-admin';
 import { toast } from 'sonner';
 import { EditTenantDialog } from '@/components/super/edit-tenant-dialog';
+import { formatDistanceToNow } from 'date-fns';
 
 function DetailSkeleton() {
   return (
@@ -91,6 +92,7 @@ export default function TenantDetailsPage() {
 
   const { data: tenant, isLoading, error, refetch } = useTenant(tenantId);
   const { data: stats, isLoading: statsLoading } = useTenantStats(tenantId);
+  const { data: activity, isLoading: activityLoading } = useTenantActivity(tenantId);
   const activateMutation = useActivateTenant();
   const suspendMutation = useSuspendTenant();
   const deleteMutation = useDeleteTenant();
@@ -346,10 +348,90 @@ export default function TenantDetailsPage() {
             <CardTitle className="text-white">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500">Activity timeline coming soon</p>
-            </div>
+            {activityLoading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full bg-slate-800" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4 bg-slate-800" />
+                      <Skeleton className="h-3 w-24 bg-slate-800" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : activity && activity.length > 0 ? (
+              <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-700" />
+
+                <div className="space-y-4">
+                  {activity.slice(0, 10).map((item) => {
+                    const getActivityIcon = () => {
+                      switch (item.type) {
+                        case 'booking_created':
+                          return <Calendar className="h-4 w-4 text-emerald-400" />;
+                        case 'user_added':
+                          return <Users className="h-4 w-4 text-blue-400" />;
+                        case 'location_created':
+                          return <MapPin className="h-4 w-4 text-violet-400" />;
+                        case 'payment_received':
+                          return <TrendingUp className="h-4 w-4 text-amber-400" />;
+                        case 'settings_updated':
+                          return <Edit className="h-4 w-4 text-slate-400" />;
+                        default:
+                          return <Calendar className="h-4 w-4 text-slate-400" />;
+                      }
+                    };
+
+                    const getActivityColor = () => {
+                      switch (item.type) {
+                        case 'booking_created':
+                          return 'bg-emerald-500/20 border-emerald-500/30';
+                        case 'user_added':
+                          return 'bg-blue-500/20 border-blue-500/30';
+                        case 'location_created':
+                          return 'bg-violet-500/20 border-violet-500/30';
+                        case 'payment_received':
+                          return 'bg-amber-500/20 border-amber-500/30';
+                        default:
+                          return 'bg-slate-700 border-slate-600';
+                      }
+                    };
+
+                    return (
+                      <div key={item.id} className="relative flex items-start gap-3 pl-2">
+                        <div
+                          className={`relative z-10 h-8 w-8 rounded-full border flex items-center justify-center ${getActivityColor()}`}
+                        >
+                          {getActivityIcon()}
+                        </div>
+                        <div className="flex-1 pt-1">
+                          <p className="text-sm text-white">{item.message}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-slate-500">
+                              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                            </span>
+                            {item.actor && (
+                              <>
+                                <span className="text-slate-600">•</span>
+                                <span className="text-xs text-slate-400">{item.actor}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-slate-700 mx-auto mb-3" />
+                <p className="text-slate-500">No activity yet</p>
+                <p className="text-xs text-slate-600 mt-1">Activity will appear here as the tenant uses the platform</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
