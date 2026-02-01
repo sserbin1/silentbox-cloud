@@ -74,21 +74,28 @@ export const locationsRoutes = async (app: FastifyInstance) => {
   app.post('/', { preHandler: operatorMiddleware }, async (request, reply) => {
     const body = createLocationSchema.parse(request.body);
 
+    // Generate slug from name
+    const slug = body.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
     const { data: location, error } = await supabaseAdmin
       .from('locations')
       .insert({
         tenant_id: request.tenantId,
         name: body.name,
+        slug: slug,
         address: body.address,
         city: body.city,
         country: body.country,
         latitude: body.latitude,
         longitude: body.longitude,
         timezone: body.timezone,
-        working_hours: body.workingHours,
+        opening_hours: body.workingHours || {},
         amenities: body.amenities,
         images: body.images,
-        status: 'active',
+        is_active: true,
       })
       .select()
       .single();
@@ -122,7 +129,7 @@ export const locationsRoutes = async (app: FastifyInstance) => {
     if (body.latitude !== undefined) updateData.latitude = body.latitude;
     if (body.longitude !== undefined) updateData.longitude = body.longitude;
     if (body.timezone !== undefined) updateData.timezone = body.timezone;
-    if (body.workingHours !== undefined) updateData.working_hours = body.workingHours;
+    if (body.workingHours !== undefined) updateData.opening_hours = body.workingHours;
     if (body.amenities !== undefined) updateData.amenities = body.amenities;
     if (body.images !== undefined) updateData.images = body.images;
 
@@ -154,10 +161,10 @@ export const locationsRoutes = async (app: FastifyInstance) => {
   app.delete('/:id', { preHandler: operatorMiddleware }, async (request, reply) => {
     const { id } = request.params as { id: string };
 
-    // Soft delete by setting status to inactive
+    // Soft delete by setting is_active to false
     const { error } = await supabaseAdmin
       .from('locations')
-      .update({ status: 'inactive' })
+      .update({ is_active: false })
       .eq('id', id)
       .eq('tenant_id', request.tenantId);
 
