@@ -55,8 +55,10 @@ await app.register(cors, {
     'http://localhost:8081',
     'http://cloud.silent-box.com',
     'https://cloud.silent-box.com',
+    'https://api.cloud.silent-box.com', // API subdomain for CORS preflight
     // Allow all subdomains for tenant booking portals
     /\.silentbox\.io$/,
+    /\.silent-box\.com$/, // Allow all silent-box.com subdomains
   ],
   credentials: true,
 });

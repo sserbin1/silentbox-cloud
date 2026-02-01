@@ -47,13 +47,15 @@ const checkRateLimit = (ip: string): { allowed: boolean; remaining: number; rese
 
 // Cookie options
 // SameSite=None + domain required for cross-origin cookies (admin on cloud.silent-box.com, API on api.cloud.silent-box.com)
-const getCookieOptions = (maxAge: number) => ({
+// IMPORTANT: maxAge is in SECONDS for @fastify/cookie, not milliseconds!
+// Domain must be set to parent domain (.silent-box.com) for cross-subdomain cookie sharing
+const getCookieOptions = (maxAgeSeconds: number) => ({
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
-  domain: env.NODE_ENV === 'production' ? '.silent-box.com' : undefined,
+  secure: true, // Always secure - we're always on HTTPS in production
+  sameSite: 'none' as const, // Required for cross-origin cookies
+  domain: '.silent-box.com', // Share cookies across all subdomains
   path: '/',
-  maxAge,
+  maxAge: maxAgeSeconds,
 });
 
 // Generate CSRF token
@@ -491,8 +493,9 @@ export const authRoutes = async (app: FastifyInstance) => {
     // Generate tokens
     const accessTokenExpiry = '24h';
     const refreshTokenExpiry = rememberMe ? '30d' : '7d';
-    const accessTokenMaxAge = 24 * 60 * 60 * 1000; // 24 hours in ms
-    const refreshTokenMaxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    // maxAge is in SECONDS for @fastify/cookie
+    const accessTokenMaxAge = 24 * 60 * 60; // 24 hours in seconds
+    const refreshTokenMaxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 30 or 7 days in seconds
 
     const accessToken = app.jwt.sign(
       {
@@ -564,10 +567,10 @@ export const authRoutes = async (app: FastifyInstance) => {
       // Ignore decode errors
     }
 
-    // Clear all auth cookies
-    reply.clearCookie('access_token', { path: '/' });
-    reply.clearCookie('refresh_token', { path: '/' });
-    reply.clearCookie('csrf_token', { path: '/' });
+    // Clear all auth cookies - MUST specify same domain as when setting!
+    reply.clearCookie('access_token', { path: '/', domain: '.silent-box.com' });
+    reply.clearCookie('refresh_token', { path: '/', domain: '.silent-box.com' });
+    reply.clearCookie('csrf_token', { path: '/', domain: '.silent-box.com' });
 
     if (userId) {
       await logAuditEvent('admin_logout', userId, tenantId, {}, ip);
@@ -653,11 +656,11 @@ export const authRoutes = async (app: FastifyInstance) => {
 
       const csrfToken = generateCsrfToken();
 
-      // Set new cookies
-      reply.setCookie('access_token', newAccessToken, getCookieOptions(24 * 60 * 60 * 1000));
-      reply.setCookie('refresh_token', newRefreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000));
+      // Set new cookies (maxAge in SECONDS)
+      reply.setCookie('access_token', newAccessToken, getCookieOptions(24 * 60 * 60)); // 24 hours
+      reply.setCookie('refresh_token', newRefreshToken, getCookieOptions(7 * 24 * 60 * 60)); // 7 days
       reply.setCookie('csrf_token', csrfToken, {
-        ...getCookieOptions(7 * 24 * 60 * 60 * 1000),
+        ...getCookieOptions(7 * 24 * 60 * 60), // 7 days
         httpOnly: false,
       });
 
