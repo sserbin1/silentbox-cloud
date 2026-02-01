@@ -307,6 +307,201 @@ export const superadminRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
+  // Get analytics trends (chart data)
+  app.get<{ Querystring: { period?: string } }>('/analytics/trends', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const period = request.query.period || '30d';
+    const days = period === '7d' ? 7 : period === '90d' ? 90 : 30;
+
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Get daily booking counts
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('created_at')
+        .gte('created_at', startDate.toISOString());
+
+      // Get daily revenue from transactions
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('amount, created_at')
+        .eq('status', 'completed')
+        .eq('type', 'credit_purchase')
+        .gte('created_at', startDate.toISOString());
+
+      // Get new tenants by day
+      const { data: newTenants } = await supabase
+        .from('tenants')
+        .select('created_at')
+        .gte('created_at', startDate.toISOString());
+
+      // Aggregate by date
+      const dataByDate: Record<string, { bookings: number; revenue: number; tenants: number }> = {};
+
+      // Initialize all dates
+      for (let i = 0; i < days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - (days - 1 - i));
+        const dateKey = date.toISOString().split('T')[0];
+        dataByDate[dateKey] = { bookings: 0, revenue: 0, tenants: 0 };
+      }
+
+      // Count bookings per day
+      bookings?.forEach((b: any) => {
+        const dateKey = new Date(b.created_at).toISOString().split('T')[0];
+        if (dataByDate[dateKey]) {
+          dataByDate[dateKey].bookings++;
+        }
+      });
+
+      // Sum revenue per day
+      transactions?.forEach((t: any) => {
+        const dateKey = new Date(t.created_at).toISOString().split('T')[0];
+        if (dataByDate[dateKey]) {
+          dataByDate[dateKey].revenue += t.amount || 0;
+        }
+      });
+
+      // Count new tenants per day
+      newTenants?.forEach((t: any) => {
+        const dateKey = new Date(t.created_at).toISOString().split('T')[0];
+        if (dataByDate[dateKey]) {
+          dataByDate[dateKey].tenants++;
+        }
+      });
+
+      // Convert to array
+      const chartData = Object.entries(dataByDate).map(([date, values]) => ({
+        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        ...values,
+      }));
+
+      return { success: true, data: chartData };
+    } catch (error) {
+      logger.error({ error }, 'Failed to get analytics trends');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get analytics trends',
+      });
+    }
+  });
+
+  // Get top performing tenants
+  app.get<{ Querystring: { limit?: string } }>('/analytics/top-tenants', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    const limit = Math.min(20, parseInt(request.query.limit || '5', 10));
+
+    try {
+      // Get all tenants
+      const { data: tenants } = await supabase
+        .from('tenants')
+        .select('id, name, slug')
+        .eq('status', 'active');
+
+      if (!tenants || tenants.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      // Get booking counts per tenant
+      const { data: bookingCounts } = await supabase
+        .from('bookings')
+        .select('tenant_id');
+
+      // Get revenue per tenant
+      const { data: revenues } = await supabase
+        .from('transactions')
+        .select('tenant_id, amount')
+        .eq('status', 'completed')
+        .eq('type', 'credit_purchase');
+
+      // Aggregate stats per tenant
+      const tenantStats: Record<string, { bookings: number; revenue: number }> = {};
+
+      bookingCounts?.forEach((b: any) => {
+        if (!tenantStats[b.tenant_id]) {
+          tenantStats[b.tenant_id] = { bookings: 0, revenue: 0 };
+        }
+        tenantStats[b.tenant_id].bookings++;
+      });
+
+      revenues?.forEach((r: any) => {
+        if (!tenantStats[r.tenant_id]) {
+          tenantStats[r.tenant_id] = { bookings: 0, revenue: 0 };
+        }
+        tenantStats[r.tenant_id].revenue += r.amount || 0;
+      });
+
+      // Merge with tenant data and sort by revenue
+      const topTenants = tenants
+        .map((t: any) => ({
+          ...t,
+          bookings: tenantStats[t.id]?.bookings || 0,
+          revenue: tenantStats[t.id]?.revenue || 0,
+        }))
+        .sort((a: any, b: any) => b.revenue - a.revenue)
+        .slice(0, limit);
+
+      return { success: true, data: topTenants };
+    } catch (error) {
+      logger.error({ error }, 'Failed to get top tenants');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get top tenants',
+      });
+    }
+  });
+
+  // Get billing stats
+  app.get('/billing/stats', { preHandler: verifySuperAdmin }, async (request, reply) => {
+    try {
+      // Get total revenue (all completed transactions)
+      const { data: allTransactions } = await supabase
+        .from('transactions')
+        .select('amount, created_at')
+        .eq('type', 'credit_purchase')
+        .eq('status', 'completed');
+
+      const totalRevenue = allTransactions?.reduce((sum, tx) => sum + (tx.amount || 0), 0) || 0;
+
+      // Calculate MRR (Monthly Recurring Revenue) - last 30 days average
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const recentTransactions = allTransactions?.filter(
+        (tx) => new Date(tx.created_at) >= thirtyDaysAgo
+      ) || [];
+      const mrr = recentTransactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+
+      // Get active subscriptions (active tenants count)
+      const { count: activeSubscriptions } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get pending and overdue counts (placeholder - would need invoice table)
+      // For now, return 0 as we don't have invoicing implemented yet
+      const pendingInvoices = 0;
+      const overdueInvoices = 0;
+
+      return {
+        success: true,
+        data: {
+          mrr,
+          totalRevenue,
+          activeSubscriptions: activeSubscriptions || 0,
+          pendingInvoices,
+          overdueInvoices,
+        },
+      };
+    } catch (error) {
+      logger.error({ error }, 'Failed to get billing stats');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get billing stats',
+      });
+    }
+  });
+
   // Get all tenants
   app.get('/tenants', { preHandler: verifySuperAdmin }, async (request, reply) => {
     try {

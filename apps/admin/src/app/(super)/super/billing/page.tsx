@@ -2,9 +2,39 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CreditCard, FileText, TrendingUp, Calendar, Download, Plus } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CreditCard, FileText, TrendingUp, Calendar, Download, Plus, AlertCircle, RefreshCw } from 'lucide-react';
+import { useBillingStats } from '@/hooks/use-super-admin';
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('pl-PL', {
+    style: 'currency',
+    currency: 'PLN',
+  }).format(amount);
+}
 
 export default function BillingPage() {
+  const { data: stats, isLoading, error, refetch } = useBillingStats();
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card className="bg-slate-900 border-slate-800">
+          <CardContent className="pt-6">
+            <div className="text-center text-red-400">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+              <p>Failed to load billing data</p>
+              <Button variant="outline" className="mt-4 border-slate-700" onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -28,8 +58,12 @@ export default function BillingPage() {
                 <TrendingUp className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">0 zł</p>
-                <p className="text-xs text-slate-500">MRR</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-24 bg-slate-800" />
+                ) : (
+                  <p className="text-2xl font-bold text-white">{formatCurrency(stats?.mrr || 0)}</p>
+                )}
+                <p className="text-xs text-slate-500">MRR (30 days)</p>
               </div>
             </div>
           </CardContent>
@@ -42,7 +76,11 @@ export default function BillingPage() {
                 <CreditCard className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">0</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16 bg-slate-800" />
+                ) : (
+                  <p className="text-2xl font-bold text-white">{stats?.activeSubscriptions || 0}</p>
+                )}
                 <p className="text-xs text-slate-500">Active Subscriptions</p>
               </div>
             </div>
@@ -56,7 +94,11 @@ export default function BillingPage() {
                 <FileText className="h-5 w-5 text-amber-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">0</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-12 bg-slate-800" />
+                ) : (
+                  <p className="text-2xl font-bold text-white">{stats?.pendingInvoices || 0}</p>
+                )}
                 <p className="text-xs text-slate-500">Pending Invoices</p>
               </div>
             </div>
@@ -70,7 +112,11 @@ export default function BillingPage() {
                 <Calendar className="h-5 w-5 text-red-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">0</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-12 bg-slate-800" />
+                ) : (
+                  <p className="text-2xl font-bold text-white">{stats?.overdueInvoices || 0}</p>
+                )}
                 <p className="text-xs text-slate-500">Overdue</p>
               </div>
             </div>
@@ -128,18 +174,23 @@ export default function BillingPage() {
         </Card>
       </div>
 
-      {/* Revenue Chart Placeholder */}
+      {/* Total Revenue Card */}
       <Card className="bg-slate-900 border-slate-800">
         <CardHeader>
-          <CardTitle className="text-white">Revenue Over Time</CardTitle>
+          <CardTitle className="text-white">Total Revenue</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-center justify-center">
-            <div className="text-center">
-              <TrendingUp className="h-12 w-12 text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500">Revenue chart will be displayed here</p>
-              <p className="text-xs text-slate-600 mt-1">Data will populate as subscriptions are processed</p>
-            </div>
+          <div className="text-center py-8">
+            {isLoading ? (
+              <Skeleton className="h-12 w-48 mx-auto bg-slate-800" />
+            ) : (
+              <>
+                <p className="text-4xl font-bold text-emerald-400">
+                  {formatCurrency(stats?.totalRevenue || 0)}
+                </p>
+                <p className="text-slate-500 mt-2">All-time revenue from completed transactions</p>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

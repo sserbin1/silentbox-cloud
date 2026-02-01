@@ -577,11 +577,42 @@ export const superAdminApi = {
   getPlatformStats: () => adminApi.get<PlatformStats>('/api/super/stats/overview'),
   getActivity: () => adminApi.get<PlatformActivity>('/api/super/activity'),
 
+  // Analytics
+  getAnalyticsTrends: (period: string) => adminApi.get<AnalyticsTrend[]>(`/api/super/analytics/trends?period=${period}`),
+  getTopTenants: (limit: number) => adminApi.get<TopTenant[]>(`/api/super/analytics/top-tenants?limit=${limit}`),
+
+  // Billing
+  getBillingStats: () => adminApi.get<BillingStats>('/api/super/billing/stats'),
+
   // Admins
   getSuperAdmins: () => adminApi.get<User[]>('/api/super/admins'),
   promoteToSuperAdmin: (userId: string) => adminApi.post(`/api/super/admins/${userId}/promote`, {}),
   demoteSuperAdmin: (userId: string) => adminApi.post(`/api/super/admins/${userId}/demote`, {}),
 };
+
+// Analytics types
+export interface AnalyticsTrend {
+  date: string;
+  bookings: number;
+  revenue: number;
+  tenants: number;
+}
+
+export interface TopTenant {
+  id: string;
+  name: string;
+  slug: string;
+  bookings: number;
+  revenue: number;
+}
+
+export interface BillingStats {
+  mrr: number;
+  totalRevenue: number;
+  activeSubscriptions: number;
+  pendingInvoices: number;
+  overdueInvoices: number;
+}
 
 export interface Tenant {
   id: string;

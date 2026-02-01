@@ -38,7 +38,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { usePlatformStats, useTenants, usePlatformActivity } from '@/hooks/use-super-admin';
+import { usePlatformStats, useTenants, usePlatformActivity, useAnalyticsTrends, useTopTenants } from '@/hooks/use-super-admin';
 
 // Chart colors
 const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
@@ -49,27 +49,10 @@ export default function AnalyticsPage() {
   const { data: stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = usePlatformStats();
   const { data: tenants, isLoading: tenantsLoading } = useTenants();
   const { data: activity, isLoading: activityLoading } = usePlatformActivity();
+  const { data: chartData, isLoading: chartLoading } = useAnalyticsTrends(period);
+  const { data: topTenantsData, isLoading: topTenantsLoading } = useTopTenants(5);
 
-  const isLoading = statsLoading || tenantsLoading;
-
-  // Generate mock chart data based on period (when real data is available, replace)
-  const generateChartData = () => {
-    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-    const data = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        tenants: Math.floor(Math.random() * 3) + (stats?.totalTenants || 0),
-        bookings: Math.floor(Math.random() * 50) + 10,
-        revenue: Math.floor(Math.random() * 5000) + 1000,
-      });
-    }
-    return data;
-  };
-
-  const chartData = generateChartData();
+  const isLoading = statsLoading || tenantsLoading || chartLoading;
 
   // Tenant distribution by status
   const tenantsByStatus = tenants?.reduce((acc, tenant) => {
@@ -82,12 +65,8 @@ export default function AnalyticsPage() {
     value,
   }));
 
-  // Top tenants by revenue/bookings (mock - replace with real data)
-  const topTenants = tenants?.slice(0, 5).map((tenant, i) => ({
-    ...tenant,
-    revenue: Math.floor(Math.random() * 10000) + 1000,
-    bookings: Math.floor(Math.random() * 100) + 20,
-  })) || [];
+  // Top tenants by revenue/bookings (real data from API)
+  const topTenants = topTenantsData || [];
 
   // Country distribution
   const tenantsByCountry = tenants?.reduce((acc, tenant) => {
@@ -251,7 +230,7 @@ export default function AnalyticsPage() {
               <div className="h-64 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
               </div>
-            ) : chartData.length === 0 ? (
+            ) : !chartData || chartData.length === 0 ? (
               <div className="h-64 flex items-center justify-center">
                 <div className="text-center">
                   <BarChart3 className="h-12 w-12 text-slate-700 mx-auto mb-3" />
@@ -293,7 +272,7 @@ export default function AnalyticsPage() {
               <div className="h-64 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
               </div>
-            ) : chartData.length === 0 ? (
+            ) : !chartData || chartData.length === 0 ? (
               <div className="h-64 flex items-center justify-center">
                 <div className="text-center">
                   <BarChart3 className="h-12 w-12 text-slate-700 mx-auto mb-3" />
@@ -441,12 +420,8 @@ export default function AnalyticsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          tenant.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
-                          tenant.status === 'trialing' ? 'bg-amber-500/20 text-amber-400' :
-                          'bg-slate-500/20 text-slate-400'
-                        }`}>
-                          {tenant.status}
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                          active
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right text-white">{tenant.bookings}</td>

@@ -188,3 +188,48 @@ export function useDeleteTenant() {
     },
   });
 }
+
+// Analytics trends hook
+export function useAnalyticsTrends(period: '7d' | '30d' | '90d' = '30d') {
+  return useQuery({
+    queryKey: ['super', 'analytics', 'trends', period],
+    queryFn: async () => {
+      const response = await superAdminApi.getAnalyticsTrends(period);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch analytics trends');
+      }
+      return response.data;
+    },
+    refetchInterval: 60000,
+  });
+}
+
+// Top tenants hook
+export function useTopTenants(limit: number = 5) {
+  return useQuery({
+    queryKey: ['super', 'analytics', 'top-tenants', limit],
+    queryFn: async () => {
+      const response = await superAdminApi.getTopTenants(limit);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch top tenants');
+      }
+      return response.data;
+    },
+    refetchInterval: 60000,
+  });
+}
+
+// Billing stats hook
+export function useBillingStats() {
+  return useQuery({
+    queryKey: ['super', 'billing', 'stats'],
+    queryFn: async () => {
+      const response = await superAdminApi.getBillingStats();
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch billing stats');
+      }
+      return response.data;
+    },
+    refetchInterval: 60000,
+  });
+}

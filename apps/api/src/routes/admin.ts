@@ -1697,4 +1697,104 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
       });
     }
   });
+
+  // ===========================================
+  // Audit Logs (Phase 2)
+  // ===========================================
+
+  // Get audit logs with pagination and filtering
+  app.get<{
+    Querystring: {
+      page?: string;
+      limit?: string;
+      action?: string;
+      resource?: string;
+      date_from?: string;
+      date_to?: string;
+    };
+  }>('/audit-logs', async (request: any, reply) => {
+    const tenantId = request.adminTenantId;
+    const {
+      page = '1',
+      limit = '50',
+      action,
+      resource,
+      date_from,
+      date_to,
+    } = request.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const offset = (pageNum - 1) * limitNum;
+
+    try {
+      let query = supabase
+        .from('audit_logs')
+        .select(`
+          id,
+          action,
+          resource,
+          resource_id,
+          details,
+          created_at,
+          users(id, email, full_name)
+        `, { count: 'exact' })
+        .eq('tenant_id', tenantId);
+
+      if (action) {
+        query = query.eq('action', action);
+      }
+      if (resource) {
+        query = query.eq('resource', resource);
+      }
+      if (date_from) {
+        query = query.gte('created_at', date_from);
+      }
+      if (date_to) {
+        query = query.lte('created_at', date_to);
+      }
+
+      const { count: total } = await query;
+
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
+
+      if (error) throw error;
+
+      // Get unique actions and resources for filter dropdowns
+      const { data: actionsData } = await supabase
+        .from('audit_logs')
+        .select('action')
+        .eq('tenant_id', tenantId);
+
+      const { data: resourcesData } = await supabase
+        .from('audit_logs')
+        .select('resource')
+        .eq('tenant_id', tenantId);
+
+      const uniqueActions = [...new Set(actionsData?.map((a: any) => a.action) || [])];
+      const uniqueResources = [...new Set(resourcesData?.map((r: any) => r.resource) || [])];
+
+      return {
+        success: true,
+        data,
+        meta: {
+          total: total || 0,
+          page: pageNum,
+          limit: limitNum,
+          filters: {
+            actions: uniqueActions,
+            resources: uniqueResources,
+          },
+        },
+      };
+    } catch (error) {
+      logger.error({ error, tenantId }, 'Failed to get audit logs');
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to get audit logs',
+      });
+    }
+  });
 };
