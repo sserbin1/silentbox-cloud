@@ -52,12 +52,9 @@ export default function LoginPage() {
         tenant_id: result.data.user.tenantId,
       });
 
-      // Redirect based on role
-      if (result.data.user.role === 'super_admin') {
-        router.push('/super');
-      } else {
-        router.push('/dashboard');
-      }
+      // Redirect based on role - use window.location for hard redirect to ensure cookies are sent
+      const redirectUrl = result.data.user.role === 'super_admin' ? '/super' : '/dashboard';
+      window.location.href = redirectUrl;
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       console.error('Login error:', err);
