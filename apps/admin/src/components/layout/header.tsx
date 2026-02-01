@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Search, Moon, Sun, Command, Plus, User, Settings, LogOut, Check } from 'lucide-react';
+import { Bell, Search, Moon, Sun, Command, User, Settings, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,8 +103,8 @@ export function Header({ title, subtitle }: HeaderProps) {
           </kbd>
         </div>
 
-        {/* Quick Actions */}
-        <Button
+        {/* Quick Actions - commented out until /bookings/new page is created */}
+        {/* <Button
           variant="outline"
           size="sm"
           className="hidden sm:flex items-center gap-2 border-border/50 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
@@ -112,7 +112,7 @@ export function Header({ title, subtitle }: HeaderProps) {
         >
           <Plus className="h-4 w-4" />
           <span>{t('admin.header.newBooking')}</span>
-        </Button>
+        </Button> */}
 
         <div className="flex items-center gap-1 ml-2">
           {/* Theme toggle */}
