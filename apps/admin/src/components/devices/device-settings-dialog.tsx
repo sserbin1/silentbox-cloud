@@ -36,7 +36,6 @@ interface Device {
   last_seen?: string | null;
   status?: string;
   booths?: {
-    id: string;
     name: string;
     locations?: {
       name: string;
