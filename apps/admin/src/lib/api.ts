@@ -226,8 +226,27 @@ export const locationsApi = {
 export const boothsApi = {
   getAll: (locationId?: string) => adminApi.get<Booth[]>(`/api/booths${locationId ? `?locationId=${locationId}` : ''}`),
   getById: (id: string) => adminApi.get<Booth>(`/api/booths/${id}`),
-  create: (data: CreateBoothData) => adminApi.post<Booth>('/api/booths', data),
-  update: (id: string, data: UpdateBoothData) => adminApi.put<Booth>(`/api/booths/${id}`, data),
+  create: (data: CreateBoothData) => {
+    // Transform to API format (camelCase, pricePer15Min)
+    const apiData = {
+      locationId: data.location_id,
+      name: data.name,
+      pricePer15Min: data.price_per_hour / 4, // Convert hourly to 15min rate
+      amenities: data.amenities || [],
+    };
+    return adminApi.post<Booth>('/api/booths', apiData);
+  },
+  update: (id: string, data: UpdateBoothData) => {
+    // Transform to API format
+    const apiData: Record<string, unknown> = {};
+    if (data.name !== undefined) apiData.name = data.name;
+    if (data.amenities !== undefined) apiData.amenities = data.amenities;
+    if (data.status !== undefined) apiData.status = data.status;
+    if (data.price_per_hour !== undefined) {
+      apiData.pricePer15Min = data.price_per_hour / 4;
+    }
+    return adminApi.patch<Booth>(`/api/booths/${id}`, apiData);
+  },
   delete: (id: string) => adminApi.delete(`/api/booths/${id}`),
 };
 
