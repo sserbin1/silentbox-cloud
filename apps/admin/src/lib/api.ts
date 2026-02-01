@@ -583,7 +583,7 @@ export const superAdminApi = {
   demoteSuperAdmin: (userId: string) => adminApi.post(`/api/super/admins/${userId}/demote`, {}),
 };
 
-interface Tenant {
+export interface Tenant {
   id: string;
   name: string;
   slug: string;

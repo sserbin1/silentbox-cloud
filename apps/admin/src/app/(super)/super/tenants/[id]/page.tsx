@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTenant, useTenantStats, useActivateTenant, useSuspendTenant, useDeleteTenant } from '@/hooks/use-super-admin';
+import { toast } from 'sonner';
 
 function DetailSkeleton() {
   return (
@@ -95,25 +96,28 @@ export default function TenantDetailsPage() {
   const handleActivate = async () => {
     try {
       await activateMutation.mutateAsync(tenantId);
+      toast.success('Tenant activated successfully');
     } catch (error) {
-      console.error('Failed to activate tenant:', error);
+      toast.error('Failed to activate tenant');
     }
   };
 
   const handleSuspend = async () => {
     try {
       await suspendMutation.mutateAsync(tenantId);
+      toast.success('Tenant suspended successfully');
     } catch (error) {
-      console.error('Failed to suspend tenant:', error);
+      toast.error('Failed to suspend tenant');
     }
   };
 
   const handleDeleteConfirm = async () => {
     try {
       await deleteMutation.mutateAsync(tenantId);
+      toast.success('Tenant deleted successfully');
       router.push('/super/tenants');
     } catch (error) {
-      console.error('Failed to delete tenant:', error);
+      toast.error('Failed to delete tenant');
     }
   };
 

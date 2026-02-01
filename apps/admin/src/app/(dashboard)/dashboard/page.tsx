@@ -20,6 +20,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useDashboardStats, useRecentBookings, useLocationsOverview } from '@/hooks/use-dashboard';
+import { useLocationOccupancy } from '@/hooks/use-occupancy';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 
@@ -100,6 +101,7 @@ export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useDashboardStats();
   const { data: recentBookings, isLoading: bookingsLoading, error: bookingsError, refetch: refetchBookings } = useRecentBookings();
   const { data: locations, isLoading: locationsLoading, error: locationsError, refetch: refetchLocations } = useLocationsOverview();
+  const { data: locationOccupancy, isLoading: occupancyLoading } = useLocationOccupancy();
 
   // Calculate occupancy percentage
   const occupancyPercent = stats ? Math.round((stats.occupiedBooths / (stats.totalBooths || 1)) * 100) : 0;
@@ -365,8 +367,9 @@ export default function DashboardPage() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {locations.map((location) => {
                   const boothCount = location.booths_count || 0;
-                  // Mock occupancy for now - will need real-time data
-                  const occupancy = Math.floor(Math.random() * 100);
+                  // Get real occupancy from the occupancy hook
+                  const occupancyData = locationOccupancy?.find(o => o.locationId === location.id);
+                  const occupancy = occupancyData?.occupancyPercent ?? 0;
 
                   return (
                     <div
@@ -386,7 +389,36 @@ export default function DashboardPage() {
                           {location.status}
                         </span>
                       </div>
+                      {/* Occupancy bar */}
                       <div className="mt-4">
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-muted-foreground">Occupancy</span>
+                          {occupancyLoading ? (
+                            <Skeleton className="h-3 w-8" />
+                          ) : (
+                            <span className={`font-medium ${
+                              occupancy >= 80 ? 'text-red-500' :
+                              occupancy >= 50 ? 'text-amber-500' :
+                              'text-emerald-500'
+                            }`}>{occupancy}%</span>
+                          )}
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          {occupancyLoading ? (
+                            <Skeleton className="h-full w-full" />
+                          ) : (
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                occupancy >= 80 ? 'bg-red-500' :
+                                occupancy >= 50 ? 'bg-amber-500' :
+                                'bg-emerald-500'
+                              }`}
+                              style={{ width: `${occupancy}%` }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3">
                         <p className="text-sm text-muted-foreground truncate">{location.address}</p>
                         <p className="text-xs text-muted-foreground mt-1">{location.city}</p>
                       </div>

@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,9 +38,21 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Plus, Search, MapPin, DollarSign, Edit, Wifi, WifiOff, Trash2, AlertCircle, RefreshCw, Loader2, Box } from 'lucide-react';
+import { toast } from 'sonner';
 import { useBooths, useCreateBooth, useUpdateBooth, useDeleteBooth } from '@/hooks/use-booths';
 import { useLocations } from '@/hooks/use-locations';
 import Link from 'next/link';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+
+// Form schema with string amenities (converted to array on submit)
+const boothFormSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
+  location_id: z.string().min(1, 'Location is required'),
+  price_per_hour: z.number().min(0, 'Price must be positive').max(10000, 'Price seems too high'),
+  amenities: z.string(),
+});
+
+type BoothFormInput = z.infer<typeof boothFormSchema>;
 
 const statusColors: Record<string, string> = {
   available: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -84,19 +99,118 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void
   );
 }
 
-interface BoothFormData {
-  name: string;
-  location_id: string;
-  price_per_hour: string;
-  amenities: string;
+interface BoothFormProps {
+  defaultValues?: BoothFormInput;
+  onSubmit: (data: BoothFormInput) => Promise<void>;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  submitLabel: string;
+  locations: Array<{ id: string; name: string }>;
 }
 
-const defaultFormData: BoothFormData = {
-  name: '',
-  location_id: '',
-  price_per_hour: '',
-  amenities: '',
-};
+function BoothForm({ defaultValues, onSubmit, onCancel, isSubmitting, submitLabel, locations }: BoothFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<BoothFormInput>({
+    resolver: zodResolver(boothFormSchema),
+    defaultValues: defaultValues || {
+      name: '',
+      location_id: '',
+      price_per_hour: 0,
+      amenities: '',
+    },
+  });
+
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
+
+  const nameAriaProps = getFieldAriaProps('name', !!errors.name);
+  const locationAriaProps = getFieldAriaProps('location_id', !!errors.location_id);
+  const priceAriaProps = getFieldAriaProps('price_per_hour', !!errors.price_per_hour);
+  const amenitiesAriaProps = getFieldAriaProps('amenities', !!errors.amenities);
+
+  const watchedLocationId = watch('location_id');
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            placeholder="e.g., Booth A1"
+            aria-invalid={nameAriaProps['aria-invalid']}
+            aria-describedby={nameAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.name?.message} id={nameAriaProps.errorId} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="location">Location</Label>
+          <Select
+            value={watchedLocationId}
+            onValueChange={(value) => setValue('location_id', value)}
+          >
+            <SelectTrigger
+              aria-invalid={locationAriaProps['aria-invalid']}
+              aria-describedby={locationAriaProps['aria-describedby']}
+            >
+              <SelectValue placeholder="Select a location" />
+            </SelectTrigger>
+            <SelectContent>
+              {locations?.map((location) => (
+                <SelectItem key={location.id} value={location.id}>
+                  {location.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormError message={errors.location_id?.message} id={locationAriaProps.errorId} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="price">Price per Hour (PLN)</Label>
+          <Input
+            id="price"
+            type="number"
+            {...register('price_per_hour', { valueAsNumber: true })}
+            placeholder="e.g., 30"
+            aria-invalid={priceAriaProps['aria-invalid']}
+            aria-describedby={priceAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.price_per_hour?.message} id={priceAriaProps.errorId} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="amenities">Amenities (comma-separated)</Label>
+          <Input
+            id="amenities"
+            {...register('amenities')}
+            placeholder="e.g., WiFi, Power outlets, Monitor"
+            aria-invalid={amenitiesAriaProps['aria-invalid']}
+            aria-describedby={amenitiesAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.amenities?.message} id={amenitiesAriaProps.errorId} />
+        </div>
+      </div>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {submitLabel}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
 
 function BoothsContent() {
   const searchParams = useSearchParams();
@@ -107,7 +221,6 @@ function BoothsContent() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBooth, setSelectedBooth] = useState<any>(null);
-  const [formData, setFormData] = useState<BoothFormData>(defaultFormData);
 
   const { data: booths, isLoading, error, refetch } = useBooths(locationIdFilter || undefined);
   const { data: locations } = useLocations();
@@ -125,49 +238,43 @@ function BoothsContent() {
     return location?.name || 'Unknown Location';
   };
 
-  const handleCreateSubmit = async () => {
+  const handleCreateSubmit = async (data: BoothFormInput) => {
     try {
       await createMutation.mutateAsync({
-        name: formData.name,
-        location_id: formData.location_id,
-        price_per_hour: parseFloat(formData.price_per_hour) || 0,
-        amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean),
+        name: data.name,
+        location_id: data.location_id,
+        price_per_hour: data.price_per_hour,
+        amenities: data.amenities.split(',').map(a => a.trim()).filter(Boolean),
       });
+      toast.success('Booth created successfully');
       setIsCreateDialogOpen(false);
-      setFormData(defaultFormData);
-    } catch (error) {
-      console.error('Failed to create booth:', error);
+    } catch (err) {
+      toast.error('Failed to create booth');
     }
   };
 
   const handleEditClick = (booth: any) => {
     setSelectedBooth(booth);
-    setFormData({
-      name: booth.name,
-      location_id: booth.location_id,
-      price_per_hour: booth.price_per_hour?.toString() || '',
-      amenities: booth.amenities?.join(', ') || '',
-    });
     setIsEditDialogOpen(true);
   };
 
-  const handleEditSubmit = async () => {
+  const handleEditSubmit = async (data: BoothFormInput) => {
     if (!selectedBooth) return;
     try {
       await updateMutation.mutateAsync({
         id: selectedBooth.id,
         data: {
-          name: formData.name,
-          location_id: formData.location_id,
-          price_per_hour: parseFloat(formData.price_per_hour) || 0,
-          amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean),
+          name: data.name,
+          location_id: data.location_id,
+          price_per_hour: data.price_per_hour,
+          amenities: data.amenities.split(',').map(a => a.trim()).filter(Boolean),
         },
       });
+      toast.success('Booth updated successfully');
       setIsEditDialogOpen(false);
       setSelectedBooth(null);
-      setFormData(defaultFormData);
-    } catch (error) {
-      console.error('Failed to update booth:', error);
+    } catch (err) {
+      toast.error('Failed to update booth');
     }
   };
 
@@ -180,63 +287,13 @@ function BoothsContent() {
     if (!selectedBooth) return;
     try {
       await deleteMutation.mutateAsync(selectedBooth.id);
+      toast.success('Booth deleted successfully');
       setIsDeleteDialogOpen(false);
       setSelectedBooth(null);
-    } catch (error) {
-      console.error('Failed to delete booth:', error);
+    } catch (err) {
+      toast.error('Failed to delete booth');
     }
   };
-
-  const BoothForm = () => (
-    <div className="grid gap-4 py-4">
-      <div className="grid gap-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g., Booth A1"
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="location">Location</Label>
-        <Select
-          value={formData.location_id}
-          onValueChange={(value) => setFormData({ ...formData, location_id: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a location" />
-          </SelectTrigger>
-          <SelectContent>
-            {locations?.map((location) => (
-              <SelectItem key={location.id} value={location.id}>
-                {location.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="price">Price per Hour (PLN)</Label>
-        <Input
-          id="price"
-          type="number"
-          value={formData.price_per_hour}
-          onChange={(e) => setFormData({ ...formData, price_per_hour: e.target.value })}
-          placeholder="e.g., 30"
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="amenities">Amenities (comma-separated)</Label>
-        <Input
-          id="amenities"
-          value={formData.amenities}
-          onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
-          placeholder="e.g., WiFi, Power outlets, Monitor"
-        />
-      </div>
-    </div>
-  );
 
   return (
     <>
@@ -277,16 +334,13 @@ function BoothsContent() {
                   Create a new booth at one of your locations.
                 </DialogDescription>
               </DialogHeader>
-              <BoothForm />
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create
-                </Button>
-              </DialogFooter>
+              <BoothForm
+                onSubmit={handleCreateSubmit}
+                onCancel={() => setIsCreateDialogOpen(false)}
+                isSubmitting={createMutation.isPending}
+                submitLabel="Create"
+                locations={locations || []}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -405,16 +459,21 @@ function BoothsContent() {
               Update the booth details.
             </DialogDescription>
           </DialogHeader>
-          <BoothForm />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditSubmit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
+          {selectedBooth && (
+            <BoothForm
+              defaultValues={{
+                name: selectedBooth.name,
+                location_id: selectedBooth.location_id,
+                price_per_hour: selectedBooth.price_per_hour || 0,
+                amenities: selectedBooth.amenities?.join(', ') || '',
+              }}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setIsEditDialogOpen(false)}
+              isSubmitting={updateMutation.isPending}
+              submitLabel="Save Changes"
+              locations={locations || []}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

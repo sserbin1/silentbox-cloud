@@ -41,6 +41,8 @@ import {
   Box,
 } from 'lucide-react';
 import { useTenants, useActivateTenant, useSuspendTenant, useDeleteTenant } from '@/hooks/use-super-admin';
+import { toast } from 'sonner';
+import type { Tenant } from '@/lib/api';
 
 function TenantCardSkeleton() {
   return (
@@ -90,7 +92,7 @@ const statusColors: Record<string, string> = {
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTenant, setSelectedTenant] = useState<any>(null);
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: tenants, isLoading, error, refetch } = useTenants();
@@ -99,7 +101,7 @@ export default function TenantsPage() {
   const deleteMutation = useDeleteTenant();
 
   const filteredTenants = tenants?.filter(
-    (tenant: any) =>
+    (tenant) =>
       tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tenant.contact_email?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
@@ -107,20 +109,22 @@ export default function TenantsPage() {
   const handleActivate = async (id: string) => {
     try {
       await activateMutation.mutateAsync(id);
+      toast.success('Tenant activated successfully');
     } catch (error) {
-      console.error('Failed to activate tenant:', error);
+      toast.error('Failed to activate tenant');
     }
   };
 
   const handleSuspend = async (id: string) => {
     try {
       await suspendMutation.mutateAsync(id);
+      toast.success('Tenant suspended successfully');
     } catch (error) {
-      console.error('Failed to suspend tenant:', error);
+      toast.error('Failed to suspend tenant');
     }
   };
 
-  const handleDeleteClick = (tenant: any) => {
+  const handleDeleteClick = (tenant: Tenant) => {
     setSelectedTenant(tenant);
     setIsDeleteDialogOpen(true);
   };
@@ -129,10 +133,11 @@ export default function TenantsPage() {
     if (!selectedTenant) return;
     try {
       await deleteMutation.mutateAsync(selectedTenant.id);
+      toast.success('Tenant deleted successfully');
       setIsDeleteDialogOpen(false);
       setSelectedTenant(null);
     } catch (error) {
-      console.error('Failed to delete tenant:', error);
+      toast.error('Failed to delete tenant');
     }
   };
 
@@ -189,7 +194,7 @@ export default function TenantsPage() {
             )}
           </div>
         ) : (
-          filteredTenants.map((tenant: any) => (
+          filteredTenants.map((tenant) => (
             <Card key={tenant.id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">

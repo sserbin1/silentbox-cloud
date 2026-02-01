@@ -2,19 +2,28 @@
 
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Save, Building, Bell, Lock, Loader2, CreditCard, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useSettings, useUpdateSettings } from '@/hooks/use-settings';
-import { TenantSettings } from '@/lib/api';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+import { tenantSettingsSchema, type TenantSettingsInput } from '@/lib/validations/settings';
 
 export default function SettingsPage() {
   const { data: settings, isLoading, error, refetch } = useSettings();
   const updateSettings = useUpdateSettings();
 
-  const { register, handleSubmit, reset, formState: { isDirty } } = useForm<TenantSettings>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isDirty, errors },
+  } = useForm<TenantSettingsInput>({
+    resolver: zodResolver(tenantSettingsSchema),
     defaultValues: settings || {},
   });
 
@@ -25,13 +34,18 @@ export default function SettingsPage() {
     }
   }, [settings, reset]);
 
-  const onSubmit = async (data: TenantSettings) => {
+  const onSubmit = async (data: TenantSettingsInput) => {
     try {
       await updateSettings.mutateAsync(data);
+      toast.success('Settings saved successfully');
     } catch (err) {
-      // Error is handled by React Query
+      toast.error('Failed to save settings');
     }
   };
+
+  const businessNameAriaProps = getFieldAriaProps('business_name', !!errors.business_name);
+  const emailAriaProps = getFieldAriaProps('contact_email', !!errors.contact_email);
+  const phoneAriaProps = getFieldAriaProps('contact_phone', !!errors.contact_phone);
 
   if (isLoading) {
     return (
@@ -71,18 +85,6 @@ export default function SettingsPage() {
       <Header title="Settings" />
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6 max-w-4xl">
-        {/* Success/Error Messages */}
-        {updateSettings.isSuccess && (
-          <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
-            Settings saved successfully
-          </div>
-        )}
-        {updateSettings.isError && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-            {updateSettings.error?.message || 'Failed to save settings'}
-          </div>
-        )}
-
         {/* Business Settings */}
         <Card>
           <CardHeader>
@@ -96,15 +98,34 @@ export default function SettingsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Business Name</label>
-                <Input {...register('business_name')} placeholder="Your business name" />
+                <Input
+                  {...register('business_name')}
+                  placeholder="Your business name"
+                  aria-invalid={businessNameAriaProps['aria-invalid']}
+                  aria-describedby={businessNameAriaProps['aria-describedby']}
+                />
+                <FormError message={errors.business_name?.message} id={businessNameAriaProps.errorId} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Business Email</label>
-                <Input {...register('contact_email')} type="email" placeholder="contact@example.com" />
+                <Input
+                  {...register('contact_email')}
+                  type="email"
+                  placeholder="contact@example.com"
+                  aria-invalid={emailAriaProps['aria-invalid']}
+                  aria-describedby={emailAriaProps['aria-describedby']}
+                />
+                <FormError message={errors.contact_email?.message} id={emailAriaProps.errorId} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Phone Number</label>
-                <Input {...register('contact_phone')} placeholder="+48 123 456 789" />
+                <Input
+                  {...register('contact_phone')}
+                  placeholder="+48 123 456 789"
+                  aria-invalid={phoneAriaProps['aria-invalid']}
+                  aria-describedby={phoneAriaProps['aria-describedby']}
+                />
+                <FormError message={errors.contact_phone?.message} id={phoneAriaProps.errorId} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Address</label>

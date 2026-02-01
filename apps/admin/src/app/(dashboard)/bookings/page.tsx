@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Search, Calendar, Clock, MapPin, MoreHorizontal, XCircle, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { useBookings, useCancelBooking } from '@/hooks/use-bookings';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -114,10 +115,11 @@ function BookingsContent() {
     if (!selectedBooking) return;
     try {
       await cancelMutation.mutateAsync(selectedBooking.id);
+      toast.success('Booking cancelled successfully');
       setCancelDialogOpen(false);
       setSelectedBooking(null);
     } catch (error) {
-      console.error('Failed to cancel booking:', error);
+      toast.error('Failed to cancel booking');
     }
   };
 

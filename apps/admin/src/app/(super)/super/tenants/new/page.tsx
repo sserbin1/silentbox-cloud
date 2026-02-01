@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,32 +17,34 @@ import {
 } from '@/components/ui/select';
 import { Building2, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { useCreateTenant } from '@/hooks/use-super-admin';
-
-interface FormData {
-  name: string;
-  slug: string;
-  contactEmail: string;
-  contactPhone: string;
-  address: string;
-  city: string;
-  country: string;
-}
-
-const defaultFormData: FormData = {
-  name: '',
-  slug: '',
-  contactEmail: '',
-  contactPhone: '',
-  address: '',
-  city: '',
-  country: 'Poland',
-};
+import { toast } from 'sonner';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+import { createTenantSchema, type CreateTenantInput } from '@/lib/validations/tenant';
 
 export default function NewTenantPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>(defaultFormData);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
   const createMutation = useCreateTenant();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<CreateTenantInput>({
+    resolver: zodResolver(createTenantSchema),
+    defaultValues: {
+      name: '',
+      slug: '',
+      contactEmail: '',
+      contactPhone: '',
+      address: '',
+      city: '',
+      country: 'Poland',
+    },
+  });
+
+  const watchedCountry = watch('country');
 
   const generateSlug = (name: string) => {
     return name
@@ -50,57 +53,34 @@ export default function NewTenantPage() {
       .replace(/^-|-$/g, '');
   };
 
-  const handleNameChange = (value: string) => {
-    setFormData({
-      ...formData,
-      name: value,
-      slug: generateSlug(value),
-    });
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValue('name', value);
+    setValue('slug', generateSlug(value));
   };
 
-  const validate = (): boolean => {
-    const newErrors: Partial<FormData> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = 'Slug is required';
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens';
-    }
-
-    if (!formData.contactEmail.trim()) {
-      newErrors.contactEmail = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
-      newErrors.contactEmail = 'Invalid email address';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) return;
-
+  const onSubmit = async (data: CreateTenantInput) => {
     try {
       await createMutation.mutateAsync({
-        name: formData.name,
-        slug: formData.slug,
-        contactEmail: formData.contactEmail,
-        contactPhone: formData.contactPhone || undefined,
-        address: formData.address || undefined,
-        city: formData.city || undefined,
-        country: formData.country || undefined,
+        name: data.name,
+        slug: data.slug,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone || undefined,
+        address: data.address || undefined,
+        city: data.city || undefined,
+        country: data.country || undefined,
       });
+      toast.success('Tenant created successfully');
       router.push('/super/tenants');
-    } catch (error) {
-      console.error('Failed to create tenant:', error);
+    } catch (err) {
+      toast.error('Failed to create tenant');
     }
   };
+
+  const nameAriaProps = getFieldAriaProps('name', !!errors.name);
+  const slugAriaProps = getFieldAriaProps('slug', !!errors.slug);
+  const emailAriaProps = getFieldAriaProps('contactEmail', !!errors.contactEmail);
+  const phoneAriaProps = getFieldAriaProps('contactPhone', !!errors.contactPhone);
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -117,7 +97,7 @@ export default function NewTenantPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="bg-slate-900 border-slate-800">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
@@ -135,29 +115,28 @@ export default function NewTenantPage() {
                 <Label htmlFor="name" className="text-slate-300">Company Name *</Label>
                 <Input
                   id="name"
-                  value={formData.name}
-                  onChange={(e) => handleNameChange(e.target.value)}
+                  {...register('name')}
+                  onChange={handleNameChange}
                   placeholder="e.g., Silentbox Warsaw"
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  aria-invalid={nameAriaProps['aria-invalid']}
+                  aria-describedby={nameAriaProps['aria-describedby']}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-400">{errors.name}</p>
-                )}
+                <FormError message={errors.name?.message} id={nameAriaProps.errorId} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="slug" className="text-slate-300">Slug *</Label>
                 <Input
                   id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  {...register('slug')}
                   placeholder="e.g., silentbox-warsaw"
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  aria-invalid={slugAriaProps['aria-invalid']}
+                  aria-describedby={slugAriaProps['aria-describedby']}
                 />
-                {errors.slug && (
-                  <p className="text-xs text-red-400">{errors.slug}</p>
-                )}
+                <FormError message={errors.slug?.message} id={slugAriaProps.errorId} />
                 <p className="text-xs text-slate-500">
-                  Used in URLs: app.silentbox.cloud/{formData.slug || 'your-slug'}
+                  Used in URLs: app.silentbox.cloud/{watch('slug') || 'your-slug'}
                 </p>
               </div>
             </div>
@@ -169,25 +148,26 @@ export default function NewTenantPage() {
                 <Input
                   id="email"
                   type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                  {...register('contactEmail')}
                   placeholder="contact@company.com"
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  aria-invalid={emailAriaProps['aria-invalid']}
+                  aria-describedby={emailAriaProps['aria-describedby']}
                 />
-                {errors.contactEmail && (
-                  <p className="text-xs text-red-400">{errors.contactEmail}</p>
-                )}
+                <FormError message={errors.contactEmail?.message} id={emailAriaProps.errorId} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-slate-300">Contact Phone</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                  {...register('contactPhone')}
                   placeholder="+48 123 456 789"
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  aria-invalid={phoneAriaProps['aria-invalid']}
+                  aria-describedby={phoneAriaProps['aria-describedby']}
                 />
+                <FormError message={errors.contactPhone?.message} id={phoneAriaProps.errorId} />
               </div>
             </div>
 
@@ -196,8 +176,7 @@ export default function NewTenantPage() {
               <Label htmlFor="address" className="text-slate-300">Address</Label>
               <Input
                 id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                {...register('address')}
                 placeholder="Street address"
                 className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
               />
@@ -208,8 +187,7 @@ export default function NewTenantPage() {
                 <Label htmlFor="city" className="text-slate-300">City</Label>
                 <Input
                   id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  {...register('city')}
                   placeholder="e.g., Warsaw"
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                 />
@@ -217,8 +195,8 @@ export default function NewTenantPage() {
               <div className="space-y-2">
                 <Label htmlFor="country" className="text-slate-300">Country</Label>
                 <Select
-                  value={formData.country}
-                  onValueChange={(value) => setFormData({ ...formData, country: value })}
+                  value={watchedCountry}
+                  onValueChange={(value) => setValue('country', value)}
                 >
                   <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Select country" />

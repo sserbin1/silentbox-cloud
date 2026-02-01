@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,7 +38,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUsers, useAddCredits } from '@/hooks/use-users';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+import { addCreditsSchema, type AddCreditsInput } from '@/lib/validations/user';
 
 const roleColors: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
@@ -78,12 +83,66 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void
   );
 }
 
+interface CreditsFormProps {
+  onSubmit: (data: AddCreditsInput) => Promise<void>;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  isDeducting: boolean;
+  userName: string;
+}
+
+function CreditsForm({ onSubmit, onCancel, isSubmitting, isDeducting }: CreditsFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AddCreditsInput>({
+    resolver: zodResolver(addCreditsSchema),
+    defaultValues: {
+      amount: 1,
+    },
+  });
+
+  const amountAriaProps = getFieldAriaProps('amount', !!errors.amount);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="amount">Amount</Label>
+          <Input
+            id="amount"
+            type="number"
+            min="1"
+            {...register('amount', { valueAsNumber: true })}
+            placeholder="Enter amount"
+            aria-invalid={amountAriaProps['aria-invalid']}
+            aria-describedby={amountAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.amount?.message} id={amountAriaProps.errorId} />
+        </div>
+      </div>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          variant={isDeducting ? 'destructive' : 'default'}
+        >
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {isDeducting ? 'Deduct' : 'Add'} Credits
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreditsDialogOpen, setIsCreditsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [creditsAmount, setCreditsAmount] = useState('');
-  const [creditsReason, setCreditsReason] = useState('');
   const [isDeducting, setIsDeducting] = useState(false);
 
   const { data: users, isLoading, error, refetch } = useUsers();
@@ -97,33 +156,28 @@ export default function UsersPage() {
 
   const handleAddCreditsClick = (user: any) => {
     setSelectedUser(user);
-    setCreditsAmount('');
-    setCreditsReason('');
     setIsDeducting(false);
     setIsCreditsDialogOpen(true);
   };
 
   const handleDeductCreditsClick = (user: any) => {
     setSelectedUser(user);
-    setCreditsAmount('');
-    setCreditsReason('');
     setIsDeducting(true);
     setIsCreditsDialogOpen(true);
   };
 
-  const handleCreditsSubmit = async () => {
-    if (!selectedUser || !creditsAmount) return;
+  const handleCreditsSubmit = async (data: AddCreditsInput) => {
+    if (!selectedUser) return;
     try {
-      const amount = parseFloat(creditsAmount);
       await addCreditsMutation.mutateAsync({
         userId: selectedUser.id,
-        amount: isDeducting ? -amount : amount,
-        reason: creditsReason || undefined,
+        amount: isDeducting ? -data.amount : data.amount,
       });
+      toast.success(isDeducting ? 'Credits deducted successfully' : 'Credits added successfully');
       setIsCreditsDialogOpen(false);
       setSelectedUser(null);
-    } catch (error) {
-      console.error('Failed to adjust credits:', error);
+    } catch (err) {
+      toast.error(isDeducting ? 'Failed to deduct credits' : 'Failed to add credits');
     }
   };
 
@@ -265,41 +319,15 @@ export default function UsersPage() {
               {isDeducting ? 'from' : 'to'} {selectedUser?.full_name || selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                min="1"
-                value={creditsAmount}
-                onChange={(e) => setCreditsAmount(e.target.value)}
-                placeholder="Enter amount"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="reason">Reason (optional)</Label>
-              <Input
-                id="reason"
-                value={creditsReason}
-                onChange={(e) => setCreditsReason(e.target.value)}
-                placeholder="e.g., Promotional credit, Refund"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreditsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreditsSubmit}
-              disabled={addCreditsMutation.isPending || !creditsAmount}
-              variant={isDeducting ? 'destructive' : 'default'}
-            >
-              {addCreditsMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isDeducting ? 'Deduct' : 'Add'} Credits
-            </Button>
-          </DialogFooter>
+          {selectedUser && (
+            <CreditsForm
+              onSubmit={handleCreditsSubmit}
+              onCancel={() => setIsCreditsDialogOpen(false)}
+              isSubmitting={addCreditsMutation.isPending}
+              isDeducting={isDeducting}
+              userName={selectedUser?.full_name || selectedUser?.email}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>

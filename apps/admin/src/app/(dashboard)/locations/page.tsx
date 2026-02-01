@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,8 +29,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Plus, Search, MapPin, Box, Edit, Trash2, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useLocations, useCreateLocation, useUpdateLocation, useDeleteLocation } from '@/hooks/use-locations';
 import Link from 'next/link';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+import { createLocationSchema, type CreateLocationInput } from '@/lib/validations/location';
 
 const statusColors: Record<string, string> = {
   active: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -74,21 +79,119 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void
   );
 }
 
-interface LocationFormData {
-  name: string;
-  address: string;
-  city: string;
-  lat: string;
-  lng: string;
+interface LocationFormProps {
+  defaultValues?: CreateLocationInput;
+  onSubmit: (data: CreateLocationInput) => Promise<void>;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  submitLabel: string;
 }
 
-const defaultFormData: LocationFormData = {
-  name: '',
-  address: '',
-  city: '',
-  lat: '',
-  lng: '',
-};
+function LocationForm({ defaultValues, onSubmit, onCancel, isSubmitting, submitLabel }: LocationFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CreateLocationInput>({
+    resolver: zodResolver(createLocationSchema),
+    defaultValues: defaultValues || {
+      name: '',
+      address: '',
+      city: '',
+      coordinates: { lat: 0, lng: 0 },
+    },
+  });
+
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
+
+  const nameAriaProps = getFieldAriaProps('name', !!errors.name);
+  const addressAriaProps = getFieldAriaProps('address', !!errors.address);
+  const cityAriaProps = getFieldAriaProps('city', !!errors.city);
+  const latAriaProps = getFieldAriaProps('lat', !!errors.coordinates?.lat);
+  const lngAriaProps = getFieldAriaProps('lng', !!errors.coordinates?.lng);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            placeholder="e.g., Warsaw Central"
+            aria-invalid={nameAriaProps['aria-invalid']}
+            aria-describedby={nameAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.name?.message} id={nameAriaProps.errorId} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            {...register('address')}
+            placeholder="e.g., Al. Jerozolimskie 54"
+            aria-invalid={addressAriaProps['aria-invalid']}
+            aria-describedby={addressAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.address?.message} id={addressAriaProps.errorId} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            {...register('city')}
+            placeholder="e.g., Warsaw"
+            aria-invalid={cityAriaProps['aria-invalid']}
+            aria-describedby={cityAriaProps['aria-describedby']}
+          />
+          <FormError message={errors.city?.message} id={cityAriaProps.errorId} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="lat">Latitude</Label>
+            <Input
+              id="lat"
+              type="number"
+              step="any"
+              {...register('coordinates.lat', { valueAsNumber: true })}
+              placeholder="52.2297"
+              aria-invalid={latAriaProps['aria-invalid']}
+              aria-describedby={latAriaProps['aria-describedby']}
+            />
+            <FormError message={errors.coordinates?.lat?.message} id={latAriaProps.errorId} />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lng">Longitude</Label>
+            <Input
+              id="lng"
+              type="number"
+              step="any"
+              {...register('coordinates.lng', { valueAsNumber: true })}
+              placeholder="21.0122"
+              aria-invalid={lngAriaProps['aria-invalid']}
+              aria-describedby={lngAriaProps['aria-describedby']}
+            />
+            <FormError message={errors.coordinates?.lng?.message} id={lngAriaProps.errorId} />
+          </div>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          {submitLabel}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
 
 export default function LocationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,7 +199,6 @@ export default function LocationsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
-  const [formData, setFormData] = useState<LocationFormData>(defaultFormData);
 
   const { data: locations, isLoading, error, refetch } = useLocations();
   const createMutation = useCreateLocation();
@@ -109,56 +211,33 @@ export default function LocationsPage() {
       location.city.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleCreateSubmit = async () => {
+  const handleCreateSubmit = async (data: CreateLocationInput) => {
     try {
-      await createMutation.mutateAsync({
-        name: formData.name,
-        address: formData.address,
-        city: formData.city,
-        coordinates: {
-          lat: parseFloat(formData.lat) || 0,
-          lng: parseFloat(formData.lng) || 0,
-        },
-      });
+      await createMutation.mutateAsync(data);
+      toast.success('Location created successfully');
       setIsCreateDialogOpen(false);
-      setFormData(defaultFormData);
-    } catch (error) {
-      console.error('Failed to create location:', error);
+    } catch (err) {
+      toast.error('Failed to create location');
     }
   };
 
   const handleEditClick = (location: any) => {
     setSelectedLocation(location);
-    setFormData({
-      name: location.name,
-      address: location.address,
-      city: location.city,
-      lat: location.coordinates?.lat?.toString() || '',
-      lng: location.coordinates?.lng?.toString() || '',
-    });
     setIsEditDialogOpen(true);
   };
 
-  const handleEditSubmit = async () => {
+  const handleEditSubmit = async (data: CreateLocationInput) => {
     if (!selectedLocation) return;
     try {
       await updateMutation.mutateAsync({
         id: selectedLocation.id,
-        data: {
-          name: formData.name,
-          address: formData.address,
-          city: formData.city,
-          coordinates: {
-            lat: parseFloat(formData.lat) || 0,
-            lng: parseFloat(formData.lng) || 0,
-          },
-        },
+        data,
       });
+      toast.success('Location updated successfully');
       setIsEditDialogOpen(false);
       setSelectedLocation(null);
-      setFormData(defaultFormData);
-    } catch (error) {
-      console.error('Failed to update location:', error);
+    } catch (err) {
+      toast.error('Failed to update location');
     }
   };
 
@@ -171,68 +250,13 @@ export default function LocationsPage() {
     if (!selectedLocation) return;
     try {
       await deleteMutation.mutateAsync(selectedLocation.id);
+      toast.success('Location deleted successfully');
       setIsDeleteDialogOpen(false);
       setSelectedLocation(null);
-    } catch (error) {
-      console.error('Failed to delete location:', error);
+    } catch (err) {
+      toast.error('Failed to delete location');
     }
   };
-
-  const LocationForm = () => (
-    <div className="grid gap-4 py-4">
-      <div className="grid gap-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g., Warsaw Central"
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          placeholder="e.g., Al. Jerozolimskie 54"
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="city">City</Label>
-        <Input
-          id="city"
-          value={formData.city}
-          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-          placeholder="e.g., Warsaw"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="lat">Latitude</Label>
-          <Input
-            id="lat"
-            type="number"
-            step="any"
-            value={formData.lat}
-            onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
-            placeholder="52.2297"
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="lng">Longitude</Label>
-          <Input
-            id="lng"
-            type="number"
-            step="any"
-            value={formData.lng}
-            onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
-            placeholder="21.0122"
-          />
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <>
@@ -264,16 +288,12 @@ export default function LocationsPage() {
                   Create a new location for your booths.
                 </DialogDescription>
               </DialogHeader>
-              <LocationForm />
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create
-                </Button>
-              </DialogFooter>
+              <LocationForm
+                onSubmit={handleCreateSubmit}
+                onCancel={() => setIsCreateDialogOpen(false)}
+                isSubmitting={createMutation.isPending}
+                submitLabel="Create"
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -383,16 +403,20 @@ export default function LocationsPage() {
               Update the location details.
             </DialogDescription>
           </DialogHeader>
-          <LocationForm />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditSubmit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
+          {selectedLocation && (
+            <LocationForm
+              defaultValues={{
+                name: selectedLocation.name,
+                address: selectedLocation.address,
+                city: selectedLocation.city,
+                coordinates: selectedLocation.coordinates || { lat: 0, lng: 0 },
+              }}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setIsEditDialogOpen(false)}
+              isSubmitting={updateMutation.isPending}
+              submitLabel="Save Changes"
+            />
+          )}
         </DialogContent>
       </Dialog>
 

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +53,8 @@ import {
 } from '@/hooks/use-pricing';
 import { useSettings, useUpdateSettings } from '@/hooks/use-settings';
 import { Discount, PeakHours, CreditPackage } from '@/lib/api';
+import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
+import { pricingSettingsSchema, type PricingSettingsInput } from '@/lib/validations/settings';
 
 const DAYS_OF_WEEK = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
@@ -79,44 +83,49 @@ export default function PricingPage() {
   const updatePackage = useUpdatePackage();
   const deletePackage = useDeletePackage();
 
-  // Local state for general settings form
-  const [generalForm, setGeneralForm] = useState({
-    base_price_per_hour: settings?.pricing?.base_price_per_hour?.toString() || '30',
-    currency: settings?.pricing?.currency || 'PLN',
-    min_booking_minutes: settings?.pricing?.min_booking_minutes?.toString() || '30',
-    max_booking_hours: settings?.pricing?.max_booking_hours?.toString() || '8',
-    grace_period_minutes: settings?.pricing?.grace_period_minutes?.toString() || '15',
-    no_show_penalty_percent: settings?.pricing?.no_show_penalty_percent?.toString() || '50',
-    free_cancellation_hours: settings?.pricing?.free_cancellation_hours?.toString() || '1',
+  // React Hook Form for general settings
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<PricingSettingsInput>({
+    resolver: zodResolver(pricingSettingsSchema),
+    defaultValues: {
+      base_price_per_hour: settings?.pricing?.base_price_per_hour ?? 30,
+      currency: settings?.pricing?.currency ?? 'PLN',
+      min_booking_minutes: settings?.pricing?.min_booking_minutes ?? 30,
+      max_booking_hours: settings?.pricing?.max_booking_hours ?? 8,
+      grace_period_minutes: settings?.pricing?.grace_period_minutes ?? 15,
+      no_show_penalty_percent: settings?.pricing?.no_show_penalty_percent ?? 50,
+      free_cancellation_hours: settings?.pricing?.free_cancellation_hours ?? 1,
+    },
   });
 
-  // Update local form when settings load
+  // Watch form values for display
+  const watchedValues = watch();
+
+  // Update form when settings load
   useEffect(() => {
     if (settings?.pricing) {
-      setGeneralForm({
-        base_price_per_hour: settings.pricing.base_price_per_hour?.toString() || '30',
-        currency: settings.pricing.currency || 'PLN',
-        min_booking_minutes: settings.pricing.min_booking_minutes?.toString() || '30',
-        max_booking_hours: settings.pricing.max_booking_hours?.toString() || '8',
-        grace_period_minutes: settings.pricing.grace_period_minutes?.toString() || '15',
-        no_show_penalty_percent: settings.pricing.no_show_penalty_percent?.toString() || '50',
-        free_cancellation_hours: settings.pricing.free_cancellation_hours?.toString() || '1',
+      reset({
+        base_price_per_hour: settings.pricing.base_price_per_hour ?? 30,
+        currency: settings.pricing.currency ?? 'PLN',
+        min_booking_minutes: settings.pricing.min_booking_minutes ?? 30,
+        max_booking_hours: settings.pricing.max_booking_hours ?? 8,
+        grace_period_minutes: settings.pricing.grace_period_minutes ?? 15,
+        no_show_penalty_percent: settings.pricing.no_show_penalty_percent ?? 50,
+        free_cancellation_hours: settings.pricing.free_cancellation_hours ?? 1,
       });
     }
-  }, [settings]);
+  }, [settings, reset]);
 
-  const handleSaveGeneral = async () => {
+  const handleSaveGeneral = async (data: PricingSettingsInput) => {
     try {
       await updateSettings.mutateAsync({
-        pricing: {
-          base_price_per_hour: parseFloat(generalForm.base_price_per_hour),
-          currency: generalForm.currency,
-          min_booking_minutes: parseInt(generalForm.min_booking_minutes),
-          max_booking_hours: parseInt(generalForm.max_booking_hours),
-          grace_period_minutes: parseInt(generalForm.grace_period_minutes),
-          no_show_penalty_percent: parseInt(generalForm.no_show_penalty_percent),
-          free_cancellation_hours: parseInt(generalForm.free_cancellation_hours),
-        },
+        pricing: data,
       });
       toast.success('Pricing settings saved successfully');
     } catch (err) {
@@ -260,7 +269,12 @@ export default function PricingPage() {
   const discounts = pricing?.discounts || [];
   const peakHours = pricing?.peak_hours || [];
   const packages = pricing?.packages || [];
-  const currency = generalForm.currency;
+  const currency = watchedValues.currency || 'PLN';
+
+  // ARIA props for form fields
+  const basePriceAriaProps = getFieldAriaProps('base_price_per_hour', !!errors.base_price_per_hour);
+  const noShowAriaProps = getFieldAriaProps('no_show_penalty_percent', !!errors.no_show_penalty_percent);
+  const cancellationAriaProps = getFieldAriaProps('free_cancellation_hours', !!errors.free_cancellation_hours);
 
   return (
     <>
@@ -289,149 +303,157 @@ export default function PricingPage() {
 
           {/* General Pricing Tab */}
           <TabsContent value="general" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Base Pricing</CardTitle>
-                <CardDescription>
-                  Set the default pricing structure for all booths. Individual booths can override these settings.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="basePrice">Base Price per Hour</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="basePrice"
-                        type="number"
-                        value={generalForm.base_price_per_hour}
-                        onChange={(e) => setGeneralForm({ ...generalForm, base_price_per_hour: e.target.value })}
-                        className="flex-1"
-                      />
+            <form onSubmit={handleSubmit(handleSaveGeneral)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Base Pricing</CardTitle>
+                  <CardDescription>
+                    Set the default pricing structure for all booths. Individual booths can override these settings.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="basePrice">Base Price per Hour</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="basePrice"
+                          type="number"
+                          {...register('base_price_per_hour', { valueAsNumber: true })}
+                          className="flex-1"
+                          aria-invalid={basePriceAriaProps['aria-invalid']}
+                          aria-describedby={basePriceAriaProps['aria-describedby']}
+                        />
+                        <Select
+                          value={watchedValues.currency}
+                          onValueChange={(value) => setValue('currency', value)}
+                        >
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PLN">PLN</SelectItem>
+                            <SelectItem value="UAH">UAH</SelectItem>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <FormError message={errors.base_price_per_hour?.message} id={basePriceAriaProps.errorId} />
+                      <p className="text-xs text-muted-foreground">
+                        Equivalent to {((watchedValues.base_price_per_hour ?? 30) / 4).toFixed(2)} {currency} per 15 minutes
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="minBooking">Minimum Booking Duration</Label>
                       <Select
-                        value={generalForm.currency}
-                        onValueChange={(value) => setGeneralForm({ ...generalForm, currency: value })}
+                        value={String(watchedValues.min_booking_minutes ?? 30)}
+                        onValueChange={(value) => setValue('min_booking_minutes', parseInt(value))}
                       >
-                        <SelectTrigger className="w-24">
+                        <SelectTrigger id="minBooking">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="PLN">PLN</SelectItem>
-                          <SelectItem value="UAH">UAH</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="60">1 hour</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Equivalent to {(parseFloat(generalForm.base_price_per_hour) / 4).toFixed(2)} {currency} per 15 minutes
-                    </p>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="minBooking">Minimum Booking Duration</Label>
-                    <Select
-                      value={generalForm.min_booking_minutes}
-                      onValueChange={(value) => setGeneralForm({ ...generalForm, min_booking_minutes: value })}
-                    >
-                      <SelectTrigger id="minBooking">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="60">1 hour</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maxBooking">Maximum Booking Duration</Label>
+                      <Select
+                        value={String(watchedValues.max_booking_hours ?? 8)}
+                        onValueChange={(value) => setValue('max_booking_hours', parseInt(value))}
+                      >
+                        <SelectTrigger id="maxBooking">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4">4 hours</SelectItem>
+                          <SelectItem value="8">8 hours</SelectItem>
+                          <SelectItem value="12">12 hours</SelectItem>
+                          <SelectItem value="24">24 hours</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="maxBooking">Maximum Booking Duration</Label>
-                    <Select
-                      value={generalForm.max_booking_hours}
-                      onValueChange={(value) => setGeneralForm({ ...generalForm, max_booking_hours: value })}
-                    >
-                      <SelectTrigger id="maxBooking">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="4">4 hours</SelectItem>
-                        <SelectItem value="8">8 hours</SelectItem>
-                        <SelectItem value="12">12 hours</SelectItem>
-                        <SelectItem value="24">24 hours</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="gracePeriod">Grace Period</Label>
-                    <Select
-                      value={generalForm.grace_period_minutes}
-                      onValueChange={(value) => setGeneralForm({ ...generalForm, grace_period_minutes: value })}
-                    >
-                      <SelectTrigger id="gracePeriod">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">5 minutes</SelectItem>
-                        <SelectItem value="10">10 minutes</SelectItem>
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Time allowed after booking start before marking as no-show
-                    </p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="noShowPenalty">No-Show Penalty</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="noShowPenalty"
-                        type="number"
-                        value={generalForm.no_show_penalty_percent}
-                        onChange={(e) => setGeneralForm({ ...generalForm, no_show_penalty_percent: e.target.value })}
-                        className="w-20"
-                      />
-                      <span className="text-muted-foreground">% of booking price</span>
+                    <div className="space-y-2">
+                      <Label htmlFor="gracePeriod">Grace Period</Label>
+                      <Select
+                        value={String(watchedValues.grace_period_minutes ?? 15)}
+                        onValueChange={(value) => setValue('grace_period_minutes', parseInt(value))}
+                      >
+                        <SelectTrigger id="gracePeriod">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 minutes</SelectItem>
+                          <SelectItem value="10">10 minutes</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Time allowed after booking start before marking as no-show
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="cancellation">Free Cancellation Window</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="cancellation"
-                        type="number"
-                        value={generalForm.free_cancellation_hours}
-                        onChange={(e) => setGeneralForm({ ...generalForm, free_cancellation_hours: e.target.value })}
-                        className="w-20"
-                      />
-                      <span className="text-muted-foreground">hours before start</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Full refund if cancelled at least {generalForm.free_cancellation_hours} hour(s) before
-                    </p>
-                  </div>
-                </div>
+                  <Separator />
 
-                <div className="flex justify-end">
-                  <Button onClick={handleSaveGeneral} disabled={updateSettings.isPending}>
-                    {updateSettings.isPending ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save Changes
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="noShowPenalty">No-Show Penalty</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="noShowPenalty"
+                          type="number"
+                          {...register('no_show_penalty_percent', { valueAsNumber: true })}
+                          className="w-20"
+                          aria-invalid={noShowAriaProps['aria-invalid']}
+                          aria-describedby={noShowAriaProps['aria-describedby']}
+                        />
+                        <span className="text-muted-foreground">% of booking price</span>
+                      </div>
+                      <FormError message={errors.no_show_penalty_percent?.message} id={noShowAriaProps.errorId} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cancellation">Free Cancellation Window</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="cancellation"
+                          type="number"
+                          {...register('free_cancellation_hours', { valueAsNumber: true })}
+                          className="w-20"
+                          aria-invalid={cancellationAriaProps['aria-invalid']}
+                          aria-describedby={cancellationAriaProps['aria-describedby']}
+                        />
+                        <span className="text-muted-foreground">hours before start</span>
+                      </div>
+                      <FormError message={errors.free_cancellation_hours?.message} id={cancellationAriaProps.errorId} />
+                      <p className="text-xs text-muted-foreground">
+                        Full refund if cancelled at least {watchedValues.free_cancellation_hours ?? 1} hour(s) before
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={updateSettings.isPending}>
+                      {updateSettings.isPending ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      Save Changes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </form>
           </TabsContent>
 
           {/* Discounts Tab */}
@@ -817,7 +839,7 @@ export default function PricingPage() {
                                   +{pkg.bonus_credits} bonus •{' '}
                                 </span>
                               )}
-                              {((pkg.credits + pkg.bonus_credits) / pkg.price * 100 - 100).toFixed(0)}% value
+                              {pkg.price > 0 ? ((pkg.credits + pkg.bonus_credits) / pkg.price * 100 - 100).toFixed(0) : 0}% value
                             </p>
                           </div>
                         </CardContent>
