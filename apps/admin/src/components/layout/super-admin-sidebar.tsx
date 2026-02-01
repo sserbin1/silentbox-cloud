@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Building2,
   LayoutDashboard,
@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth';
+import { authApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 const navigation = [
   {
@@ -51,6 +54,19 @@ const secondaryNav = [
 
 export function SuperAdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignore API errors
+    }
+    logout();
+    router.push('/login');
+    toast.success('Logged out successfully');
+  };
 
   return (
     <div className="flex h-full w-72 flex-col bg-slate-900 text-slate-100">
@@ -196,11 +212,11 @@ export function SuperAdminSidebar() {
         {/* User Profile */}
         <div className="flex items-center gap-3 rounded-xl bg-slate-800/50 p-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-sm font-semibold text-white">
-            SA
+            {user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'SA'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Super Admin</p>
-            <p className="text-xs text-slate-400 truncate">admin@silentbox.cloud</p>
+            <p className="text-sm font-medium truncate">{user?.full_name || 'Super Admin'}</p>
+            <p className="text-xs text-slate-400 truncate">{user?.email || 'admin@silentbox.cloud'}</p>
           </div>
         </div>
 
@@ -208,6 +224,7 @@ export function SuperAdminSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />
           Sign out
