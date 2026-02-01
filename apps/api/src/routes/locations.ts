@@ -101,11 +101,13 @@ export const locationsRoutes = async (app: FastifyInstance) => {
       .single();
 
     if (error) {
+      console.error('Location create error:', JSON.stringify(error));
       return reply.status(500).send({
         success: false,
         error: {
           code: ERROR_CODES.INTERNAL_ERROR,
           message: 'Failed to create location',
+          details: error.message,
         },
       });
     }
