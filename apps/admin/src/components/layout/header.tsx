@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuthStore } from '@/store/auth';
+import { authApi } from '@/lib/api';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -41,16 +42,14 @@ export function Header({ title, subtitle }: HeaderProps) {
 
   const handleLogout = async () => {
     try {
-      // Call logout API
-      await fetch('/api/auth/logout', { method: 'POST' });
-      logout();
-      router.push('/login');
-      toast.success('Logged out successfully');
+      await authApi.logout();
     } catch {
-      // Even if API fails, clear local state
-      logout();
-      router.push('/login');
+      // Ignore API errors
     }
+    // Always clear local state and redirect
+    logout();
+    router.push('/login');
+    toast.success(t('admin.header.logout'));
   };
 
   const getUserInitials = () => {
