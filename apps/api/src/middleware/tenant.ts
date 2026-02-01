@@ -45,8 +45,27 @@ export const tenantMiddleware = async (request: FastifyRequest, reply: FastifyRe
     return;
   }
 
-  // Skip for admin routes (they have their own JWT-based auth)
+  // For admin routes, extract tenant from JWT cookie but don't enforce tenant resolution
   if (ADMIN_ROUTES.some((route) => path.startsWith(route))) {
+    // Try to get tenant from JWT in cookie
+    const accessToken = request.cookies?.access_token;
+    if (accessToken) {
+      try {
+        const decoded = request.server.jwt.decode<{ tenant_id?: string }>(accessToken);
+        if (decoded?.tenant_id) {
+          request.tenantId = decoded.tenant_id;
+        }
+      } catch {
+        // Token decode failed, continue without tenant
+      }
+    }
+    // Also check X-Tenant-ID header for admin routes
+    if (!request.tenantId) {
+      const headerTenantId = request.headers['x-tenant-id'] as string;
+      if (headerTenantId) {
+        request.tenantId = headerTenantId;
+      }
+    }
     return;
   }
 
