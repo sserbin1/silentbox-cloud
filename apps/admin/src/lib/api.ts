@@ -196,8 +196,30 @@ export const dashboardApi = {
 export const locationsApi = {
   getAll: () => adminApi.get<Location[]>('/api/locations'),
   getById: (id: string) => adminApi.get<Location>(`/api/locations/${id}`),
-  create: (data: CreateLocationData) => adminApi.post<Location>('/api/locations', data),
-  update: (id: string, data: UpdateLocationData) => adminApi.put<Location>(`/api/locations/${id}`, data),
+  create: (data: CreateLocationData) => {
+    // Transform coordinates to latitude/longitude for API
+    const apiData = {
+      name: data.name,
+      address: data.address,
+      city: data.city,
+      latitude: data.coordinates.lat,
+      longitude: data.coordinates.lng,
+    };
+    return adminApi.post<Location>('/api/locations', apiData);
+  },
+  update: (id: string, data: UpdateLocationData) => {
+    // Transform coordinates to latitude/longitude for API
+    const apiData: Record<string, unknown> = {};
+    if (data.name !== undefined) apiData.name = data.name;
+    if (data.address !== undefined) apiData.address = data.address;
+    if (data.city !== undefined) apiData.city = data.city;
+    if (data.status !== undefined) apiData.status = data.status;
+    if (data.coordinates) {
+      apiData.latitude = data.coordinates.lat;
+      apiData.longitude = data.coordinates.lng;
+    }
+    return adminApi.patch<Location>(`/api/locations/${id}`, apiData);
+  },
   delete: (id: string) => adminApi.delete(`/api/locations/${id}`),
 };
 
