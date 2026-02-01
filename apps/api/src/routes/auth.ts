@@ -46,10 +46,11 @@ const checkRateLimit = (ip: string): { allowed: boolean; remaining: number; rese
 };
 
 // Cookie options
+// SameSite=None required for cross-origin cookies (admin on cloud.silent-box.com, API on api.cloud.silent-box.com)
 const getCookieOptions = (maxAge: number) => ({
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
   path: '/',
   maxAge,
 });
