@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 import { useSettings, useUpdateSettings } from '@/hooks/use-settings';
 import { FormError, getFieldAriaProps } from '@/components/ui/form-error';
 import { tenantSettingsSchema, type TenantSettingsInput } from '@/lib/validations/settings';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const { data: settings, isLoading, error, refetch } = useSettings();
   const updateSettings = useUpdateSettings();
 
@@ -37,9 +39,9 @@ export default function SettingsPage() {
   const onSubmit = async (data: TenantSettingsInput) => {
     try {
       await updateSettings.mutateAsync(data);
-      toast.success('Settings saved successfully');
+      toast.success(t('admin.settings.saved'));
     } catch (err) {
-      toast.error('Failed to save settings');
+      toast.error(t('admin.common.error'));
     }
   };
 
@@ -50,7 +52,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <>
-        <Header title="Settings" />
+        <Header title={t('admin.settings.title')} />
         <div className="p-6 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -61,16 +63,16 @@ export default function SettingsPage() {
   if (error) {
     return (
       <>
-        <Header title="Settings" />
+        <Header title={t('admin.settings.title')} />
         <div className="p-6">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center text-red-600">
-                <p>Failed to load settings</p>
+                <p>{t('admin.common.error')}</p>
                 <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
                 <Button variant="outline" className="mt-4" onClick={() => refetch()}>
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Try Again
+                  {t('admin.actions.refresh')}
                 </Button>
               </div>
             </CardContent>
@@ -82,7 +84,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Header title="Settings" />
+      <Header title={t('admin.settings.title')} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6 max-w-4xl">
         {/* Business Settings */}
@@ -90,24 +92,24 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building className="h-5 w-5" />
-              Business Information
+              {t('admin.settings.tenantName')}
             </CardTitle>
-            <CardDescription>Manage your business details</CardDescription>
+            <CardDescription>{t('admin.settings.general')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Business Name</label>
+                <label className="text-sm font-medium">{t('admin.settings.tenantName')}</label>
                 <Input
                   {...register('business_name')}
-                  placeholder="Your business name"
+                  placeholder={t('admin.settings.tenantName')}
                   aria-invalid={businessNameAriaProps['aria-invalid']}
                   aria-describedby={businessNameAriaProps['aria-describedby']}
                 />
                 <FormError message={errors.business_name?.message} id={businessNameAriaProps.errorId} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Business Email</label>
+                <label className="text-sm font-medium">{t('admin.users.email')}</label>
                 <Input
                   {...register('contact_email')}
                   type="email"
@@ -118,7 +120,7 @@ export default function SettingsPage() {
                 <FormError message={errors.contact_email?.message} id={emailAriaProps.errorId} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Phone Number</label>
+                <label className="text-sm font-medium">{t('admin.users.phone')}</label>
                 <Input
                   {...register('contact_phone')}
                   placeholder="+48 123 456 789"
@@ -128,16 +130,16 @@ export default function SettingsPage() {
                 <FormError message={errors.contact_phone?.message} id={phoneAriaProps.errorId} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Address</label>
-                <Input {...register('address')} placeholder="Street address" />
+                <label className="text-sm font-medium">{t('admin.locations.address')}</label>
+                <Input {...register('address')} placeholder={t('admin.locations.address')} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">City</label>
-                <Input {...register('city')} placeholder="City" />
+                <label className="text-sm font-medium">{t('admin.locations.city')}</label>
+                <Input {...register('city')} placeholder={t('admin.locations.city')} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Country</label>
-                <Input {...register('country')} placeholder="Country" />
+                <label className="text-sm font-medium">{t('admin.locations.country')}</label>
+                <Input {...register('country')} placeholder={t('admin.locations.country')} />
               </div>
             </div>
           </CardContent>
@@ -148,17 +150,17 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Notifications
+              {t('admin.settings.notifications')}
             </CardTitle>
-            <CardDescription>Configure notification preferences</CardDescription>
+            <CardDescription>{t('admin.settings.emailNotifications')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Booking Confirmation Emails</p>
+                  <p className="font-medium">{t('admin.settings.emailNotifications')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Send email when booking is confirmed
+                    {t('admin.settings.emailNotifications')}
                   </p>
                 </div>
                 <input
@@ -169,9 +171,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Booking Reminder Emails</p>
+                  <p className="font-medium">{t('admin.settings.emailNotifications')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Send reminder email before booking
+                    {t('admin.settings.emailNotifications')}
                   </p>
                 </div>
                 <input
@@ -182,9 +184,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Cancellation Emails</p>
+                  <p className="font-medium">{t('admin.settings.emailNotifications')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Send email when booking is cancelled
+                    {t('admin.settings.emailNotifications')}
                   </p>
                 </div>
                 <input
@@ -195,9 +197,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">SMS Booking Confirmation</p>
+                  <p className="font-medium">{t('admin.settings.smsNotifications')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Send SMS when booking is confirmed
+                    {t('admin.settings.smsNotifications')}
                   </p>
                 </div>
                 <input
@@ -208,9 +210,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">SMS Booking Reminder</p>
+                  <p className="font-medium">{t('admin.settings.smsNotifications')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Send SMS reminder before booking
+                    {t('admin.settings.smsNotifications')}
                   </p>
                 </div>
                 <input
@@ -228,9 +230,9 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
-              Integrations
+              {t('admin.settings.integrations')}
             </CardTitle>
-            <CardDescription>Enable or disable external service integrations</CardDescription>
+            <CardDescription>{t('admin.settings.integrations')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
@@ -256,7 +258,7 @@ export default function SettingsPage() {
                     <Lock className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="font-medium">TTLock</p>
+                    <p className="font-medium">{t('admin.settings.ttlockIntegration')}</p>
                     <p className="text-sm text-muted-foreground">Smart lock integration</p>
                   </div>
                 </div>
@@ -272,7 +274,7 @@ export default function SettingsPage() {
                     <Bell className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="font-medium">Push Notifications</p>
+                    <p className="font-medium">{t('admin.settings.pushNotifications')}</p>
                     <p className="text-sm text-muted-foreground">Firebase push notifications</p>
                   </div>
                 </div>
@@ -294,7 +296,7 @@ export default function SettingsPage() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Save Changes
+            {t('admin.settings.save')}
           </Button>
         </div>
       </form>

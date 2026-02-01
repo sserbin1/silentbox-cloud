@@ -413,6 +413,19 @@ export const translations = {
     'admin.confirm.delete': 'Are you sure you want to delete this?',
     'admin.confirm.cancel': 'Are you sure you want to cancel?',
     'admin.confirm.unsaved': 'You have unsaved changes. Are you sure you want to leave?',
+
+    // Header
+    'admin.header.search': 'Search...',
+    'admin.header.newBooking': 'New Booking',
+    'admin.header.notifications': 'Notifications',
+    'admin.header.noNotifications': 'No new notifications',
+    'admin.header.viewAll': 'View all notifications',
+    'admin.header.profile': 'Profile',
+    'admin.header.settings': 'Settings',
+    'admin.header.logout': 'Log out',
+    'admin.header.owner': 'Owner',
+    'admin.header.operator': 'Operator',
+    'admin.header.admin': 'Admin',
   },
 
   de: {
@@ -805,6 +818,19 @@ export const translations = {
     'admin.confirm.delete': 'Sind Sie sicher, dass Sie dies löschen möchten?',
     'admin.confirm.cancel': 'Sind Sie sicher, dass Sie abbrechen möchten?',
     'admin.confirm.unsaved': 'Sie haben ungespeicherte Änderungen. Möchten Sie die Seite wirklich verlassen?',
+
+    // Header
+    'admin.header.search': 'Suchen...',
+    'admin.header.newBooking': 'Neue Buchung',
+    'admin.header.notifications': 'Benachrichtigungen',
+    'admin.header.noNotifications': 'Keine neuen Benachrichtigungen',
+    'admin.header.viewAll': 'Alle Benachrichtigungen anzeigen',
+    'admin.header.profile': 'Profil',
+    'admin.header.settings': 'Einstellungen',
+    'admin.header.logout': 'Abmelden',
+    'admin.header.owner': 'Eigentümer',
+    'admin.header.operator': 'Operator',
+    'admin.header.admin': 'Administrator',
   },
 
   uk: {
@@ -1197,6 +1223,19 @@ export const translations = {
     'admin.confirm.delete': 'Ви впевнені, що хочете це видалити?',
     'admin.confirm.cancel': 'Ви впевнені, що хочете скасувати?',
     'admin.confirm.unsaved': 'У вас є незбережені зміни. Ви впевнені, що хочете піти?',
+
+    // Header
+    'admin.header.search': 'Пошук...',
+    'admin.header.newBooking': 'Нове бронювання',
+    'admin.header.notifications': 'Сповіщення',
+    'admin.header.noNotifications': 'Немає нових сповіщень',
+    'admin.header.viewAll': 'Переглянути всі сповіщення',
+    'admin.header.profile': 'Профіль',
+    'admin.header.settings': 'Налаштування',
+    'admin.header.logout': 'Вийти',
+    'admin.header.owner': 'Власник',
+    'admin.header.operator': 'Оператор',
+    'admin.header.admin': 'Адміністратор',
   },
 
   fr: {
@@ -1589,6 +1628,19 @@ export const translations = {
     'admin.confirm.delete': 'Êtes-vous sûr de vouloir supprimer ceci ?',
     'admin.confirm.cancel': 'Êtes-vous sûr de vouloir annuler ?',
     'admin.confirm.unsaved': 'Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?',
+
+    // Header
+    'admin.header.search': 'Rechercher...',
+    'admin.header.newBooking': 'Nouvelle réservation',
+    'admin.header.notifications': 'Notifications',
+    'admin.header.noNotifications': 'Aucune nouvelle notification',
+    'admin.header.viewAll': 'Voir toutes les notifications',
+    'admin.header.profile': 'Profil',
+    'admin.header.settings': 'Paramètres',
+    'admin.header.logout': 'Se déconnecter',
+    'admin.header.owner': 'Propriétaire',
+    'admin.header.operator': 'Opérateur',
+    'admin.header.admin': 'Administrateur',
   },
 } as const;
 
