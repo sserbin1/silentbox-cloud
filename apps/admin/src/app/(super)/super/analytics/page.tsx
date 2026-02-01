@@ -39,6 +39,7 @@ import {
   Cell,
 } from 'recharts';
 import { usePlatformStats, useTenants, usePlatformActivity, useAnalyticsTrends, useTopTenants } from '@/hooks/use-super-admin';
+import { toast } from 'sonner';
 
 // Chart colors
 const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
@@ -53,6 +54,42 @@ export default function AnalyticsPage() {
   const { data: topTenantsData, isLoading: topTenantsLoading } = useTopTenants(5);
 
   const isLoading = statsLoading || tenantsLoading || chartLoading;
+
+  const handleExportReport = () => {
+    // Prepare CSV data
+    const csvRows = [
+      ['Platform Analytics Report'],
+      [`Period: ${period === '7d' ? 'Last 7 days' : period === '30d' ? 'Last 30 days' : 'Last 90 days'}`],
+      [`Generated: ${new Date().toLocaleString()}`],
+      [],
+      ['Key Metrics'],
+      ['Total Tenants', stats?.totalTenants || 0],
+      ['Total Bookings', stats?.totalBookings || 0],
+      ['Total Revenue', `${stats?.totalRevenue || 0} PLN`],
+      ['Active Users', stats?.activeUsers || 0],
+      [],
+      ['Tenants by Status'],
+      ...Object.entries(tenantsByStatus).map(([status, count]) => [status, count]),
+      [],
+      ['Tenants by Country'],
+      ...Object.entries(tenantsByCountry).map(([country, count]) => [country, count]),
+      [],
+      ['Top Tenants by Bookings'],
+      ['Name', 'Bookings', 'Revenue'],
+      ...(topTenants || []).map((t: { name: string; bookings: number; revenue: number }) =>
+        [t.name, t.bookings, `${t.revenue} PLN`]
+      ),
+    ];
+
+    const csvContent = csvRows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `analytics-report-${period}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+
+    toast.success('Report exported successfully');
+  };
 
   // Tenant distribution by status
   const tenantsByStatus = tenants?.reduce((acc, tenant) => {
@@ -121,7 +158,12 @@ export default function AnalyticsPage() {
               <SelectItem value="90d">Last 90 days</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+          <Button
+            variant="outline"
+            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            onClick={handleExportReport}
+            disabled={isLoading}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>

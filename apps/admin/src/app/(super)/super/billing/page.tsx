@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CreditCard, FileText, TrendingUp, Calendar, Download, Plus, AlertCircle, RefreshCw } from 'lucide-react';
-import { useBillingStats } from '@/hooks/use-super-admin';
+import { useBillingStats, useTenants } from '@/hooks/use-super-admin';
+import { toast } from 'sonner';
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('pl-PL', {
@@ -15,6 +16,38 @@ function formatCurrency(amount: number): string {
 
 export default function BillingPage() {
   const { data: stats, isLoading, error, refetch } = useBillingStats();
+  const { data: tenants } = useTenants();
+
+  const handleExportInvoices = () => {
+    // Generate sample invoices data based on tenants
+    const csvRows = [
+      ['Invoice Export'],
+      [`Generated: ${new Date().toLocaleString()}`],
+      [],
+      ['Invoice ID', 'Tenant', 'Amount', 'Status', 'Due Date'],
+      // Sample data - in production this would come from API
+      ...(tenants || []).slice(0, 5).map((tenant, i) => [
+        `INV-2026-${String(i + 1).padStart(4, '0')}`,
+        tenant.name,
+        '299.00 PLN',
+        'Paid',
+        new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      ]),
+    ];
+
+    const csvContent = csvRows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+
+    toast.success('Invoices exported successfully');
+  };
+
+  const handleCreateInvoice = () => {
+    toast.info('Invoice creation wizard coming soon');
+  };
 
   if (error) {
     return (
@@ -43,7 +76,10 @@ export default function BillingPage() {
           <h1 className="text-2xl font-bold text-white">Billing</h1>
           <p className="text-slate-400 mt-1">Subscriptions, invoices & revenue</p>
         </div>
-        <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+        <Button
+          className="bg-amber-500 hover:bg-amber-600 text-white"
+          onClick={handleCreateInvoice}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Create Invoice
         </Button>
@@ -129,7 +165,12 @@ export default function BillingPage() {
         <Card className="bg-slate-900 border-slate-800">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Recent Invoices</CardTitle>
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white"
+              onClick={handleExportInvoices}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>

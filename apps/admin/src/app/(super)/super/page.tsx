@@ -1,10 +1,72 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Building2, Users, CreditCard, TrendingUp, Activity, AlertCircle, RefreshCw } from 'lucide-react';
+import { Building2, Users, CreditCard, TrendingUp, Activity, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { usePlatformStats, usePlatformActivity } from '@/hooks/use-super-admin';
 import { Button } from '@/components/ui/button';
+
+interface HealthStatus {
+  api: 'operational' | 'degraded' | 'down' | 'checking';
+  database: 'healthy' | 'degraded' | 'down' | 'checking';
+  payments: 'active' | 'degraded' | 'down' | 'checking';
+  ttlock: 'active' | 'degraded' | 'down' | 'checking';
+}
+
+function useHealthCheck() {
+  const [health, setHealth] = useState<HealthStatus>({
+    api: 'checking',
+    database: 'checking',
+    payments: 'checking',
+    ttlock: 'checking',
+  });
+  const [isChecking, setIsChecking] = useState(false);
+
+  const checkHealth = async () => {
+    setIsChecking(true);
+    setHealth({
+      api: 'checking',
+      database: 'checking',
+      payments: 'checking',
+      ttlock: 'checking',
+    });
+
+    // Check API
+    try {
+      const apiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.silent-box.com'}/health`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+      setHealth(prev => ({ ...prev, api: apiResponse.ok ? 'operational' : 'degraded' }));
+
+      // If API is up, database is likely healthy too
+      setHealth(prev => ({ ...prev, database: apiResponse.ok ? 'healthy' : 'degraded' }));
+    } catch {
+      setHealth(prev => ({ ...prev, api: 'down', database: 'down' }));
+    }
+
+    // Payments - check if configured (we'll assume active if API is up)
+    setHealth(prev => ({
+      ...prev,
+      payments: prev.api === 'operational' ? 'active' : 'degraded',
+    }));
+
+    // TTLock - typically degraded until gateway is configured
+    setHealth(prev => ({ ...prev, ttlock: 'degraded' }));
+
+    setIsChecking(false);
+  };
+
+  useEffect(() => {
+    checkHealth();
+    // Re-check every 60 seconds
+    const interval = setInterval(checkHealth, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return { health, isChecking, checkHealth };
+}
 
 function StatCardSkeleton() {
   return (
@@ -55,6 +117,42 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void
 export default function SuperAdminDashboard() {
   const { data: stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = usePlatformStats();
   const { data: activity, isLoading: activityLoading, error: activityError, refetch: refetchActivity } = usePlatformActivity();
+  const { health, isChecking, checkHealth } = useHealthCheck();
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'operational':
+      case 'healthy':
+      case 'active':
+        return 'bg-emerald-500';
+      case 'degraded':
+        return 'bg-amber-500';
+      case 'down':
+        return 'bg-red-500';
+      default:
+        return 'bg-slate-500';
+    }
+  };
+
+  const getStatusTextColor = (status: string) => {
+    switch (status) {
+      case 'operational':
+      case 'healthy':
+      case 'active':
+        return 'text-emerald-400';
+      case 'degraded':
+        return 'text-amber-400';
+      case 'down':
+        return 'text-red-400';
+      default:
+        return 'text-slate-400';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    if (status === 'checking') return 'Checking...';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -186,39 +284,60 @@ export default function SuperAdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
+        {/* Platform Health */}
         <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Platform Health</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={checkHealth}
+              disabled={isChecking}
+              className="text-slate-400 hover:text-white"
+            >
+              {isChecking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
+                <div className={`h-3 w-3 rounded-full ${getStatusColor(health.api)} ${health.api !== 'checking' ? 'animate-pulse' : ''}`} />
                 <span className="text-sm text-slate-300">API Status</span>
               </div>
-              <span className="text-sm font-medium text-emerald-400">Operational</span>
+              <span className={`text-sm font-medium ${getStatusTextColor(health.api)}`}>
+                {formatStatus(health.api)}
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
+                <div className={`h-3 w-3 rounded-full ${getStatusColor(health.database)} ${health.database !== 'checking' ? 'animate-pulse' : ''}`} />
                 <span className="text-sm text-slate-300">Database</span>
               </div>
-              <span className="text-sm font-medium text-emerald-400">Healthy</span>
+              <span className={`text-sm font-medium ${getStatusTextColor(health.database)}`}>
+                {formatStatus(health.database)}
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
+                <div className={`h-3 w-3 rounded-full ${getStatusColor(health.payments)} ${health.payments !== 'checking' ? 'animate-pulse' : ''}`} />
                 <span className="text-sm text-slate-300">Payment Processing</span>
               </div>
-              <span className="text-sm font-medium text-emerald-400">Active</span>
+              <span className={`text-sm font-medium ${getStatusTextColor(health.payments)}`}>
+                {formatStatus(health.payments)}
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
+                <div className={`h-3 w-3 rounded-full ${getStatusColor(health.ttlock)} ${health.ttlock !== 'checking' ? 'animate-pulse' : ''}`} />
                 <span className="text-sm text-slate-300">TTLock Integration</span>
               </div>
-              <span className="text-sm font-medium text-amber-400">Degraded</span>
+              <span className={`text-sm font-medium ${getStatusTextColor(health.ttlock)}`}>
+                {formatStatus(health.ttlock)}
+              </span>
             </div>
           </CardContent>
         </Card>

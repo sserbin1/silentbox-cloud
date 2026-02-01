@@ -23,6 +23,7 @@ import {
 import { useDevices, useUnlockDevice, useLockDevice, useSyncDevice } from '@/hooks/use-devices';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { DeviceSettingsDialog } from '@/components/devices/device-settings-dialog';
 
 const statusColors: Record<string, string> = {
   online: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -117,6 +118,16 @@ export default function DevicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingDeviceId, setLoadingDeviceId] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState<'unlock' | 'lock' | 'sync' | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<{
+    id: string;
+    external_id?: string;
+    device_type?: string;
+    battery_level?: number | null;
+    last_seen?: string | null;
+    status?: string;
+    booths?: { id: string; name: string; locations?: { name: string } };
+  } | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { data: devices, isLoading, error, refetch, isRefetching } = useDevices();
   const unlockDevice = useUnlockDevice();
@@ -390,7 +401,15 @@ export default function DevicesPage() {
                           <RefreshCw className="h-4 w-4" />
                         )}
                       </Button>
-                      <Button variant="outline" size="sm" title="Device settings">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Device settings"
+                        onClick={() => {
+                          setSelectedDevice(device);
+                          setIsSettingsOpen(true);
+                        }}
+                      >
                         <Settings className="h-4 w-4" />
                       </Button>
                     </div>
@@ -401,6 +420,13 @@ export default function DevicesPage() {
           )}
         </div>
       </div>
+
+      {/* Device Settings Dialog */}
+      <DeviceSettingsDialog
+        device={selectedDevice}
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
     </>
   );
 }

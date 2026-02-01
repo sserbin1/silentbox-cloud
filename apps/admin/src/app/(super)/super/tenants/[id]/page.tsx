@@ -38,6 +38,7 @@ import {
 import { useState } from 'react';
 import { useTenant, useTenantStats, useActivateTenant, useSuspendTenant, useDeleteTenant } from '@/hooks/use-super-admin';
 import { toast } from 'sonner';
+import { EditTenantDialog } from '@/components/super/edit-tenant-dialog';
 
 function DetailSkeleton() {
   return (
@@ -86,6 +87,7 @@ export default function TenantDetailsPage() {
   const tenantId = params.id as string;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data: tenant, isLoading, error, refetch } = useTenant(tenantId);
   const { data: stats, isLoading: statsLoading } = useTenantStats(tenantId);
@@ -165,7 +167,11 @@ export default function TenantDetailsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+          <Button
+            onClick={() => setIsEditDialogOpen(true)}
+            variant="outline"
+            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          >
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
@@ -372,6 +378,13 @@ export default function TenantDetailsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Tenant Dialog */}
+      <EditTenantDialog
+        tenant={tenant}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
     </div>
   );
 }
