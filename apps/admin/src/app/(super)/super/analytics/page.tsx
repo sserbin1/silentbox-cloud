@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
       ['Total Tenants', stats?.totalTenants || 0],
       ['Total Bookings', stats?.totalBookings || 0],
       ['Total Revenue', `${stats?.totalRevenue || 0} PLN`],
-      ['Active Users', stats?.activeUsers || 0],
+      ['Total Users', stats?.totalUsers || 0],
       [],
       ['Tenants by Status'],
       ...Object.entries(tenantsByStatus).map(([status, count]) => [status, count]),
