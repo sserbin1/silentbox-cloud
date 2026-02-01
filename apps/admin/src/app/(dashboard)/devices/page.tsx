@@ -125,7 +125,7 @@ export default function DevicesPage() {
     battery_level?: number | null;
     last_seen?: string | null;
     status?: string;
-    booths?: { id: string; name: string; locations?: { name: string } };
+    booths?: { name: string; locations?: { name: string } };
   } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
