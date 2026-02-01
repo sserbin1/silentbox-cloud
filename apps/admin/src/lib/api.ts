@@ -154,9 +154,9 @@ interface LoginResponse {
   user: {
     id: string;
     email: string;
-    full_name: string;
+    fullName: string;
     role: 'admin' | 'operator' | 'super_admin';
-    tenant_id: string | null;
+    tenantId: string | null;
   };
   accessToken: string;
   refreshToken: string;

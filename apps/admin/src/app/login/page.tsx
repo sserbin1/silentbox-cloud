@@ -47,9 +47,9 @@ export default function LoginPage() {
       setUser({
         id: result.data.user.id,
         email: result.data.user.email,
-        full_name: result.data.user.full_name,
+        full_name: result.data.user.fullName,
         role: result.data.user.role,
-        tenant_id: result.data.user.tenant_id,
+        tenant_id: result.data.user.tenantId,
       });
 
       // Redirect based on role
