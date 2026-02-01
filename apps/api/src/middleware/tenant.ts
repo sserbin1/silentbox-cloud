@@ -20,6 +20,10 @@ const AUTH_ROUTES = [
   '/api/auth/login',
   '/api/auth/refresh',
   '/api/auth/oauth',
+  '/api/auth/admin/login',
+  '/api/auth/admin/logout',
+  '/api/auth/admin/refresh',
+  '/api/auth/admin/me',
 ];
 
 // Super admin routes (platform-level, no tenant)
