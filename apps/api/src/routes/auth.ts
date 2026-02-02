@@ -463,10 +463,11 @@ export const authRoutes = async (app: FastifyInstance) => {
 
     if (user.auth_id) {
       // Use Supabase Auth
-      const { error: authError } = await supabaseAdmin.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
         email: body.email,
         password: body.password,
       });
+      app.log.info({ authError: authError?.message, authData: !!authData?.user, userAuthId: user.auth_id }, 'Admin login auth check');
       isValidPassword = !authError;
     } else if (user.password_hash) {
       // Use bcrypt for demo users
@@ -474,6 +475,7 @@ export const authRoutes = async (app: FastifyInstance) => {
     }
 
     if (!isValidPassword) {
+      app.log.warn({ userId: user.id, hasAuthId: !!user.auth_id, hasPasswordHash: !!user.password_hash }, 'Admin login password validation failed');
       await logAuditEvent('admin_login_failed', user.id, user.tenant_id, { reason: 'invalid_password' }, ip);
       return reply.status(401).send({
         success: false,
