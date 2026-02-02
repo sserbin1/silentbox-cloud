@@ -33,15 +33,18 @@ const extractToken = (request: FastifyRequest): string | null => {
   // Try cookie first (httpOnly cookie from admin auth)
   const cookieToken = request.cookies?.access_token;
   if (cookieToken) {
+    request.log.debug({ hasCookie: true }, 'Token from cookie');
     return cookieToken;
   }
 
   // Fall back to Authorization header
   const authHeader = request.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
+    request.log.debug({ hasAuthHeader: true }, 'Token from auth header');
     return authHeader.substring(7);
   }
 
+  request.log.debug({ cookies: Object.keys(request.cookies || {}), hasAuthHeader: !!authHeader }, 'No token found');
   return null;
 };
 
