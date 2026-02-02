@@ -14,7 +14,7 @@ import { logger } from '../lib/logger.js';
 // Rate limiting store (in-memory, consider Redis for production cluster)
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const RATE_LIMIT_MAX_ATTEMPTS = 20; // Increased for admin panel
 
 // Clean up old entries periodically
 setInterval(() => {
