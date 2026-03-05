@@ -3,32 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --color-primary-50: #EEF2FF;
-  --color-primary-100: #E0E7FF;
-  --color-primary-200: #C7D2FE;
-  --color-primary-300: #A5B4FC;
+  --color-primary-50: #1E1B4B;
+  --color-primary-100: #2E1065;
+  --color-primary-200: #4C1D95;
+  --color-primary-300: #6D28D9;
   --color-primary-400: #818CF8;
-  --color-primary-500: #6366F1;
-  --color-primary-600: #4F46E5;
-  --color-primary-700: #4338CA;
-  --color-primary-800: #3730A3;
-  --color-primary-900: #312E81;
+  --color-primary-500: #8B5CF6;
+  --color-primary-600: #7C3AED;
+  --color-primary-700: #6D28D9;
+  --color-primary-800: #5B21B6;
+  --color-primary-900: #4C1D95;
 
-  --color-accent-50: #FFFBEB;
-  --color-accent-500: #F59E0B;
-  --color-accent-600: #D97706;
+  --color-accent-50: #1E1B4B;
+  --color-accent-500: #818CF8;
+  --color-accent-600: #6366F1;
+
+  --color-bg: #09090B;
+  --color-bg-secondary: #0F0F11;
+  --color-card: #18181B;
+  --color-border: #27272A;
+  --color-border-hover: #3F3F46;
+  --color-text: #F4F4F5;
+  --color-text-secondary: #A1A1AA;
+  --color-text-muted: #71717A;
+
+  --gradient-accent: linear-gradient(135deg, #A78BFA, #818CF8, #60A5FA);
+  --gradient-accent-hover: linear-gradient(135deg, #C4B5FD, #A5B4FC, #93C5FD);
 
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
 @layer base {
   * {
-    @apply border-gray-200;
+    @apply border-zinc-800;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgba(139, 92, 246, 0.3);
+    color: #F4F4F5;
   }
 }
 
@@ -37,16 +57,47 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* --- Buttons --- */
+
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    focus-ring-offset-color: var(--color-bg);
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply btn text-white shadow-lg;
+    background: var(--gradient-accent);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.25), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: var(--gradient-accent-hover);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), 0 6px 16px rgba(0, 0, 0, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:focus {
+    @apply ring-violet-500 ring-offset-zinc-950;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500;
+    @apply btn text-zinc-300 border;
+    background-color: #27272A;
+    border-color: #3F3F46;
+  }
+
+  .btn-secondary:hover {
+    background-color: #3F3F46;
+    border-color: #52525B;
+    color: #F4F4F5;
+  }
+
+  .btn-secondary:focus {
+    @apply ring-zinc-500 ring-offset-zinc-950;
   }
 
   .btn-lg {
@@ -61,20 +112,133 @@
     @apply px-3 py-2 text-sm;
   }
 
+  /* --- Card --- */
+
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+    @apply rounded-2xl border;
+    background-color: var(--color-card);
+    border-color: var(--color-border);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
+
+  .card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  /* --- Input --- */
 
   .input {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+    @apply w-full px-4 py-3 rounded-xl border transition-all;
+    background-color: var(--color-card);
+    border-color: var(--color-border);
+    color: var(--color-text);
   }
 
+  .input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15), 0 0 16px rgba(129, 140, 248, 0.1);
+  }
+
+  /* --- Label --- */
+
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1.5;
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--color-text-secondary);
+  }
+
+  /* --- Glass header --- */
+
+  .glass-header {
+    background: rgba(9, 9, 11, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* --- Gradient text --- */
+
+  .gradient-text {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Glow effect --- */
+
+  .glow {
+    position: relative;
+  }
+
+  .glow::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: var(--gradient-accent);
+    z-index: -1;
+    opacity: 0;
+    filter: blur(12px);
+    transition: opacity 0.3s ease;
+  }
+
+  .glow:hover::after {
+    opacity: 0.5;
+  }
+
+  /* --- Gradient border card --- */
+
+  .card-gradient-border {
+    position: relative;
+    background-color: var(--color-card);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .card-gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gradient-accent);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-gradient-border:hover::before {
+    opacity: 0.7;
+  }
+
+  /* --- Divider --- */
+
+  .divider {
+    border-color: var(--color-border);
+  }
+
+  /* --- Secondary background section --- */
+
+  .bg-secondary {
+    background-color: var(--color-bg-secondary);
   }
 }
 
-/* Custom scrollbar */
+/* ============================================
+   Custom Scrollbar — Dark Theme
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -85,15 +249,24 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #3F3F46;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #52525B;
 }
 
-/* Animation utilities */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3F3F46 transparent;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -106,7 +279,37 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
 }
 
 @keyframes pulse-soft {
@@ -120,4 +323,30 @@
 
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3), 0 0 60px rgba(96, 165, 250, 0.1);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Stagger animation delays for lists */
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 50ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 250ms; }
+.animate-stagger > *:nth-child(7) { animation-delay: 300ms; }
+.animate-stagger > *:nth-child(8) { animation-delay: 350ms; }
+.animate-stagger > * {
+  animation-fill-mode: both;
 }

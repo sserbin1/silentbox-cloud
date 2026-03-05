@@ -14,7 +14,7 @@ export function Header() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-[#09090B]/80 backdrop-blur-xl border-b border-zinc-800/50">
       <div className="container-page">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -29,12 +29,12 @@ export function Header() {
               />
             ) : (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/20">
                   <span className="text-white font-bold text-sm">
                     {tenant.name.charAt(0)}
                   </span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-xl font-bold text-white">
                   {tenant.name}
                 </span>
               </div>
@@ -45,20 +45,20 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-8">
             <Link
               href="/spaces"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-zinc-400 hover:text-white font-medium transition-colors"
             >
               Browse Spaces
             </Link>
             <Link
               href="/locations"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-zinc-400 hover:text-white font-medium transition-colors"
             >
               Locations
             </Link>
             {tenant.features.showPricing && (
               <Link
                 href="/pricing"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                className="text-zinc-400 hover:text-white font-medium transition-colors"
               >
                 Pricing
               </Link>
@@ -71,21 +71,21 @@ export function Header() {
               <div className="relative">
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-800/50 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-primary-700 font-semibold text-sm">
+                  <div className="w-8 h-8 bg-gradient-to-br from-violet-500/20 to-blue-500/20 rounded-full flex items-center justify-center ring-1 ring-violet-500/30">
+                    <span className="text-violet-300 font-semibold text-sm">
                       {user?.name?.charAt(0) || 'U'}
                     </span>
                   </div>
-                  <span className="text-gray-700 font-medium">{user?.name}</span>
+                  <span className="text-zinc-300 font-medium">{user?.name}</span>
                 </button>
 
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-fade-in">
+                  <div className="absolute right-0 mt-2 w-56 bg-zinc-900 rounded-xl shadow-2xl shadow-black/50 border border-zinc-800 py-2 animate-fade-in">
                     <Link
                       href="/my-bookings"
-                      className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       <Calendar className="w-5 h-5" />
@@ -93,19 +93,19 @@ export function Header() {
                     </Link>
                     <Link
                       href="/profile"
-                      className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />
                       Profile
                     </Link>
-                    <hr className="my-2 border-gray-100" />
+                    <hr className="my-2 border-zinc-800" />
                     <button
                       onClick={() => {
                         logout();
                         setProfileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors w-full text-left"
                     >
                       <LogOut className="w-5 h-5" />
                       Sign Out
@@ -117,11 +117,14 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  className="text-zinc-400 hover:text-white font-medium transition-colors"
                 >
                   Sign In
                 </Link>
-                <Link href="/register" className="btn-primary btn-md">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white font-medium text-sm hover:from-violet-500 hover:to-blue-500 transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40"
+                >
                   Get Started
                 </Link>
               </>
@@ -131,12 +134,12 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-zinc-800/50 transition-colors"
           >
             {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-gray-600" />
+              <X className="w-6 h-6 text-zinc-400" />
             ) : (
-              <Menu className="w-6 h-6 text-gray-600" />
+              <Menu className="w-6 h-6 text-zinc-400" />
             )}
           </button>
         </div>
@@ -144,18 +147,18 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white animate-fade-in">
+        <div className="md:hidden border-t border-zinc-800/50 bg-[#0F0F11] animate-fade-in">
           <div className="container-page py-4 space-y-4">
             <Link
               href="/spaces"
-              className="block py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block py-2 text-zinc-400 hover:text-white font-medium transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Browse Spaces
             </Link>
             <Link
               href="/locations"
-              className="block py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block py-2 text-zinc-400 hover:text-white font-medium transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               Locations
@@ -163,27 +166,27 @@ export function Header() {
             {tenant.features.showPricing && (
               <Link
                 href="/pricing"
-                className="block py-2 text-gray-600 hover:text-gray-900 font-medium"
+                className="block py-2 text-zinc-400 hover:text-white font-medium transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pricing
               </Link>
             )}
 
-            <hr className="border-gray-100" />
+            <hr className="border-zinc-800" />
 
             {isAuthenticated ? (
               <>
                 <Link
                   href="/my-bookings"
-                  className="block py-2 text-gray-600 hover:text-gray-900 font-medium"
+                  className="block py-2 text-zinc-400 hover:text-white font-medium transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   My Bookings
                 </Link>
                 <Link
                   href="/profile"
-                  className="block py-2 text-gray-600 hover:text-gray-900 font-medium"
+                  className="block py-2 text-zinc-400 hover:text-white font-medium transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Profile
@@ -193,7 +196,7 @@ export function Header() {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block py-2 text-red-600 font-medium w-full text-left"
+                  className="block py-2 text-red-400 font-medium w-full text-left"
                 >
                   Sign Out
                 </button>
@@ -202,14 +205,14 @@ export function Header() {
               <div className="flex flex-col gap-3 pt-2">
                 <Link
                   href="/login"
-                  className="btn-secondary btn-md w-full"
+                  className="block w-full text-center px-5 py-2.5 rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white font-medium transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="btn-primary btn-md w-full"
+                  className="block w-full text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white font-medium hover:from-violet-500 hover:to-blue-500 transition-all shadow-lg shadow-violet-500/25"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Get Started

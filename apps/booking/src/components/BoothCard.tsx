@@ -12,12 +12,12 @@ interface BoothCardProps {
 }
 
 export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
-  const imageUrl = booth.images?.[0] || 'https://placehold.co/400x300/EEF2FF/6366F1?text=Workspace';
+  const imageUrl = booth.images?.[0] || 'https://placehold.co/400x300/18181B/7C3AED?text=Workspace';
 
   return (
     <Link
       href={`/spaces/${booth.id}`}
-      className="card overflow-hidden group hover:shadow-lg transition-all duration-300"
+      className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group hover:border-zinc-700 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300"
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
@@ -28,9 +28,12 @@ export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
 
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" />
+
         {/* Badge */}
         <div className="absolute top-3 left-3">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-medium text-gray-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800/90 backdrop-blur-sm rounded-lg text-sm font-medium text-zinc-300">
             <span>{getBoothTypeIcon(booth.type)}</span>
             {getBoothTypeLabel(booth.type)}
           </span>
@@ -39,7 +42,7 @@ export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
         {/* Rating */}
         {booth.averageRating && (
           <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-medium text-gray-700">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-800/90 backdrop-blur-sm rounded-lg text-sm font-medium text-zinc-300">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               {booth.averageRating.toFixed(1)}
             </span>
@@ -49,19 +52,19 @@ export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+        <h3 className="text-lg font-semibold text-zinc-100 mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-violet-400 group-hover:to-blue-400 transition-colors">
           {booth.name}
         </h3>
 
         {booth.location && (
-          <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-3">
+          <div className="flex items-center gap-1.5 text-zinc-500 text-sm mb-3">
             <MapPin className="w-4 h-4" />
             <span>{booth.location.name}</span>
           </div>
         )}
 
         {/* Meta */}
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+        <div className="flex items-center gap-4 text-sm text-zinc-400 mb-4">
           <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4" />
             <span>{booth.capacity} {booth.capacity === 1 ? 'person' : 'people'}</span>
@@ -77,13 +80,13 @@ export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
             {booth.amenities.slice(0, 3).map((amenity) => (
               <span
                 key={amenity}
-                className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md"
+                className="text-xs px-2 py-1 bg-zinc-800 text-zinc-400 rounded-md"
               >
                 {amenity}
               </span>
             ))}
             {booth.amenities.length > 3 && (
-              <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md">
+              <span className="text-xs px-2 py-1 bg-zinc-800 text-zinc-400 rounded-md">
                 +{booth.amenities.length - 3}
               </span>
             )}
@@ -91,14 +94,14 @@ export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
         )}
 
         {/* Price */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
           <div>
-            <span className="text-xl font-bold text-primary-600">
+            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">
               {formatPrice(booth.pricePerHour, booth.currency)}
             </span>
-            <span className="text-gray-500 text-sm"> / hour</span>
+            <span className="text-zinc-500 text-sm"> / hour</span>
           </div>
-          <span className="text-primary-600 font-medium text-sm group-hover:translate-x-1 transition-transform">
+          <span className="text-zinc-400 font-medium text-sm group-hover:text-white group-hover:translate-x-1 transition-all">
             Book now →
           </span>
         </div>

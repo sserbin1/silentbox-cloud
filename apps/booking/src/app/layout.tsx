@@ -11,7 +11,7 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const viewport: Viewport = {
-  themeColor: '#6366F1',
+  themeColor: '#09090B',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -69,7 +69,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className={`${inter.variable} font-sans min-h-screen flex flex-col`}>
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col bg-[#09090B] text-zinc-100 antialiased`}>
         <Providers tenant={tenant}>
           <ServiceWorkerRegistration />
           <PWAInstallPrompt />

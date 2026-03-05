@@ -117,19 +117,19 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="card p-6">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
       <div className="text-center mb-6">
-        <div className="text-3xl font-bold text-primary-600">
+        <div className="text-3xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
           {formatPrice(booth.pricePerHour, booth.currency)}
         </div>
-        <div className="text-gray-500">per hour</div>
+        <div className="text-zinc-500">per hour</div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Date Selection */}
         <div>
-          <label className="label flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+          <label className="label flex items-center gap-2 text-zinc-300">
+            <Calendar className="w-4 h-4 text-zinc-500" />
             Select Date
           </label>
           <input
@@ -137,15 +137,15 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
             value={date}
             onChange={(e) => setDate(e.target.value)}
             min={today}
-            className="input"
+            className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
             required
           />
         </div>
 
         {/* Time Selection */}
         <div>
-          <label className="label flex items-center gap-2">
-            <Clock className="w-4 h-4" />
+          <label className="label flex items-center gap-2 text-zinc-300">
+            <Clock className="w-4 h-4 text-zinc-500" />
             Start Time
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -157,8 +157,8 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
                 className={cn(
                   'p-2 text-sm rounded-lg border transition-all',
                   startTime === time
-                    ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium'
-                    : 'border-gray-200 hover:border-primary-300 text-gray-700'
+                    ? 'border-violet-500 bg-violet-500/20 text-violet-300 font-medium'
+                    : 'border-zinc-800 hover:border-zinc-700 text-zinc-400'
                 )}
               >
                 {time}
@@ -169,7 +169,7 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
 
         {/* Duration Selection */}
         <div>
-          <label className="label">Duration</label>
+          <label className="label text-zinc-300">Duration</label>
           <div className="grid grid-cols-5 gap-2">
             {DURATION_OPTIONS.map((opt) => (
               <button
@@ -179,8 +179,8 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
                 className={cn(
                   'p-2 text-sm rounded-lg border transition-all',
                   duration === opt.hours
-                    ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium'
-                    : 'border-gray-200 hover:border-primary-300 text-gray-700'
+                    ? 'border-violet-500 bg-violet-500/20 text-violet-300 font-medium'
+                    : 'border-zinc-800 hover:border-zinc-700 text-zinc-400'
                 )}
               >
                 {opt.label}
@@ -191,40 +191,40 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
 
         {/* Guest Info */}
         {needsGuestInfo && (
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
+          <div className="space-y-4 pt-4 border-t border-zinc-800">
+            <p className="text-sm text-zinc-400">
               Enter your details to complete the booking:
             </p>
             <div>
-              <label className="label">Your Name *</label>
+              <label className="label text-zinc-300">Your Name *</label>
               <input
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="input"
+                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 px-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                 placeholder="John Doe"
                 required
               />
             </div>
             <div>
-              <label className="label">Email *</label>
+              <label className="label text-zinc-300">Email *</label>
               <input
                 type="email"
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                className="input"
+                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 px-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                 placeholder="john@example.com"
                 required
               />
             </div>
             {tenant.features.requirePhone && (
               <div>
-                <label className="label">Phone *</label>
+                <label className="label text-zinc-300">Phone *</label>
                 <input
                   type="tel"
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
-                  className="input"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 px-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="+48 123 456 789"
                   required
                 />
@@ -235,20 +235,20 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
 
         {/* Price Summary */}
         {startTime && date && (
-          <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-            <div className="flex justify-between text-gray-600">
+          <div className="bg-zinc-800/50 rounded-xl p-4 space-y-2">
+            <div className="flex justify-between text-zinc-400">
               <span>
-                {formatPrice(booth.pricePerHour, booth.currency)} × {duration}h
+                {formatPrice(booth.pricePerHour, booth.currency)} x {duration}h
               </span>
               <span>{formatPrice(totalPrice, booth.currency)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-green-600">
+              <div className="flex justify-between text-green-400">
                 <span>Discount ({discount * 100}% off)</span>
                 <span>-{formatPrice(totalPrice * discount, booth.currency)}</span>
               </div>
             )}
-            <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-200">
+            <div className="flex justify-between font-semibold text-white pt-2 border-t border-zinc-700">
               <span>Total</span>
               <span>{formatPrice(finalPrice, booth.currency)}</span>
             </div>
@@ -257,7 +257,7 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
 
         {/* Error Message */}
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-sm">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             {error}
           </div>
@@ -267,7 +267,7 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
         <button
           type="submit"
           disabled={!isValid || !guestInfoValid || loading}
-          className="btn-primary btn-lg w-full disabled:opacity-50"
+          className="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
         >
           {loading ? (
             'Processing...'
@@ -282,11 +282,11 @@ export function BookingForm({ booth, tenantSlug, allowGuestBooking }: BookingFor
         </button>
 
         {!isAuthenticated && allowGuestBooking && (
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-zinc-500">
             Have an account?{' '}
             <a
               href={`/login?redirect=/spaces/${booth.id}`}
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="text-violet-400 hover:text-violet-300 font-medium"
             >
               Sign in
             </a>

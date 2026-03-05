@@ -73,15 +73,15 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4">
+    <div className="min-h-[calc(100vh-200px)] bg-[#09090B] flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <div className="card p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-zinc-100 mb-2">
               Create your account
             </h1>
-            <p className="text-gray-600">
+            <p className="text-zinc-500">
               Join {tenant.name} to book workspaces
             </p>
           </div>
@@ -90,14 +90,14 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
-              <label className="label">Full name</label>
+              <label className="label text-zinc-300">Full name</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="input pl-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="John Doe"
                   required
                   autoComplete="name"
@@ -107,14 +107,14 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label className="label">Email address</label>
+              <label className="label text-zinc-300">Email address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input pl-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
@@ -124,19 +124,19 @@ export default function RegisterPage() {
 
             {/* Phone (optional or required based on tenant settings) */}
             <div>
-              <label className="label">
+              <label className="label text-zinc-300">
                 Phone number
                 {!tenant.features.requirePhone && (
-                  <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                  <span className="text-zinc-600 font-normal ml-1">(optional)</span>
                 )}
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="input pl-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="+48 123 456 789"
                   required={tenant.features.requirePhone}
                   autoComplete="tel"
@@ -146,14 +146,14 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="label">Password</label>
+              <label className="label text-zinc-300">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pl-12 pr-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-12 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="Create a strong password"
                   required
                   autoComplete="new-password"
@@ -161,7 +161,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -184,14 +184,14 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label className="label">Confirm password</label>
+              <label className="label text-zinc-300">Confirm password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input pl-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="Confirm your password"
                   required
                   autoComplete="new-password"
@@ -206,7 +206,7 @@ export default function RegisterPage() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+              <div className="flex items-center gap-2 p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-sm">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 {error}
               </div>
@@ -216,7 +216,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading || !passwordValid || !passwordsMatch}
-              className="btn-primary btn-lg w-full"
+              className="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -232,10 +232,10 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-zinc-800" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">
+              <span className="px-4 bg-zinc-900 text-zinc-500">
                 Already have an account?
               </span>
             </div>
@@ -244,17 +244,17 @@ export default function RegisterPage() {
           {/* Login Link */}
           <Link
             href={`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-            className="btn-secondary btn-lg w-full"
+            className="w-full py-3.5 rounded-xl font-semibold border border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors flex items-center justify-center"
           >
             Sign in instead
           </Link>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-zinc-600 mt-6">
           By creating an account, you agree to our{' '}
           {tenant.termsUrl ? (
-            <a href={tenant.termsUrl} className="text-primary-600 hover:underline">
+            <a href={tenant.termsUrl} className="text-violet-400 hover:underline">
               Terms of Service
             </a>
           ) : (
@@ -262,7 +262,7 @@ export default function RegisterPage() {
           )}{' '}
           and{' '}
           {tenant.privacyUrl ? (
-            <a href={tenant.privacyUrl} className="text-primary-600 hover:underline">
+            <a href={tenant.privacyUrl} className="text-violet-400 hover:underline">
               Privacy Policy
             </a>
           ) : (
@@ -276,7 +276,7 @@ export default function RegisterPage() {
 
 function PasswordCheck({ passed, label }: { passed: boolean; label: string }) {
   return (
-    <div className={`flex items-center gap-2 text-sm ${passed ? 'text-green-600' : 'text-gray-400'}`}>
+    <div className={`flex items-center gap-2 text-sm ${passed ? 'text-green-400' : 'text-zinc-600'}`}>
       <CheckCircle className={`w-4 h-4 ${passed ? 'opacity-100' : 'opacity-50'}`} />
       {label}
     </div>

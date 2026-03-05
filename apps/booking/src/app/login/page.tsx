@@ -43,15 +43,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4">
+    <div className="min-h-[calc(100vh-200px)] bg-[#09090B] flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <div className="card p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-zinc-100 mb-2">
               Welcome back
             </h1>
-            <p className="text-gray-600">
+            <p className="text-zinc-500">
               Sign in to your {tenant.name} account
             </p>
           </div>
@@ -60,14 +60,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="label">Email address</label>
+              <label className="label text-zinc-300">Email address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input pl-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-4 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
@@ -78,21 +78,21 @@ export default function LoginPage() {
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="label mb-0">Password</label>
+                <label className="label mb-0 text-zinc-300">Password</label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-primary-600 hover:text-primary-700"
+                  className="text-sm text-violet-400 hover:text-violet-300"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pl-12 pr-12"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 pl-12 pr-12 py-3 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-colors"
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+              <div className="flex items-center gap-2 p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-sm">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 {error}
               </div>
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary btn-lg w-full"
+              className="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 shadow-lg shadow-violet-500/25 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -139,10 +139,10 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-zinc-800" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">
+              <span className="px-4 bg-zinc-900 text-zinc-500">
                 New to {tenant.name}?
               </span>
             </div>
@@ -151,17 +151,17 @@ export default function LoginPage() {
           {/* Register Link */}
           <Link
             href={`/register${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-            className="btn-secondary btn-lg w-full"
+            className="w-full py-3.5 rounded-xl font-semibold border border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors flex items-center justify-center"
           >
             Create an account
           </Link>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-zinc-600 mt-6">
           By signing in, you agree to our{' '}
           {tenant.termsUrl ? (
-            <a href={tenant.termsUrl} className="text-primary-600 hover:underline">
+            <a href={tenant.termsUrl} className="text-violet-400 hover:underline">
               Terms of Service
             </a>
           ) : (
@@ -169,7 +169,7 @@ export default function LoginPage() {
           )}{' '}
           and{' '}
           {tenant.privacyUrl ? (
-            <a href={tenant.privacyUrl} className="text-primary-600 hover:underline">
+            <a href={tenant.privacyUrl} className="text-violet-400 hover:underline">
               Privacy Policy
             </a>
           ) : (

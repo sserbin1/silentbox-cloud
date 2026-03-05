@@ -27,8 +27,8 @@ export default async function SpacesPage({ searchParams }: SpacesPageProps) {
   if (!slug) {
     return (
       <div className="container-page py-16 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">No tenant found</h1>
-        <p className="text-gray-600">Please access this page via a tenant subdomain.</p>
+        <h1 className="text-2xl font-bold text-white mb-4">No tenant found</h1>
+        <p className="text-zinc-400">Please access this page via a tenant subdomain.</p>
       </div>
     );
   }
@@ -60,12 +60,12 @@ export default async function SpacesPage({ searchParams }: SpacesPageProps) {
     : booths;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-zinc-900/50 border-b border-zinc-800">
         <div className="container-page py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Spaces</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-white mb-2">Browse Spaces</h1>
+          <p className="text-zinc-400">
             {filteredBooths.length} {filteredBooths.length === 1 ? 'space' : 'spaces'} available
           </p>
         </div>
@@ -91,14 +91,14 @@ export default async function SpacesPage({ searchParams }: SpacesPageProps) {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
+              <div className="text-center py-16 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                <div className="w-16 h-16 bg-gradient-to-br from-violet-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-violet-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   No spaces found
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-zinc-400 mb-6">
                   Try adjusting your filters or search query.
                 </p>
               </div>

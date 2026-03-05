@@ -77,13 +77,13 @@ export default async function BoothPage({ params }: BoothPageProps) {
     : ['https://placehold.co/800x600/EEF2FF/6366F1?text=Workspace'];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       {/* Back Button */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-zinc-900/50 border-b border-zinc-800">
         <div className="container-page py-4">
           <Link
             href="/spaces"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Spaces
@@ -96,7 +96,7 @@ export default async function BoothPage({ params }: BoothPageProps) {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Image Gallery */}
-            <div className="card overflow-hidden">
+            <div className="card overflow-hidden bg-zinc-900 border border-zinc-800 rounded-2xl">
               <div className="relative h-64 md:h-96">
                 <Image
                   src={images[0]}
@@ -108,18 +108,18 @@ export default async function BoothPage({ params }: BoothPageProps) {
 
                 {/* Action Buttons */}
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                    <Share2 className="w-5 h-5 text-gray-700" />
+                  <button className="w-10 h-10 bg-zinc-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-zinc-700 transition-colors">
+                    <Share2 className="w-5 h-5 text-zinc-300" />
                   </button>
-                  <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                    <Heart className="w-5 h-5 text-gray-700" />
+                  <button className="w-10 h-10 bg-zinc-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-zinc-700 transition-colors">
+                    <Heart className="w-5 h-5 text-zinc-300" />
                   </button>
                 </div>
               </div>
 
               {/* Thumbnail Gallery */}
               {images.length > 1 && (
-                <div className="flex gap-2 p-4 overflow-x-auto">
+                <div className="flex gap-2 p-4 overflow-x-auto bg-zinc-900">
                   {images.slice(0, 5).map((img, i) => (
                     <div
                       key={i}
@@ -133,34 +133,34 @@ export default async function BoothPage({ params }: BoothPageProps) {
             </div>
 
             {/* Title & Meta */}
-            <div className="card p-6">
+            <div className="card p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-violet-500/20 text-violet-300 rounded-full text-sm font-medium">
                       <span>{getBoothTypeIcon(booth.type)}</span>
                       {getBoothTypeLabel(booth.type)}
                     </span>
                     {booth.averageRating && (
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700">
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-zinc-300">
                         <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                         {booth.averageRating.toFixed(1)}
                         {booth.reviewCount && (
-                          <span className="text-gray-500">
+                          <span className="text-zinc-500">
                             ({booth.reviewCount} reviews)
                           </span>
                         )}
                       </span>
                     )}
                   </div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  <h1 className="text-2xl md:text-3xl font-bold text-white">
                     {booth.name}
                   </h1>
                 </div>
               </div>
 
               {booth.location && (
-                <div className="flex items-center gap-2 text-gray-600 mb-6">
+                <div className="flex items-center gap-2 text-zinc-500 mb-6">
                   <MapPin className="w-5 h-5" />
                   <span>
                     {booth.location.name} &middot; {booth.location.address}, {booth.location.city}
@@ -170,38 +170,38 @@ export default async function BoothPage({ params }: BoothPageProps) {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                  <Users className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                  <div className="text-lg font-semibold text-gray-900">
+                <div className="text-center p-4 bg-zinc-800 rounded-xl">
+                  <Users className="w-6 h-6 mx-auto mb-2 text-zinc-400" />
+                  <div className="text-lg font-semibold text-white">
                     {booth.capacity}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-zinc-500">
                     {booth.capacity === 1 ? 'Person' : 'People'}
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                  <Clock className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                  <div className="text-lg font-semibold text-gray-900">
+                <div className="text-center p-4 bg-zinc-800 rounded-xl">
+                  <Clock className="w-6 h-6 mx-auto mb-2 text-zinc-400" />
+                  <div className="text-lg font-semibold text-white">
                     1h min
                   </div>
-                  <div className="text-sm text-gray-500">Booking</div>
+                  <div className="text-sm text-zinc-500">Booking</div>
                 </div>
-                <div className="text-center p-4 bg-primary-50 rounded-xl">
-                  <div className="text-2xl font-bold text-primary-700">
+                <div className="text-center p-4 bg-gradient-to-br from-violet-500/20 to-blue-500/20 rounded-xl">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
                     {formatPrice(booth.pricePerHour, booth.currency)}
                   </div>
-                  <div className="text-sm text-primary-600">per hour</div>
+                  <div className="text-sm text-zinc-400">per hour</div>
                 </div>
               </div>
             </div>
 
             {/* Description */}
             {booth.description && (
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="card p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   About this space
                 </h2>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-zinc-400 leading-relaxed">
                   {booth.description}
                 </p>
               </div>
@@ -209,24 +209,24 @@ export default async function BoothPage({ params }: BoothPageProps) {
 
             {/* Amenities */}
             {booth.amenities?.length > 0 && (
-              <div className="card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="card p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   Amenities
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {booth.amenities.map((amenity) => (
                     <div
                       key={amenity}
-                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                      className="flex items-center gap-3 p-3 bg-zinc-800 rounded-xl"
                     >
-                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
+                      <div className="w-10 h-10 bg-violet-500/20 rounded-lg flex items-center justify-center text-violet-400">
                         {AMENITY_ICONS[amenity.toLowerCase()] || (
                           <span className="text-sm font-medium">
                             {amenity.charAt(0)}
                           </span>
                         )}
                       </div>
-                      <span className="text-gray-700 capitalize">{amenity}</span>
+                      <span className="text-zinc-300 capitalize">{amenity}</span>
                     </div>
                   ))}
                 </div>
@@ -235,15 +235,15 @@ export default async function BoothPage({ params }: BoothPageProps) {
 
             {/* Reviews */}
             {tenant?.features.showReviews && reviews.length > 0 && (
-              <div className="card p-6">
+              <div className="card p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-white">
                     Reviews ({reviews.length})
                   </h2>
                   {booth.averageRating && (
                     <div className="flex items-center gap-2">
                       <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-white">
                         {booth.averageRating.toFixed(1)}
                       </span>
                     </div>
@@ -252,15 +252,15 @@ export default async function BoothPage({ params }: BoothPageProps) {
 
                 <div className="space-y-6">
                   {reviews.slice(0, 5).map((review) => (
-                    <div key={review.id} className="pb-6 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div key={review.id} className="pb-6 border-b border-zinc-800 last:border-0 last:pb-0">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                          <span className="text-primary-700 font-semibold">
+                        <div className="w-10 h-10 bg-violet-500/20 rounded-full flex items-center justify-center">
+                          <span className="text-violet-300 font-semibold">
                             {review.user?.name?.charAt(0) || 'U'}
                           </span>
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-white">
                             {review.user?.name || 'Anonymous'}
                           </div>
                           <div className="flex items-center gap-1">
@@ -270,18 +270,18 @@ export default async function BoothPage({ params }: BoothPageProps) {
                                 className={`w-4 h-4 ${
                                   i < review.rating
                                     ? 'text-amber-500 fill-amber-500'
-                                    : 'text-gray-300'
+                                    : 'text-zinc-600'
                                 }`}
                               />
                             ))}
                           </div>
                         </div>
-                        <span className="ml-auto text-sm text-gray-500">
+                        <span className="ml-auto text-sm text-zinc-500">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       {review.comment && (
-                        <p className="text-gray-600">{review.comment}</p>
+                        <p className="text-zinc-400">{review.comment}</p>
                       )}
                     </div>
                   ))}
