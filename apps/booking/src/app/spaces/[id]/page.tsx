@@ -72,9 +72,14 @@ export default async function BoothPage({ params }: BoothPageProps) {
     reviews = reviewsRes.data || [];
   }
 
+  const fallbackImages: Record<number, string> = {
+    1: '/images/booths/solo.webp',
+    2: '/images/booths/duet.png',
+    4: '/images/booths/quartet.png',
+  };
   const images = booth.images?.length > 0
     ? booth.images
-    : ['https://placehold.co/800x600/EEF2FF/6366F1?text=Workspace'];
+    : [fallbackImages[booth.capacity] || '/images/booths/solo.webp'];
 
   return (
     <div className="min-h-screen bg-[#09090B]">

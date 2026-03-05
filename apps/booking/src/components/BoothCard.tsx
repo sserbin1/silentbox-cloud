@@ -12,7 +12,13 @@ interface BoothCardProps {
 }
 
 export function BoothCard({ booth, tenantSlug }: BoothCardProps) {
-  const imageUrl = booth.images?.[0] || 'https://placehold.co/400x300/18181B/7C3AED?text=Workspace';
+  // Use booth images, or fallback to local product photos based on capacity
+  const fallbackImages: Record<number, string> = {
+    1: '/images/booths/solo.webp',
+    2: '/images/booths/duet.png',
+    4: '/images/booths/quartet.png',
+  };
+  const imageUrl = booth.images?.[0] || fallbackImages[booth.capacity] || '/images/booths/solo.webp';
 
   return (
     <Link

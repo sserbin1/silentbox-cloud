@@ -373,7 +373,62 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {/* Map with location pins */}
+          <div className="relative w-full aspect-[2/1] bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden mb-12">
+            {/* Map Background - Europe SVG */}
+            <div className="absolute inset-0 opacity-20">
+              <svg viewBox="0 0 800 400" className="w-full h-full" fill="none">
+                {/* Simplified Europe outline */}
+                <path d="M350 50 L380 60 L400 55 L420 65 L450 58 L470 70 L490 68 L510 80 L500 95 L520 100 L530 120 L520 140 L540 150 L530 170 L550 180 L540 200 L520 210 L530 230 L510 240 L490 235 L470 250 L450 245 L430 260 L410 255 L390 270 L370 265 L350 280 L330 275 L310 285 L290 270 L270 260 L260 240 L250 220 L240 200 L250 180 L240 160 L250 140 L260 120 L270 100 L280 80 L300 70 L320 60 Z" fill="currentColor" className="text-violet-500/30" />
+              </svg>
+            </div>
+            {/* Grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+            {/* Location Pins */}
+            {locations.length > 0 ? (
+              locations.slice(0, 6).map((location, i) => {
+                // Map real coordinates to relative positions on our map
+                // Using approximate European bounds: lat 35-60, lng -10 to 40
+                const x = location.longitude ? ((location.longitude + 10) / 50) * 100 : 30 + i * 15;
+                const y = location.latitude ? ((60 - location.latitude) / 25) * 100 : 30 + i * 10;
+                return (
+                  <Link
+                    key={location.id}
+                    href={`/spaces?location=${location.id}`}
+                    className="absolute group"
+                    style={{ left: `${Math.max(5, Math.min(90, x))}%`, top: `${Math.max(5, Math.min(90, y))}%` }}
+                  >
+                    {/* Pulse ring */}
+                    <span className="absolute -inset-3 rounded-full bg-violet-500/20 animate-ping" />
+                    {/* Pin dot */}
+                    <span className="relative block w-4 h-4 rounded-full bg-gradient-to-r from-violet-500 to-blue-500 shadow-lg shadow-violet-500/50 border-2 border-zinc-900" />
+                    {/* Tooltip */}
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-200 font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+                      {location.name}
+                      <span className="block text-xs text-zinc-500">{location.city}</span>
+                      <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-zinc-800" />
+                    </span>
+                  </Link>
+                );
+              })
+            ) : (
+              /* Default pins if no API data */
+              <>
+                <MapPinStatic left="42%" top="35%" label="Warsaw" />
+                <MapPinStatic left="40%" top="30%" label="Krakow" />
+                <MapPinStatic left="48%" top="32%" label="Kyiv" />
+                <MapPinStatic left="30%" top="60%" label="Valencia" />
+              </>
+            )}
+
+            {/* Gradient edges */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-transparent to-[#09090B]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#09090B]/50 via-transparent to-[#09090B]/50" />
+          </div>
+
+          {/* Location Type Cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <LocationTypeCard
               icon={<ShoppingBag className="w-6 h-6" />}
               title="Shopping Malls"
@@ -398,7 +453,7 @@ export default async function HomePage() {
 
           {/* Actual Locations from API */}
           {locations.length > 0 && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {locations.slice(0, 6).map((location) => (
                 <Link
                   key={location.id}
@@ -639,6 +694,19 @@ function LocationTypeCard({ icon, title, description }: { icon: React.ReactNode;
       </div>
       <h3 className="font-semibold text-white mb-1">{title}</h3>
       <p className="text-sm text-zinc-500">{description}</p>
+    </div>
+  );
+}
+
+function MapPinStatic({ left, top, label }: { left: string; top: string; label: string }) {
+  return (
+    <div className="absolute group" style={{ left, top }}>
+      <span className="absolute -inset-3 rounded-full bg-violet-500/20 animate-ping" />
+      <span className="relative block w-4 h-4 rounded-full bg-gradient-to-r from-violet-500 to-blue-500 shadow-lg shadow-violet-500/50 border-2 border-zinc-900" />
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-200 font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+        {label}
+        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-zinc-800" />
+      </span>
     </div>
   );
 }
